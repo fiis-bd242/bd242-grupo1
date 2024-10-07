@@ -33,3 +33,7 @@
 - [6. Modelo Relacional](./6/6.md)
   - [6.1. Esquema Relacional (Gráfico)](./6/6.1/6.1.md)
   - [6.2. Diccionario de Datos](./6/6.2/6.2.md)
+- [7. Creación de Tablas y Poblamiento de Datos](./7/7.md)
+  - [7.1. Creación de Tablas](./7/7.1/7.1.md)
+  - [7.2. Poblamiento Inicial de Datos](./7/7.2/7.2.md)
+  - [7.3. Carga Masiva de Datos](./7/7.3/7.3.md)
