@@ -1,4 +1,13 @@
 ```sql
+CREATE TABLE seller (
+	cod_seller SERIAL NOT NULL, 
+	nombre_seller VARCHAR (50),
+	rubro VARCHAR (50),
+	correo VARCHAR (50),
+	telefono numeric (9) NOT NULL,
+	ruc numeric (11) NOT null,
+	PRIMARY KEY (cod_seller)
+);
 
 CREATE TABLE Feedback (
                           id_feedback SERIAL NOT NULL,
@@ -14,6 +23,29 @@ CREATE TABLE Estado_prototipo (
     PRIMARY KEY (cod_est_prot)
 );
 
+CREATE TABLE Tipo_producto (
+                              cod_tipo_producto SERIAL NOT NULL,
+                              nombre_tipo_producto VARCHAR(255) NOT NULL,
+                              PRIMARY KEY (cod_tipo_producto)
+);
+
+CREATE TABLE Producto (
+                          cod_producto SERIAL NOT NULL,
+                          nombre_producto VARCHAR(255) NOT NULL,
+                          empresa VARCHAR(255) NOT NULL,
+                          cod_tipo_producto INTEGER NOT NULL,
+                          PRIMARY KEY (cod_producto),
+                          FOREIGN KEY (cod_tipo_producto) REFERENCES Tipo_producto(cod_tipo_producto)
+);
+
+CREATE TABLE productoxseller (
+                                 cod_productoxseller SERIAL NOT NULL,
+                                 cod_producto INTEGER NOT NULL,
+                                 cod_seller INTEGER NOT NULL,
+                                 PRIMARY KEY (cod_productoxseller),
+                                 FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto),
+                                 FOREIGN KEY (cod_seller) REFERENCES Seller(cod_seller)
+);
 CREATE TABLE Departamento (
                               id_departamento SERIAL NOT NULL,
                               descripcion VARCHAR(100) NOT NULL,
@@ -85,40 +117,6 @@ CREATE TABLE Solucion (
                           FOREIGN KEY (cod_diag) REFERENCES diagnostico(cod_diag)
 );
 
-CREATE TABLE Tipo_producto (
-    cod_tipo_producto SERIAL NOT NULL,
-    nombre_tipo_producto VARCHAR(255) NOT NULL,
-    PRIMARY KEY (cod_tipo_producto)
-);
-
-CREATE TABLE Producto (
-    cod_producto SERIAL NOT NULL,
-    nombre_producto VARCHAR(255) NOT NULL,
-    empresa VARCHAR(255) NOT NULL,
-    cod_tipo_producto INTEGER NOT NULL,
-    PRIMARY KEY (cod_producto),
-    FOREIGN KEY (cod_tipo_producto) REFERENCES Tipo_producto(cod_tipo_producto)
-);
-
-CREATE TABLE seller (
-	cod_seller SERIAL NOT NULL, 
-	nombre_seller VARCHAR (50),
-	rubro VARCHAR (50),
-	correo VARCHAR (50),
-	telefono numeric (9) NOT NULL,
-	ruc numeric (11) NOT null,
-	PRIMARY KEY (cod_seller)
-);
-
-CREATE TABLE productoxseller (
-    cod_productoxseller SERIAL NOT NULL,
-    cod_producto INTEGER NOT NULL,
-    cod_seller INTEGER NOT NULL,
-    PRIMARY KEY (cod_productoxseller),
-    FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto),
-    FOREIGN KEY (cod_seller) REFERENCES Seller(cod_seller)
-);
-
 CREATE TABLE promocion (
 	cod_promocion SERIAL  NOT NULL, 
 	fecha_inicio DATE,
@@ -132,12 +130,12 @@ CREATE TABLE promocion (
 );
 
 CREATE TABLE promocionxproducto (
-    cod_promocionxproducto SERIAL NOT NULL,
-    cod_promocion INTEGER NOT NULL,
-    cod_producto INTEGER NOT NULL,
-    PRIMARY KEY (cod_promocionxproducto),
-    FOREIGN KEY (cod_promocion) REFERENCES Promocion(cod_promocion),
-    FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto)
+                                    cod_promocionxproducto SERIAL NOT NULL,
+                                    cod_promocion INTEGER NOT NULL,
+                                    cod_producto INTEGER NOT NULL,
+                                    PRIMARY KEY (cod_promocionxproducto),
+                                    FOREIGN KEY (cod_promocion) REFERENCES Promocion(cod_promocion),
+                                    FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto)
 );
 
 CREATE TABLE Prototipo (
@@ -224,7 +222,7 @@ CREATE TABLE Ticket_asig_tip (
     estado VARCHAR(5) NOT NULL,
     comentario VARCHAR(250) NOT NULL,
     ID_empleado INTEGER NOT NULL,
-    PRIMARY KEY (id_conv),
+    PRIMARY KEY (cod_ticket_asig),
     FOREIGN KEY (ID_empleado) REFERENCES Empleado(ID_empleado)
 );
 
@@ -232,11 +230,11 @@ CREATE TABLE Ticket_general (
     cod_ticket SERIAL NOT NULL,
     fecha_creacion DATE NOT NULL,
     categoria VARCHAR(7) NOT NULL,
-    id_conv INTEGER NOT NULL,
+    cod_ticket_asig INTEGER NOT NULL,
     cod_ticket_inc INTEGER NOT NULL,
     PRIMARY KEY (cod_ticket),
     FOREIGN KEY (cod_ticket_inc) REFERENCES Ticket_incidente(cod_ticket_inc),
-    FOREIGN KEY (id_conv) REFERENCES Ticket_asig_tip(id_conv)
+    FOREIGN KEY (cod_ticket_asig) REFERENCES Ticket_asig_tip(cod_ticket_asig)
 );
 
 CREATE TABLE Notificacion (
@@ -245,9 +243,9 @@ CREATE TABLE Notificacion (
     asunto VARCHAR(100) NOT NULL,
     mensaje VARCHAR(250) NOT NULL,
     aprobacion VARCHAR(10) NOT NULL,
-    id_conv INTEGER NOT NULL,
+    cod_ticket_asig INTEGER NOT NULL,
     PRIMARY KEY (id_noti),
-    FOREIGN KEY (id_conv) REFERENCES Ticket_asig_tip(id_conv)
+    FOREIGN KEY (cod_ticket_asig) REFERENCES Ticket_asig_tip(cod_ticket_asig)
 );
 
 CREATE TABLE tipificacion (
@@ -257,9 +255,9 @@ CREATE TABLE tipificacion (
     id_departamento INTEGER NOT NULL,
     comentario VARCHAR(250) NOT NULL,
     motivo VARCHAR(250) NOT NULL,
-    id_conv INTEGER NOT NULL,
+    cod_ticket_asig INTEGER NOT NULL,
     PRIMARY KEY (cod_etiqueta),
-    FOREIGN KEY (id_conv) REFERENCES Ticket_asig_tip(id_conv),
+    FOREIGN KEY (cod_ticket_asig) REFERENCES Ticket_asig_tip(cod_ticket_asig),
     FOREIGN KEY (id_departamento) REFERENCES Departamento(id_departamento)
 );
 
@@ -422,4 +420,3 @@ CREATE TABLE SolicitudCapacitacion
   PRIMARY KEY (ID_solicitud_cap),
   FOREIGN KEY (ID_empleado) REFERENCES Empleado(ID_empleado)
 );
-```
