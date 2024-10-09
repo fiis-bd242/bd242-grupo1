@@ -1,3 +1,4 @@
+```sql
 CREATE TABLE seller (
 	cod_seller SERIAL NOT NULL, 
 	nombre_seller VARCHAR (50),
