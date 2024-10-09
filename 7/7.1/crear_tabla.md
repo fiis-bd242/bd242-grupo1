@@ -1,13 +1,4 @@
 ```sql
-CREATE TABLE seller (
-	cod_seller SERIAL NOT NULL, 
-	nombre_seller VARCHAR (50),
-	rubro VARCHAR (50),
-	correo VARCHAR (50),
-	telefono numeric (9) NOT NULL,
-	ruc numeric (11) NOT null,
-	PRIMARY KEY (cod_seller)
-);
 
 CREATE TABLE Feedback (
                           id_feedback SERIAL NOT NULL,
@@ -23,29 +14,6 @@ CREATE TABLE Estado_prototipo (
     PRIMARY KEY (cod_est_prot)
 );
 
-CREATE TABLE Tipo_producto (
-                              cod_tipo_producto SERIAL NOT NULL,
-                              nombre_tipo_producto VARCHAR(255) NOT NULL,
-                              PRIMARY KEY (cod_tipo_producto)
-);
-
-CREATE TABLE Producto (
-                          cod_producto SERIAL NOT NULL,
-                          nombre_producto VARCHAR(255) NOT NULL,
-                          empresa VARCHAR(255) NOT NULL,
-                          cod_tipo_producto INTEGER NOT NULL,
-                          PRIMARY KEY (cod_producto),
-                          FOREIGN KEY (cod_tipo_producto) REFERENCES Tipo_producto(cod_tipo_producto)
-);
-
-CREATE TABLE productoxseller (
-                                 cod_productoxseller SERIAL NOT NULL,
-                                 cod_producto INTEGER NOT NULL,
-                                 cod_seller INTEGER NOT NULL,
-                                 PRIMARY KEY (cod_productoxseller),
-                                 FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto),
-                                 FOREIGN KEY (cod_seller) REFERENCES Seller(cod_seller)
-);
 CREATE TABLE Departamento (
                               id_departamento SERIAL NOT NULL,
                               descripcion VARCHAR(100) NOT NULL,
@@ -117,6 +85,40 @@ CREATE TABLE Solucion (
                           FOREIGN KEY (cod_diag) REFERENCES diagnostico(cod_diag)
 );
 
+CREATE TABLE Tipo_producto (
+    cod_tipo_producto SERIAL NOT NULL,
+    nombre_tipo_producto VARCHAR(255) NOT NULL,
+    PRIMARY KEY (cod_tipo_producto)
+);
+
+CREATE TABLE Producto (
+    cod_producto SERIAL NOT NULL,
+    nombre_producto VARCHAR(255) NOT NULL,
+    empresa VARCHAR(255) NOT NULL,
+    cod_tipo_producto INTEGER NOT NULL,
+    PRIMARY KEY (cod_producto),
+    FOREIGN KEY (cod_tipo_producto) REFERENCES Tipo_producto(cod_tipo_producto)
+);
+
+CREATE TABLE seller (
+	cod_seller SERIAL NOT NULL, 
+	nombre_seller VARCHAR (50),
+	rubro VARCHAR (50),
+	correo VARCHAR (50),
+	telefono numeric (9) NOT NULL,
+	ruc numeric (11) NOT null,
+	PRIMARY KEY (cod_seller)
+);
+
+CREATE TABLE productoxseller (
+    cod_productoxseller SERIAL NOT NULL,
+    cod_producto INTEGER NOT NULL,
+    cod_seller INTEGER NOT NULL,
+    PRIMARY KEY (cod_productoxseller),
+    FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto),
+    FOREIGN KEY (cod_seller) REFERENCES Seller(cod_seller)
+);
+
 CREATE TABLE promocion (
 	cod_promocion SERIAL  NOT NULL, 
 	fecha_inicio DATE,
@@ -130,12 +132,12 @@ CREATE TABLE promocion (
 );
 
 CREATE TABLE promocionxproducto (
-                                    cod_promocionxproducto SERIAL NOT NULL,
-                                    cod_promocion INTEGER NOT NULL,
-                                    cod_producto INTEGER NOT NULL,
-                                    PRIMARY KEY (cod_promocionxproducto),
-                                    FOREIGN KEY (cod_promocion) REFERENCES Promocion(cod_promocion),
-                                    FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto)
+    cod_promocionxproducto SERIAL NOT NULL,
+    cod_promocion INTEGER NOT NULL,
+    cod_producto INTEGER NOT NULL,
+    PRIMARY KEY (cod_promocionxproducto),
+    FOREIGN KEY (cod_promocion) REFERENCES Promocion(cod_promocion),
+    FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto)
 );
 
 CREATE TABLE Prototipo (
