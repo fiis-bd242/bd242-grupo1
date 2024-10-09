@@ -272,5 +272,44 @@ values
 ('Mejorar la retención de clientes en un 15%.', FALSE, 6),
 ('Optimizar el proceso de reclutamiento y selección.', TRUE, 6);
 
+INSERT INTO ticket_asig_tip (id_conv, problema_ident, fecha_asig, estado, comentario, ID_empleado) 
+VALUES 
+(1, 'Problema de red', '2024-01-10', 'Pend', 'Esperando revisión del técnico', 1),
+(2, 'Error en el sistema', '2024-01-11', 'Rueo', 'Se resolvió reinstalando el software', 2),
+(3, 'Fallo de servidor', '2024-01-12', 'Pete', 'Investigación en curso', 3),
+(4, 'Lentitud de conexión', '2024-01-13', 'Pete', 'Esperando respuesta del proveedor', 4),
+(5, 'Interrupciones en la red', '2024-01-14', 'Pene', 'Plan de mantenimiento en progreso', 5);
 
+INSERT INTO Ticket_incidente (categoria, prioridad, estado, fecha_ticket_inc, ID_empleado)
+VALUES
+    ('Red', 'Alta', 'Abierto', '2024-01-01', 1),
+    ('Software', 'Media', 'EnPro', '2024-01-02', 2),
+    ('Hardware', 'Baja', 'Cerrado', '2024-01-03', 3),
+    ('Conexión', 'Alta', 'Abierto', '2024-01-04', 4),
+    ('Red', 'Media', 'Pendiente', '2024-01-05', 5);
+
+
+INSERT INTO Ticket_general (fecha_creacion, categoria, cod_ticket_asig, cod_ticket_inc) 
+VALUES 
+('2024-01-10', 'Red', 1, 1),
+('2024-01-11', 'Softw', 2, 2),
+('2024-01-12', 'Harde', 3, 3),
+('2024-01-13', 'Conón', 4, 4),
+('2024-01-14', 'Red', 5, 5);
+
+INSERT INTO Notificacion (fecha_envio, asunto, mensaje, aprobacion, cod_ticket_asig) 
+VALUES 
+('2024-01-10', 'Revisión necesaria', 'Se requiere una revisión urgente del sistema', 'Pendiente', 1),
+('2024-01-11', 'Resolución de problema', 'El problema ha sido resuelto con éxito', 'Aprobado', 2),
+('2024-01-12', 'Problema en investigación', 'Se está investigando el fallo del servidor', 'Pendiente', 3),
+('2024-01-13', 'Respuesta esperada', 'Esperando respuesta del proveedor para solución', 'Pendiente', 4),
+('2024-01-14', 'Plan de mantenimiento', 'Mantenimiento programado para resolver la red', 'Aprobado', 5);
+
+INSERT INTO tipificacion (funcionalidad, fecha_creacion, id_departamento, comentario, motivo, cod_ticket_asig) 
+VALUES 
+('Conexión de red', '2024-01-10', 1, 'Fallos intermitentes en la red', 'Mantenimiento requerido', 1),
+('Actualización de software', '2024-01-11', 2, 'Error crítico del sistema operativo', 'Reinstalación completa', 2),
+('Servidor fuera de línea', '2024-01-12', 3, 'Fallo en el servidor principal', 'Fallo en hardware', 3),
+('Lentitud en la red', '2024-01-13', 1, 'Problemas de latencia alta', 'Problema con el proveedor', 4),
+('Interrupción de red', '2024-01-14', 1, 'Caídas frecuentes de la red', 'Mantenimiento incorrecto', 5);
 ```
