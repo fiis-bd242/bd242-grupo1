@@ -420,3 +420,4 @@ CREATE TABLE SolicitudCapacitacion
   PRIMARY KEY (ID_solicitud_cap),
   FOREIGN KEY (ID_empleado) REFERENCES Empleado(ID_empleado)
 );
+```
