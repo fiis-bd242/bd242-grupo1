@@ -1,315 +1,585 @@
 ```sql
-INSERT INTO Departamento (id_departamento, descripcion)
+-- Tabla Departamento (sin cambios)
+ALTER SEQUENCE Departamento_id_departamento_seq RESTART WITH 1;
+INSERT INTO Departamento (descripcion, id_departamento_padre)
 VALUES
-    (1, 'Departamento de Marketing'),
-    (2, 'Departamento Comercial'),
-    (3, 'Departamento de Recursos Humanos'),
-    (4, 'Departamento de Finanzas'),
-    (5, 'Departamento de Operaciones'),
-    (6, 'Departamento de Atención al Cliente'),
-    (7, 'Departamento de TI'),
-    (8, 'Ventas'),
-    (9, 'Tecnología');
+    ('Recursos Humanos', NULL),
+    ('Desarrollo de Software', NULL),
+    ('Soporte Técnico', 1),
+    ('Marketing', NULL),
+    ('Comercial', NULL);
 
 
-INSERT INTO Puesto (id_puesto, descripcion, paga, nombre, id_departamento)
+-- Tabla Funcion (sin cambios)
+INSERT INTO Funcion (nombre, descripcion)
 VALUES
-    (1, 'Responsable de diseñar y ejecutar estrategias de marketing y publicidad.', 3000.00, 'Gerente de Marketing', 1),
-    (2, 'Encargado de supervisar las actividades comerciales y la gestión del equipo de ventas.', 3200.00, 'Gerente Comercial', 2),
-    (3, 'Asiste en la implementación de campañas de marketing y gestiona redes sociales.', 1800.00, 'Empleado de Marketing', 1),
-    (4, 'Apoya en las ventas y atención al cliente en el área comercial.', 1500.00, 'Empleado de Comercial', 2),
-    (5, 'Gestión de personal', 5000.00, 'Gerente de RRHH', 3),
-    (6, 'Ventas y negociación', 4000.00, 'Representante de Ventas', 8),
-    (7, 'Desarrollo de software', 5500.00, 'Desarrollador Senior', 9),
-    (8, 'Análisis financiero', 4500.00, 'Analista Financiero', 4),
-    (9, 'Estrategias de marketing', 4200.00, 'Especialista en Marketing', 1);
+    ('Gestión de personal', 'Encargado de la administración de recursos humanos.'),
+    ('Desarrollo', 'Encargado de desarrollar software y aplicaciones.'),
+    ('Soporte', 'Proveer asistencia técnica a usuarios.');
 
 
-INSERT INTO Empleado (id_empleado, Nombre, Apellido, fecha_nacimiento, fecha_ingreso, Estado, Documento_identidad, Telefono, id_puesto)
+-- Tabla Puesto (sin cambios)
+
+ALTER SEQUENCE Puesto_id_puesto_seq RESTART WITH 1;
+INSERT INTO Puesto (nombre, paga, id_departamento)
 VALUES
-    (1, 'Carlos', 'González', '1985-03-21', '2020-01-10', 'Activo', 'DNI12345678', '987654321', 1),
-    (2, 'María', 'Pérez', '1990-05-14', '2019-11-25', 'Activo', 'DNI87654321', '923456789', 2),
-    (3, 'Luis', 'Ramírez', '1982-07-11', '2021-02-01', 'Activo', 'DNI45678901', '912345678', 3),
-    (4, 'Ana', 'Lopez', '1995-08-02', '2022-03-05', 'Activo', 'DNI76543219', '998765432', 1),
-    (5, 'Jorge', 'Mendoza', '1979-12-10', '2018-06-10', 'Activo', 'DNI23456789', '911234567', 2),
-    (6, 'Sofía', 'Herrera', '1993-04-18', '2020-09-09', 'Activo', 'DNI56789012', '921234567', 3),
-    (7, 'Gabriel', 'Torres', '1988-10-22', '2021-12-15', 'Activo', 'DNI12398765', '914567123', 1),
-    (8, 'Juan', 'Pérez', '1985-05-15', '2020-01-10', 'Activo', 'DNI12345679', '987654322', 5),
-    (9, 'María', 'González', '1990-08-22', '2019-03-05', 'Activo', 'DNI23456780', '987654323', 6),
-    (10, 'Carlos', 'Rodríguez', '1988-11-30', '2021-06-15', 'Activo', 'DNI34567891', '987654324', 7),
-    (11, 'Ana', 'Martínez', '1992-02-18', '2018-09-20', 'Activo', 'DNI45678902', '987654325', 8),
-    (12, 'Luis', 'Sánchez', '1987-07-07', '2022-02-01', 'Activo', 'DNI56789013', '987654326', 9);
+    ('Gerente de RRHH', 4500.00, 1),
+    ('Desarrollador Senior', 3500.00, 2),
+    ('Técnico de Soporte', 2500.00, 3),
+    ('Analista de Marketing', 3000.00, 4),
+    ('Gerente de Marketing', 5000.00, 4),
+    ('Gerente Comercial', 5500.00, 5),
+    ('Empleado de Marketing', 2500.00, 4);
 
-
-INSERT INTO Seller (cod_seller, nombre_seller, rubro, correo, telefono, ruc)
+-- Tabla Puesto_Funcion (sin cambios)
+INSERT INTO Puesto_Funcion (id_puesto, id_funcion)
 VALUES
-    (1, 'Bembos', 'Comida', 'ventas@bembos.com.pe', 987654321, 20567890123),
-    (2, 'Norkys', 'Comida', 'info@norkys.com.pe', 923456789, 20345678912),
-    (3, 'Coney Park', 'Entretenimiento', 'contacto@coneypark.com.pe', 912345678, 20987654321),
-    (4, 'KFC', 'Comida', 'ventas@kfc.com.pe', 998765432, 20123456789),
-    (5, 'Pizza Hut', 'Comida', 'info@pizzahut.com.pe', 911234567, 20876543210),
-    (6, 'Starbucks', 'Bebida', 'contacto@starbucks.com.pe', 921234567, 20654321098),
-    (7, 'La Lucha', 'Comida ', 'ventas@lalucha.com.pe', 914567123, 20765432109);
+    (1, 1),
+    (2, 2),
+    (3, 3);
 
-
-INSERT INTO Tipo_producto (cod_tipo_producto, nombre_tipo_producto)
+-- Tabla Empleado (sin cambios)
+INSERT INTO Empleado (Nombre, Apellido, fecha_nacimiento, fecha_ingreso, Estado, Documento_identidad, Telefono, id_puesto)
 VALUES
-    (1, 'Comida'),
-    (2, 'Bebidas'),
-    (3, 'Entretenimiento'),
-    (4, 'Postres'),
-    (5, 'Snacks'),
-    (6, 'Desayunos'),
-    (7, 'Alimentos Saludables');
+    ('María', 'González', '1980-04-12', '2022-01-01', 'Activo', '12345678', '987654321', 1),
+    ('Pedro', 'Martínez', '1990-06-22', '2020-05-15', 'Activo', '23456789', '987654322', 2),
+    ('Ana', 'López', '1995-11-30', '2021-10-10', 'Activo', '34567890', '987654323', 3),
+    ('Piter', 'Hitler', '1995-11-30', '2021-10-10', 'Activo', '43657890', '984586212', 3),
+    ('Sofía', 'Ramírez', '1992-07-15', '2023-03-01', 'Activo', '45678901', '987654324', 4),
+    ('Carlos', 'Sánchez', '1985-03-22', '2019-08-01', 'Activo', '56789012', '987654325', 5),
+    ('Luis', 'Pérez', '1988-09-10', '2018-07-01', 'Activo', '67890123', '987654326', 6),
+    ('Valeria', 'Torres', '1998-02-28', '2022-11-15', 'Activo', '78901234', '987654327', 7);
 
 
-INSERT INTO Producto (cod_producto, nombre_producto, empresa, cod_tipo_producto)
+-- Tabla ticket general
+INSERT INTO Ticket_general (cod_ticket, fecha_creacion, categoria, ID_empleado)
+VALUES (1, '2024-10-10', 'Interno', 1),
+	   (2, '2024-10-11', 'Interno', 2),
+	   (3, '2024-10-12', 'Interno', 3),
+	   (4, '2024-10-13', 'Externo', 4),
+	   (5, '2024-10-14', 'Externo', 5),
+       (6, '2024-10-15', 'Externo', 6);
+
+      
+
+-- Tabla ticket incidente
+INSERT INTO Ticket_incidente (cod_ticket_inc,categoria, prioridad, estado, fecha_ticket_inc) 
+VALUES (1, 'hardware', 'alta', 'abierto', '2024-09-01'),
+       (2, 'software', 'media', 'progreso', '2024-09-02'),
+       (3,'infraest', 'baja', 'cerrado', '2024-09-03');
+
+-- Tabla Ticket postmortem
+INSERT INTO Ticket_postmortem (cod_ticket_post, fecha_creacion_post, Estado_ticket_post, cod_ticket_inc)
+VALUES 
+		(1, '2024-01-20', 'Cerrado', 1),
+		(2, '2024-02-10', 'Cerrado', 2),
+		(3, '2024-03-15', 'Abierto', 3);
+
+-- Tablas postmortem detalles
+INSERT INTO Postmortem_detalles (cod_postmortem, resumen_post, Impacto, Deteccion, Recuperacion, Severidad, cod_ticket_post) 
+VALUES (1,'Fallo crítico', 'Alto', 'Manual', '2 horas', 'Alta', 1),
+       (2,'Interrupción menor', 'Medio', 'Automática', '1 hora', 'Media', 2),
+       (3,'Error no crítico', 'Bajo', 'Automática', '30 minutos', 'Baja', 3);
+
+-- Tabla analisis post
+INSERT INTO Analisis_post (cod_analisis_post, Aprobacion_analisis, fecha_inicio_post, fecha_fin_post, cod_postmortem)
+VALUES 
+		(1, 'Aprobado', '2024-01-21', '2024-01-22', 1),
+		(2, 'Aprobado', '2024-02-11', '2024-02-12', 2),
+		(3, 'Rechazado', '2024-03-16', '2024-03-17', 3),
+		(4, 'Aprobado', '2024-05-01', '2024-05-02', 3);
+
+-- Tabla leccion
+INSERT INTO Leccion (cod_leccion, Leccion, cod_analisis_post)
+VALUES 
+		(1, 'No repetir fallos de red', 1),
+		(2, 'Mejorar la monitorización', 2),
+		(3, 'Capacitación de personal', 3),
+		(4, 'Prevenir sobrecargas', 4);
+
+-- Tabla categoria accion
+INSERT INTO Categoria_Accion (cod_cat_accion, cat_accion, cod_accion)
+VALUES 
+		(1, 'Preventiva', 1),
+		(2, 'Correctiva', 2),
+		(3, 'Capacitación', 3),
+		(4, 'Revisión', 4);
+
+-- tabla accion
+INSERT INTO Accion (cod_accion, accion, cod_analisis_post, cod_cat_accion)
+VALUES 
+		(1, 'Actualizar cortafuegos', 1, 1),
+		(2, 'Reconfigurar red', 2, 2),
+		(3, 'Entrenamiento de empleados', 3, 3),
+		(4, 'Auditoría de servidores', 4, 4);
+
+-- tabla incidente
+	
+INSERT INTO Incidente (cod_incidente, mensaje_incidente, categoria, cod_ticket_inc)
+VALUES 
+		(1, 'Falla en la red local', 'Red', 1),
+		(2, 'Falla en servidor', 'Hardware', 2),
+		(3, 'Problema en aplicación', 'Software', 3);
+
+-- tabla proveedor
+INSERT INTO Proveedor (cod_proveedor, Nombre_proveedor, SLA, cod_diag)
+VALUES 
+		(1, 'Proveedor1', '99.9%', 1),
+		(2, 'Proveedor2', '99.5%', 2),
+		(3, 'Proveedor3', '99.0%', 3);
+
+-- tabla causa
+INSERT INTO Causa (cod_causa, Causa, cod_diag)
+VALUES 
+		(1, 'Problema de configuración', 1),
+		(2, 'Mal uso del sistema', 2),
+		(3, 'Sobrecarga de datos', 3);
+
+-- tabla diagnostico
+INSERT INTO Diagnostico (cod_diag, comentario, fecha_realizacion, cod_incidente, ID_empleado, cod_proveedor, cod_causa)
+VALUES 
+		(1, 'Diagnóstico realizado correctamente', '2024-01-18', 1, 1, 1, 1),
+		(2, 'Se encontraron fallos menores', '2024-02-05', 2, 2, 2, 2),
+		(3, 'Diagnóstico pendiente', '2024-03-12', 3, 3, 3, 3);
+
+-- tabla solucion
+INSERT INTO Solucion (cod_solucion, estado_solucion, test, cod_diag)
+VALUES 
+		(1, 'Implementada', 'Exitoso', 1),
+		(2, 'En Proceso', 'Pendiente', 2),
+		(3, 'Fallida', 'Fallido', 3);
+
+	
+-- Tabla Feedback (adaptada)
+INSERT INTO Feedback (fecha)
 VALUES
-    (1, 'Hamburguesa', 'Bembos', 1),
-    (2, 'Gaseosa', 'InkaKola', 2),
-    (3, 'Entrada', 'Coney Park', 3),
-    (4, 'Pollo a la Parrilla', 'Norkys', 1),
-    (5, 'Papas Fritas', 'KFC', 1),
-    (6, 'Pollo crispy', 'KFC', 1),
-    (7, 'Hamburguesa Doble', 'La Lucha', 1);
+    ('2024-10-06'),
+    ('2024-10-08');
 
-
-INSERT INTO Promocion (cod_promocion, fecha_inicio, fecha_fin, dscto, estado_promo, dscrip_promo, ID_empleado)
-VALUES
-    (1, '2024-01-01', '2024-01-31', 15.00, FALSE, 'Promoción de Año Nuevo: Disfruta un 15% de descuento en hamburguesas y gaseosas de Bembos para celebrar el inicio de año.', 1),
-    (2, '2024-02-01', '2024-02-15', 10.00, FALSE, 'Descuento por San Valentín: Sorprende a tu pareja con un 10% de descuento en combos especiales de Norkys durante esta fecha romántica.', 2),
-    (3, '2024-03-01', '2024-03-31', 20.00, FALSE, 'Ofertas de Primavera: Ven y prueba nuestro nuevo menú de primavera con un 20% de descuento en entradas de Coney Park.', 3),
-    (4, '2024-04-01', '2024-04-15', 5.00, FALSE, 'Semana Santa: Disfruta de un 5% de descuento en platos de pollo a la parrilla en Norkys.', 4),
-    (5, '2024-09-01', '2024-10-31', 25.00, TRUE, 'Día de la Madre: Celebra a mamá con un 25% de descuento en el menú de KFC, incluyendo combos especiales.', 5),
-    (6, '2024-09-01', '2024-10-15', 30.00, TRUE, 'Ofertas de Mitad de Año: Aprovecha un 30% de descuento en bebidas de Starbucks y obtén un regalo por cada compra.', 6),
-    (7, '2024-10-01', '2024-11-30', 50.00, TRUE, 'Ofertas de Fiestas Patrias: Disfruta de un increíble 50% de descuento en hamburguesas dobles de La Lucha y celebra con nosotros.', 7);
-
-
-INSERT INTO productoxseller (cod_productoxseller, cod_producto, cod_seller)
-VALUES
-    (1, 1, 1),
-    (2, 2, 1),
-    (3, 3, 3),
-    (4, 4, 2),
-    (5, 5, 4),
-    (6, 6, 4),
-    (7, 7, 5);
-
-
-INSERT INTO promocionxproducto (cod_promocionxproducto, cod_promocion, cod_producto)
-VALUES
-    (1, 1, 1),
-    (2, 1, 2),
-    (3, 2, 4),
-    (4, 3, 3),
-    (5, 4, 4),
-    (6, 5, 5),
-    (7, 6, 2),
-    (8, 7, 7);
-
-
-ALTER SEQUENCE estado_prototipo_cod_est_prot_seq RESTART WITH 1;
+-- Tabla Estado_prototipo (sin cambios)
 INSERT INTO Estado_prototipo (estado_prot)
 VALUES
     ('Aprobado'),
     ('Rechazado'),
     ('Pendiente');
 
+-- Tabla Promocion (adaptada)
+INSERT INTO Promocion (fecha_inicio, fecha_fin, dscto, estado_promo, dscrip_promo, ID_empleado)
+VALUES
+    ('2024-10-01', '2024-10-15', 15.00, TRUE, 'Promoción de inicio de temporada', 5),
+    ('2024-11-01', '2024-11-30', 20.00, TRUE, 'Promoción de Black Friday', 6),
+    ('2024-12-01', '2024-12-25', 25.00, FALSE, 'Promoción de Navidad', 7);
 
+INSERT INTO Audiencia (id_audiencia, Edad_rango, Genero, Ubicacion)
+VALUES
+('1830ML', '[18,30]', 'M', 'Lima'),
+('3145MFA', '[31,45]', 'MF', 'Arequipa'),
+('4660MC', '[46,60]', 'M', 'Cusco'),
+('1830FT', '[18,30]', 'F', 'Trujillo'),
+('3145FL', '[31,45]', 'F', 'Lima'),
+('4660ML', '[46,60]', 'M', 'Lima'),
+('1830MF', '[18,30]', 'MF', 'Cusco'),
+('3145MT', '[31,45]', 'M', 'Trujillo');
+
+-- Prototipos
 ALTER SEQUENCE prototipo_cod_prototipo_seq RESTART WITH 1;
-INSERT INTO Prototipo (Objetivos, Prop_presupuesto, Prop_audiencia, Prop_canal, cod_est_prot, ID_empleado)
+INSERT INTO Prototipo (Prop_presupuesto, Prop_audiencia, ID_empleado, cod_est_prot)
 VALUES
-    ('Aumentar ventas en un 15%', 4500.00, '2030MLimaNorte', 'Redes sociales', 1, 1),
-    ('Incrementar interacción en redes', 3500.00, '4050MFLimaCentro', 'Publicidad digital', 2, 2),
-    ('Posicionar nuevo producto', 6000.00, '1030MSJL', 'Anuncios en TV y radio', 1, 3),
-    ('Aumentar las ventas en un 10%', 5000.00, '1850MFLimaCentro', 'Redes sociales', 1, 4),
-    ('Incrementar la visibilidad de la marca', 3000.00, '3040MCallao', 'Publicidad digital', 1, 2),
-    ('Realizar una campaña de fidelización', 4000.00, '2040MFLimaCentro', 'Email marketing', 3, 2),
-    ('Lanzar un nuevo producto en el mercado', 7000.00, '2050MFLimaNorte', 'Televisión', 3, 1);
+(5000.00, '1830ML', 5, 1),
+(3000.00, '3145MFA', 6, 2),
+(4000.00, '4660MC', 7, 3),
+(6000.00, '1830FT', 8, 1);
 
-
-ALTER SEQUENCE campana_publicitaria_cod_campana_seq RESTART WITH 1;
-INSERT INTO Campana_Publicitaria (Resultado, Presupuesto, Nombre_campana, Audiencia, Canal, cod_promocion, cod_prototipo)
+-- Canales
+ALTER SEQUENCE canal_cod_canal_seq RESTART WITH 1;
+INSERT INTO Canal (nombre_canal, descripcion)
 VALUES
-    ('Aumento de ventas en un 20%', 6000.00, 'Campaña de Verano', '1850MFLimaCentro', 'Redes sociales', 1, 1),
-    ('Incremento de tráfico web en un 30%', 4500.00, 'Campaña de Fin de Año', '4050MFLimaCentro', 'Publicidad digital', 3, 2),
-    ('Fidelización de clientes existentes', 3000.00, 'Campaña de lealtad', '1030MSJL', 'Anuncion en TV y radio', 2, 3),
-    ('Aumento de las ventas en un 10%', 5000.00, 'CampañaN1', '1850MFLimaCentro', 'Redes sociales', 1, 4);
+('Redes Sociales', 'Campaña dirigida a jóvenes en redes sociales'),
+('Televisión', 'Publicidad en canales de TV de alcance nacional'),
+('Radio', 'Publicidad en estaciones de radio regionales'),
+('Medios Impresos', 'Anuncios en periódicos y revistas locales'),
+('Publicidad Digital', 'Anuncios en plataformas de internet');
 
-
-ALTER SEQUENCE pre_test_id_pretest_seq RESTART WITH 1;
-INSERT INTO pre_test (fecha, audienciaa, audienciab, resultado, comentarios, cod_prototipo)
+-- Relación Prototipo-Canal (prototipoxcanal)
+INSERT INTO prototipoxcanal (cod_prototipo, cod_canal)
 VALUES
-    ('2024-10-01', '1850MFLimaCentro', '2030MLimaNorte', '1850MFLimaCentro', 'El prototipo es bien recibido por el público objetivo.', 1),
-    ('2024-10-02', '4050MFLimaCentro', '3040MCallao', '4050MFLimaCentro', 'Interés moderado, se sugiere ajustar la propuesta de valor.', 2),
-    ('2024-10-03', '1030MSJL', '3040MCallao', '1030MSJL', 'Los objetivos estan bien pero pueden ser mejores.', 3),
-    ('2024-10-04', '1850MFLimaCentro', '1850MFLimaNorte', '1850MFLimaCentro', 'Excelentes reacciones, se recomienda avanzar al siguiente paso.', 4),
-    ('2024-10-04', '3040MCallao', '1030MSJL', '3040MCallao', 'Excelentes reacciones, se recomienda avanzar al siguiente paso.', 5);
+(1, 1),  -- Prototipo 1 usa Redes Sociales
+(1, 5),  -- Prototipo 1 también usa Publicidad Digital
+(2, 2),  -- Prototipo 2 usa Televisión
+(3, 3),  -- Prototipo 3 usa Radio
+(3, 4),  -- Prototipo 3 también usa Medios Impresos
+(4, 5);  -- Prototipo 4 usa Publicidad Digital
 
 
-INSERT INTO Vacante (estado, fecha_fin, fecha_inicio, descripcion, id_puesto) VALUES
-                                                                                  ('Abierta', '2024-12-31', '2024-10-15', 'Se busca desarrollador Java Senior', 7),
-                                                                                  ('Abierta', '2024-11-30', '2024-10-01', 'Vacante para Analista de Marketing Digital', 9),
-                                                                                  ('Cerrada', '2024-09-30', '2024-08-01', 'Posición de Asistente de RRHH', 5);
-
-
-INSERT INTO Postulante (carrera, cv, nombre, oferta_laboral, ol_firmada, id_vacante) VALUES
-                                                                                         ('Ingeniería Informática', 'CV_JoseSilva.pdf', 'José Silva', 'Oferta_Dev_Java.pdf', FALSE, 1),
-                                                                                         ('Marketing', 'CV_LauraRios.pdf', 'Laura Ríos', 'Oferta_Marketing.pdf', FALSE, 2),
-                                                                                         ('Administración de Empresas', 'CV_PedroGomez.pdf', 'Pedro Gómez', 'Oferta_RRHH.pdf', TRUE, 3);
-
-
-INSERT INTO Feedback (descripcion, fecha) VALUES
-                                              ('Excelente conocimiento técnico y habilidades de comunicación', '2024-10-20'),
-                                              ('Buena experiencia en marketing digital, necesita mejorar en análisis de datos', '2024-10-10'),
-                                              ('Buen candidato, pero con poca experiencia en el área de RRHH', '2024-09-15');
-
-
-INSERT INTO Entrevista (estado, fecha, puntaje, tipo, id_postulante, ID_empleado, id_feedback) VALUES
-                                                                                                   ('Completada', '2024-10-20', 95, 'Técnica', 1, 10, 1),
-                                                                                                   ('Completada', '2024-10-10', 80, 'Presencial', 2, 12, 2),
-                                                                                                   ('Completada', '2024-09-15', 75, 'Virtual', 3, 8, 3);
-
-
-INSERT INTO Capacitacion (id_capacitacion,fecha_inicio, fecha_final, nombre, estado, descripcion, ID_instructor) 
+-- Objetivos
+ALTER SEQUENCE Objetivos_id_objetivo_seq RESTART WITH 1;
+INSERT INTO Objetivos (Descripcion, cod_prototipo)
 VALUES
-(1,'2024-01-01', '2024-01-10', 'Capacitación en SQL', 'Pendiente', 'Aprender SQL básico', 9),
-(2,'2024-02-01', '2024-02-05', 'Capacitación en Python', 'Pendiente', 'Introducción a Python', 8);
+('Incrementar las ventas mensuales en un 10%', 1),
+('Mejorar la percepción de la marca', 2),
+('Fomentar la adopción del producto', 3),
+('Fortalecer la relación con los clientes actuales', 4),
+('Expandir la presencia en mercados regionales', 1),
+('Aumentar el tráfico en el sitio web en un 20%', 2),
+('Reducir el costo de adquisición de clientes en un 15%', 3),
+('Generar más referencias de clientes actuales', 4);
+
+-- Campaña Publicitaria
+ALTER SEQUENCE Campana_publicitaria_cod_campana_seq RESTART WITH 1;
+INSERT INTO Campana_Publicitaria (Resultado, Presupuesto, Nombre_campana, Audiencia, cod_promocion, cod_prototipo)
+VALUES
+('Incremento de ventas en un 15%', 5000.00, 'Campaña de Verano', '1830ML', 1, 1),
+('Mayor visibilidad de marca', 3000.00, 'Campaña de Invierno', '3145MFA', 2, 2),
+('Posicionamiento exitoso', 4000.00, 'Campaña de Primavera', '4660MC', 3, 3),
+('Fidelización alcanzada', 6000.00, 'Campaña de Otoño', '1830FT', 3, 4);
 
 
+-- Desempeño del Canal
+ALTER SEQUENCE Desempeno_Canal_id_desempeno_seq RESTART WITH 1;
+INSERT INTO Desempeno_Canal (cod_campana, cod_canal, impresiones, clics, conversiones)
+VALUES
+(1, 1, 10000, 1500, 300),  -- Campaña 1 con canal Redes Sociales
+(1, 5, 12000, 1800, 350),  -- Campaña 1 con canal Publicidad Digital
+(2, 2, 15000, 2000, 400),  -- Campaña 2 con canal Televisión
+(3, 3, 8000, 1200, 250),   -- Campaña 3 con canal Radio
+(3, 4, 5000, 800, 150),     -- Campaña 3 con canal Medios Impresos
+(4, 1, 11000, 1600, 320),  -- Campaña 4 con canal Redes Sociales
+(4, 5, 14000, 2100, 450);   -- Campaña 4 con canal Publicidad Digital
+
+-- Pre-test
+ALTER SEQUENCE Pre_test_id_pretest_seq RESTART WITH 1;
+INSERT INTO Pre_test (AudienciaA, AudienciaB, Fecha_inicio, Fecha_fin, Resultado, Comentarios, cod_prototipo, id_empleado)
+VALUES
+('1830ML', '3145FL', '2024-10-01 10:00:00', '2024-10-05 18:00:00', 'Resultado positivo en A1', 'Comentarios positivos para A1', 1, 5),
+('3145MFA', '4660ML', '2024-10-06 09:00:00', '2024-10-10 17:00:00', 'Resultado mixto en A2', 'Revisar estrategia en A2', 2, 6),
+('4660MC', '1830MF', '2024-10-11 08:30:00', '2024-10-15 16:00:00', 'Buen resultado en A3', 'Alta aceptación en A3', 3, 7),
+('1830FT', '3145MT', '2024-10-16 08:00:00', '2024-10-20 19:00:00', 'Excelente recepción en A4', 'Comentarios excelentes para A4', 4, 8);
+
+-- Tabla Vacante (sin cambios)
+INSERT INTO Vacante (estado, fecha_fin, fecha_inicio, comentario, id_puesto)
+VALUES
+    ('Abierta', '2024-12-31', '2024-10-01', 'Vacante para Gerente de RRHH', 1),
+    ('Abierta', '2024-11-30', '2024-09-15', 'Vacante para Desarrollador Senior', 2),
+    ('Cerrada', '2024-08-30', '2024-07-01', 'Vacante para Técnico de Soporte', 3);
+
+-- Tabla Convocatoria (sin cambios)
+INSERT INTO Convocatoria (id_vacante, medio_publicacion, fecha_inicio, fecha_fin, estado)
+VALUES
+    (1, 'LinkedIn', '2024-10-01', '2024-11-30', 'En proceso'),
+    (2, 'Indeed', '2024-09-15', '2024-10-30', 'Abierta');
+
+-- Tabla Postulante (sin cambios)
+INSERT INTO Postulante (nombre, telefono, id_vacante)
+VALUES
+    ('Carlos Ramírez', 1351351, 1),
+    ('Lucía Flores', 3135165, 2),
+    ('Juan Pérez', 384311353, 3);
+
+-- Tabla Educacion (sin cambios)
+INSERT INTO Educacion (id_postulante, institucion, titulo, fecha_inicio, fecha_fin, en_curso)
+VALUES
+    (1, 'Universidad Nacional', 'Administración', '2015-03-01', '2020-12-15', FALSE),
+    (2, 'Instituto Tecnológico', 'Ingeniería de Sistemas', '2016-03-01', '2021-12-15', FALSE);
+
+-- Tabla Experiencia_Laboral (sin cambios)
+INSERT INTO Experiencia_Laboral (id_postulante, empresa, puesto, fecha_inicio, fecha_fin)
+VALUES
+    (1, 'TechCorp', 'Gerente de RRHH', '2021-01-01', '2024-05-31'),
+    (2, 'Compañía Y', 'Desarrollador Junior', '2022-01-01', '2024-07-31');
+
+-- Tabla Habilidad_Postulante (sin cambios)
+INSERT INTO Habilidad_Postulante (id_postulante, nombre, nivel)
+VALUES
+    (1, 'Liderazgo', 'Avanzado'),
+    (2, 'JavaScript', 'Intermedio');
+
+-- Tabla Habilidad_Experiencia (sin cambios)
+INSERT INTO Habilidad_Experiencia (id_experiencia, nombre, nivel)
+VALUES
+    (1, 'Trabajo en equipo', 'Avanzado'),
+    (2, 'Liderazgo', 'Intermedio');
+
+-- Tabla Idioma (sin cambios)
+INSERT INTO Idioma (nombre)
+VALUES
+    ('Inglés'),
+    ('Francés');
+
+-- Tabla Idioma_Postulante (sin cambios)
+INSERT INTO Idioma_Postulante (id_postulante, id_idioma, nivel)
+VALUES
+    (1, 1, 'Intermedio'),
+    (1, 2, 'Básico'),
+    (2, 1, 'Básico'),
+    (2, 2, 'Intermedio');
+
+-- Tabla Categoria_Observacion (nueva)
+INSERT INTO Categoria_Observacion (nombre)
+VALUES
+    ('Habilidades técnicas'),
+    ('Habilidades blandas'),
+    ('Experiencia laboral'),
+    ('Formación académica'),
+    ('Actitud');
+
+-- Tabla Observacion (nueva)
+INSERT INTO Observacion (id_feedback, id_categoria, descripcion)
+VALUES
+    (1, 1, 'Excelente conocimiento en lenguajes de programación'),
+    (1, 2, 'Buenas habilidades de comunicación y trabajo en equipo'),
+    (1, 3, 'Experiencia relevante en proyectos similares'),
+    (2, 4, 'Formación académica sólida y actualizada'),
+    (2, 5, 'Actitud positiva y proactiva durante la entrevista');
+
+-- Tabla Tipo_entrevista (nueva)
+INSERT INTO Tipo_entrevista (nombre)
+VALUES
+    ('Entrevista inicial'),
+    ('Entrevista técnica'),
+    ('Entrevista con RRHH'),
+    ('Entrevista final');
+
+-- Tabla Indicador (nueva)
+INSERT INTO Indicador (nombre)
+VALUES
+    ('Conocimientos técnicos'),
+    ('Habilidades de comunicación'),
+    ('Trabajo en equipo'),
+    ('Resolución de problemas'),
+    ('Adaptabilidad'),
+    ('Liderazgo');
+
+-- Tabla Tipo_entrevista_Indicador (nueva)
+INSERT INTO Tipo_entrevista_Indicador (id_tipo_entrevista, id_indicador)
+VALUES
+    (1, 2), -- Entrevista inicial - Habilidades de comunicación
+    (1, 5), -- Entrevista inicial - Adaptabilidad
+    (2, 1), -- Entrevista técnica - Conocimientos técnicos
+    (2, 4), -- Entrevista técnica - Resolución de problemas
+    (3, 2), -- Entrevista con RRHH - Habilidades de comunicación
+    (3, 3), -- Entrevista con RRHH - Trabajo en equipo
+    (4, 1), -- Entrevista final - Conocimientos técnicos
+    (4, 6); -- Entrevista final - Liderazgo
+
+INSERT INTO Entrevista (estado, fecha, puntaje_general, id_postulante, ID_empleado, id_feedback, id_tipo_entrevista)
+VALUES
+    ('Aceptada', '2024-10-05', 85, 1, 1, 1, 1), -- Entrevista inicial para Carlos Ramírez
+    ('Pendiente', '2024-10-10', 0, 2, 2, 2, 2); -- Entrevista técnica pendiente para Lucía Flores
+
+-- Tabla Puntaje_Indicador (nueva)
+INSERT INTO Puntaje_Indicador (id_entrevista, id_indicador, puntaje)
+VALUES
+    (1, 2, 85), -- Puntaje para habilidades de comunicación en la primera entrevista
+    (1, 5, 90), -- Puntaje para adaptabilidad en la primera entrevista
+    (2, 1, 75), -- Puntaje para conocimientos técnicos en la segunda entrevista
+    (2, 4, 80); -- Puntaje para resolución de problemas en la segunda entrevista
+
+-- Tabla Entrevista (adaptada)
+INSERT INTO Entrevista (estado, fecha, puntaje_general, id_postulante, ID_empleado, id_feedback, id_tipo_entrevista)
+VALUES
+    ('Aceptada', '2024-10-05', 85, 1, 1, 1, 1), -- Entrevista inicial para Carlos Ramírez
+    ('Pendiente', '2024-10-10', 0, 2, 2, 2, 2); -- Entrevista técnica pendiente para Lucía Flores
+
+-- Tabla Beneficio
+INSERT INTO Beneficio (descripcion)
+VALUES
+    ('Seguro médico'),
+    ('Vacaciones pagadas'),
+    ('Bonos de desempeño'),
+    ('Capacitación continua');
+
+INSERT INTO Oferta_Laboral (id_postulante, id_vacante, fecha_oferta, fecha_inicio_propuesta, link_documento_legal_sin_firma, estado)
+VALUES
+    (1, 1, '2024-10-01', '2024-10-10', 'link_documento_1.pdf', 'Pendiente'),
+    (2, 2, '2024-10-02', '2024-11-01', 'link_documento_2.pdf', 'Aceptada'),
+    (3, 3, '2024-10-03', '2024-12-01', 'link_documento_3.pdf', 'Rechazada');
+
+-- Tabla Oferta_Laboral_Beneficio
+INSERT INTO Oferta_Laboral_Beneficio (id_oferta, id_beneficio)
+VALUES
+    (1, 1), -- Oferta laboral 1 incluye Seguro médico
+    (1, 2), -- Oferta laboral 1 incluye Vacaciones pagadas
+    (2, 3), -- Oferta laboral 2 incluye Bonos de desempeño
+    (2, 4); -- Oferta laboral 2 incluye Capacitación continua
+    
+INSERT INTO Capacitacion (fecha_inicio, fecha_final, nombre, estado, descripcion, ID_instructor)
+VALUES
+    ('2024-10-01', '2024-10-15', 'Capacitación en Ventas', 'pendiente', 'Capacitación sobre técnicas de ventas.', 1),
+    ('2024-10-05', '2024-10-20', 'Capacitación en Marketing', 'en_proceso', 'Capacitación sobre estrategias de marketing digital.', 2),
+    ('2024-10-10', '2024-10-25', 'Capacitación en Liderazgo', 'finalizado', 'Capacitación sobre habilidades de liderazgo.', 3);
+
+-- Inserciones para la tabla empleadoxcapacitacion
 INSERT INTO empleadoxcapacitacion (estado, resultado, ID_empleado, ID_capacitacion)
- VALUES
-('Completado', 90, 3, 1),
-('Pendiente', 0, 4, 1),
-('Completado', 85, 5, 2);
-
-
-INSERT INTO Modulo (nombre, orden, estado, ID_capacitacion) 
 VALUES
-('Introducción a SQL', 1, 'Activo', 1),
-('Bases de datos', 2, 'Activo', 1),
-('Introducción a Python', 1, 'Activo', 2);
+    ('inscrito', NULL, 1, 1),
+    ('aprobado', 85, 2, 2),
+    ('reprobado', 45, 3, 3),
+    ('pendiente', NULL, 4, 1),
+    ('inscrito', NULL, 5, 2);
 
-
-INSERT INTO Test (nombre, fecha, estado, descripcion, ID_modulo) 
+-- Inserciones para la tabla Modulo
+INSERT INTO Modulo (nombre, orden, estado, ID_capacitacion)
 VALUES
-('Examen SQL 1', '2024-01-09', 'Pendiente', 'Examen 1 de SQL', 1),
-('Examen Python 1', '2024-02-04', 'Pendiente', 'Examen 1 de Python', 3);
+    ('Módulo 1: Introducción', 1, 'activo', 1),
+    ('Módulo 2: Estrategias Avanzadas', 2, 'activo', 2),
+    ('Módulo 3: Habilidades de Comunicación', 1, 'inactivo', 3);
 
+-- Inserciones para la tabla Test
+INSERT INTO Test (nombre, fecha, estado, descripcion, ID_modulo)
+VALUES
+    ('Test de Ventas', '2024-10-10', 'pendiente', 'Evaluación sobre las técnicas de ventas aprendidas.', 1),
+    ('Test de Marketing', '2024-10-15', 'realizado', 'Evaluación sobre estrategias de marketing digital.', 2);
 
+-- Inserciones para la tabla Recurso
 INSERT INTO Recurso (nombre, contenido, tipo, orden, estado, ID_modulo)
- VALUES
-('Video introductorio', 'https://www.youtube.com/watch?v=Atpj2UsF65M', 'Video', 1, 'Activo', 1),
-('PPT 2 - Bases de datos', 'http://www.yape.com/recurso-2', 'Documento', 2, 'Activo', 2);
-
-
-INSERT INTO Pregunta (titulo, tipo, ID_test) 
 VALUES
-('¿Qué es SQL?', 'Claves', 1),
-('¿Para qué se usa Python?', 'Claves', 2);
+    ('Video de Ventas', 'Contenido sobre técnicas de ventas.', 'video', 1, 'activo', 1),
+    ('Documento de Marketing', 'Guía de estrategias de marketing.', 'documento', 2, 'activo', 2);
 
-
-INSERT INTO Resultado_Test (comentario, descripcion, ID_empleado, ID_test) 
+-- Inserciones para la tabla Pregunta
+INSERT INTO Pregunta (titulo, tipo, ID_test)
 VALUES
-('Buena respuesta', 'Entendimiento completo de SQL', 3, 1),
-('Necesita mejorar', 'Conceptos básicos de Python', 4, 2);
+    ('¿Qué es la persuasión en ventas?', 'opcion_multiple', 1),
+    ('¿Las redes sociales son efectivas para el marketing?', 'verdadero_falso', 2);
 
+-- Inserciones para la tabla Resultado_Test
+INSERT INTO Resultado_Test (puntaje, comentario, ID_empleado, ID_test)
+VALUES
+    (90, 'Buen desempeño en el test de ventas.', 2, 1),
+    (70, 'Desempeño aceptable en el test de marketing.', 3, 2);
 
+-- Inserciones para la tabla Retroalimen_capacitacion
 INSERT INTO Retroalimen_capacitacion (comentario, ID_capacitacion)
- VALUES
-('Buena capacitación', 1),
-('Mejorar contenido', 2);
-
-
-INSERT INTO Alternativa (contenido, es_correcta, ID_pregunta) 
 VALUES
-('Structured Query Language', 'S', 1),
-('Para análisis de datos', 'S', 2);
+    ('La capacitación fue muy útil.', 1),
+    ('Se podría mejorar la duración del curso.', 2);
 
-
-INSERT INTO SolicitudCapacitacion (fecha_solicitud, estado, motivo, comentario, fecha_aprobacion, ID_empleado) 
+-- Inserciones para la tabla Alternativa
+INSERT INTO Alternativa (contenido, es_correcta, ID_pregunta)
 VALUES
-('2024-10-01', 'Aprobado', 'Mejorar habilidades', 'Solicita capacitación en SQL', '2024-10-05', 1),
-('2024-10-02', 'Pendiente', 'Nuevo puesto', 'Solicita capacitación en Python', NULL, 2);
+    ('La persuasión es clave en ventas.', 'correcto', 1),
+    ('No, las redes sociales no son efectivas para el marketing.', 'incorrecto', 2);
 
-INSERT INTO Asistencia (Estado, Fecha, hora_entrada, hora_salida, ID_empleado) 
+-- Inserciones para la tabla SolicitudCapacitacion
+INSERT INTO SolicitudCapacitacion (fecha_solicitud, estado, motivo, comentario, fecha_aprobacion, ID_empleado)
 VALUES
-('Presente', '2024-10-01', '09:00:00', '17:00:00', 1),
-('Ausente', '2024-10-01', NULL, NULL, 2),
-('Presente', '2024-10-02', '09:30:00', '17:00:00', 2),
-('Tarde', '2024-10-02', '10:15:00', '17:00:00', 3),
-('Presente', '2024-10-02', '09:00:00', '17:00:00', 1),
-('Ausente', '2024-10-04', NULL, NULL, 2),
-('Presente', '2024-10-03', '09:00:00', '17:00:00', 1),
-('Ausente', '2024-10-03', NULL, NULL, 5),
-('Presente', '2024-10-04', '09:00:00', '17:00:00', 6);
+    ('2024-09-15', 'pendiente', 'Evaluar la capacitación en ventas para el equipo.', 'Solicitud de capacitación para mejorar habilidades de ventas.', NULL, 1),
+    ('2024-09-20', 'aprobada', 'Evaluar la capacitación en marketing digital.', 'Solicitud de capacitación para el equipo de marketing.', '2024-09-25', 2);
+    
 
-INSERT INTO Permiso (Fecha_inicio, Fecha_final, estado, Tipo, comentario, ID_empleado)
+
+INSERT INTO Seller (cod_seller,nombre_seller, rubro, correo, telefono, ruc) 
 VALUES
-('2024-10-06', '2024-10-08', 'PENDIENTE', 'Vacaciones', 'Solicito 5 días de vacaciones para asuntos personales.', 1),
-('2024-10-10', '2024-10-11', 'APROBADO', 'Día Libre', 'Solicito un día libre por motivos médicos.', 2),
-('2024-10-15', '2024-10-17', 'PENDIENTE', 'Licencia', 'Necesito 3 días de descanso por enfermedad.', 3),
-('2024-10-20', '2024-10-20', 'APROBADO', 'Otros', 'Solicito medio día para realizar trámites.', 4);
+(1,'Bembos', 'Comida', 'ventas@bembos.com.pe', 987654321, 20567890123),
+(2,'Norkys', 'Comida', 'info@norkys.com.pe', 923456789, 20345678912),
+(3,'Coney Park', 'Entretenimiento', 'contacto@coneypark.com.pe', 912345678, 20987654321),
+(4,'KFC', 'Comida', 'ventas@kfc.com.pe', 998765432, 20123456789),
+(5,'Pizza Hut', 'Comida', 'info@pizzahut.com.pe', 911234567, 20876543210),
+(6,'Starbucks', 'Bebida', 'contacto@starbucks.com.pe', 921234567, 20654321098),
+(7,'La Lucha', 'Comida ', 'ventas@lalucha.com.pe', 914567123, 20765432109);
 
-INSERT INTO Evaluacion (estado, fecha_inicio, fecha_fin, puntaje, retroalimentacion, ID_empleado) 
+INSERT INTO Tipo_producto (cod_tipo_producto,nombre_tipo_producto) 
 VALUES
-('Finalizado', '2024-01-15', '2024-03-15', 66.6, 'Buen desempeño general, pero puede mejorar en gestión de tiempos.', 1),
-('FINALIZADO', '2024-02-10', '2024-04-15', 100.0, 'Buen trabajo en equipo, pero necesita mejorar en la atención al cliente.', 2),
-('EN PROCESO', '2024-09-01', '2024-12-07', NULL, NULL, 3),
-('EN PROCESO', '2024-09-05', '2024-12-10', NULL, NULL, 4),
-('EN PROCESO', '2024-09-12', '2024-12-17', NULL, NULL, 5),
-('Finalizado', '2024-01-15', '2024-03-15', 50.0, 'Cumplimiento amedias de meta, pero falta más proactividad.', 6);
+(1,'Comida'),
+(2,'Bebidas'),
+(3,'Entretenimiento'),
+(4,'Postres'),
+(5,'Snacks'),
+(6,'Desayunos'),
+(7,'Alimentos Saludables');
 
-INSERT INTO Objetivo (descripcion, Cumplido, ID_Evaluacion) 
-values
-('Realizar 50 reportes mensuales de ventas.', TRUE, 1),
-('Reducir el tiempo de entrega de proyectos en un 10%.', FALSE, 1),
-('Capacitar a 5 nuevos empleados en el sistema CRM.', TRUE, 1),
-('Capacitar al equipo en metodologías ágiles.', TRUE, 2),
-('Desarrollar mas de 5 campañas publicitaria en redes sociales.', TRUE, 2),
-('Aumentar las ventas en un 20% en el segundo semestre.', TRUE, 2),
-('Mejorar la comunicación interna entre departamentos.', TRUE, 2),
-('Mejorar la retención de clientes en un 15%.', FALSE, 6),
-('Optimizar el proceso de reclutamiento y selección.', TRUE, 6);
-
-INSERT INTO ticket_asig_tip (id_conv, problema_ident, fecha_asig, estado, comentario, ID_empleado) 
-VALUES 
-(1, 'Problema de red', '2024-01-10', 'Pend', 'Esperando revisión del técnico', 1),
-(2, 'Error en el sistema', '2024-01-11', 'Rueo', 'Se resolvió reinstalando el software', 2),
-(3, 'Fallo de servidor', '2024-01-12', 'Pete', 'Investigación en curso', 3),
-(4, 'Lentitud de conexión', '2024-01-13', 'Pete', 'Esperando respuesta del proveedor', 4),
-(5, 'Interrupciones en la red', '2024-01-14', 'Pene', 'Plan de mantenimiento en progreso', 5);
-
-INSERT INTO Ticket_incidente (categoria, prioridad, estado, fecha_ticket_inc, ID_empleado)
+INSERT INTO Producto (cod_producto,nombre_producto, empresa, cod_tipo_producto) 
 VALUES
-    ('Red', 'Alta', 'Abierto', '2024-01-01', 1),
-    ('Software', 'Media', 'EnPro', '2024-01-02', 2),
-    ('Hardware', 'Baja', 'Cerrado', '2024-01-03', 3),
-    ('Conexión', 'Alta', 'Abierto', '2024-01-04', 4),
-    ('Red', 'Media', 'Pendiente', '2024-01-05', 5);
+(1,'Hamburguesa', 'Bembos', 1),
+(2,'Gaseosa', 'InkaKola', 2),
+(3,'Entrada', 'Coney Park', 3),
+(4,'Pollo a la Parrilla', 'Norkys', 1),
+(5,'Papas Fritas', 'KFC', 1),
+(6,'Pollo crispy', 'KFC', 1),
+(7,'Hamburguesa Doble', 'La Lucha', 1);
 
 
-INSERT INTO Ticket_general (fecha_creacion, categoria, cod_ticket_asig, cod_ticket_inc) 
-VALUES 
-('2024-01-10', 'Red', 1, 1),
-('2024-01-11', 'Softw', 2, 2),
-('2024-01-12', 'Harde', 3, 3),
-('2024-01-13', 'Conón', 4, 4),
-('2024-01-14', 'Red', 5, 5);
+INSERT INTO Promocion (cod_promocion,fecha_inicio, fecha_fin, dscto, estado_promo, dscrip_promo, ID_empleado) 
+VALUES
+(1,'2024-01-01', '2024-01-31', 15.00, FALSE, 'Promoción de Año Nuevo: Disfruta un 15% de descuento en hamburguesas y gaseosas de Bembos para celebrar el inicio de año.', 1),
+(2,'2024-02-01', '2024-02-15', 10.00, FALSE, 'Descuento por San Valentín: Sorprende a tu pareja con un 10% de descuento en combos especiales de Norkys durante esta fecha romántica.', 2),
+(3,'2024-03-01', '2024-03-31', 20.00, FALSE, 'Ofertas de Primavera: Ven y prueba nuestro nuevo menú de primavera con un 20% de descuento en entradas de Coney Park.', 3),
+(4,'2024-04-01', '2024-04-15', 5.00, FALSE, 'Semana Santa: Disfruta de un 5% de descuento en platos de pollo a la parrilla en Norkys.', 4),
+(5,'2024-09-01', '2024-10-31', 25.00, TRUE, 'Día de la Madre: Celebra a mamá con un 25% de descuento en el menú de KFC, incluyendo combos especiales.', 5),
+(6,'2024-09-01', '2024-10-15', 30.00, TRUE, 'Ofertas de Mitad de Año: Aprovecha un 30% de descuento en bebidas de Starbucks y obtén un regalo por cada compra.', 6),
+(7,'2024-10-01', '2024-11-30', 50.00, TRUE, 'Ofertas de Fiestas Patrias: Disfruta de un increíble 50% de descuento en hamburguesas dobles de La Lucha y celebra con nosotros.', 7);
 
-INSERT INTO Notificacion (fecha_envio, asunto, mensaje, aprobacion, cod_ticket_asig) 
-VALUES 
-('2024-01-10', 'Revisión necesaria', 'Se requiere una revisión urgente del sistema', 'Pendiente', 1),
-('2024-01-11', 'Resolución de problema', 'El problema ha sido resuelto con éxito', 'Aprobado', 2),
-('2024-01-12', 'Problema en investigación', 'Se está investigando el fallo del servidor', 'Pendiente', 3),
-('2024-01-13', 'Respuesta esperada', 'Esperando respuesta del proveedor para solución', 'Pendiente', 4),
-('2024-01-14', 'Plan de mantenimiento', 'Mantenimiento programado para resolver la red', 'Aprobado', 5);
+INSERT INTO productoxseller (cod_productoxseller,cod_producto, cod_seller) 
+VALUES
+(1, 1, 1),  
+(2, 2, 1),  
+(3, 3, 3), 
+(4, 4, 2),  
+(5, 5, 4),  
+(6, 6, 4),  
+(7, 7, 5);  
+ 
+INSERT INTO promocionxproducto (cod_promocionxproducto, cod_promocion, cod_producto) 
+VALUES
+(1, 1, 1),  
+(2, 1, 2),  
+(3, 2, 4),  
+(4, 3, 3),  
+(5, 4, 4),  
+(6, 5, 5),  
+(7, 6, 2),  
+(8, 7, 7); 
 
-INSERT INTO tipificacion (funcionalidad, fecha_creacion, id_departamento, comentario, motivo, cod_ticket_asig) 
-VALUES 
-('Conexión de red', '2024-01-10', 1, 'Fallos intermitentes en la red', 'Mantenimiento requerido', 1),
-('Actualización de software', '2024-01-11', 2, 'Error crítico del sistema operativo', 'Reinstalación completa', 2),
-('Servidor fuera de línea', '2024-01-12', 3, 'Fallo en el servidor principal', 'Fallo en hardware', 3),
-('Lentitud en la red', '2024-01-13', 1, 'Problemas de latencia alta', 'Problema con el proveedor', 4),
-('Interrupción de red', '2024-01-14', 1, 'Caídas frecuentes de la red', 'Mantenimiento incorrecto', 5);
+INSERT INTO Prioridad_objetivo (nombre, peso)
+VALUES
+    ('Alta', 1),
+    ('Media', 2),
+    ('Baja', 3);
+
+INSERT INTO Objetivo (descripcion, estado, fecha_inicio, fecha_fin, ID_empleado, ID_Prioridad_objetivo)
+VALUES
+    ('Mejorar el rendimiento del equipo de soporte técnico', 'Finalizado', '2024-01-01', '2024-03-31', 3, 1),
+    ('Desarrollar la nueva funcionalidad para la plataforma', 'Pendiente', '2024-01-01', '2024-03-31', 2, 1),
+    ('Implementar estrategias de marketing digital', 'Finalizado', '2024-01-01', '2024-03-31', 5, 2),
+    ('Aumentar las ventas en un 10%', 'Pendiente', '2024-01-01', '2024-03-31', 6, 2),
+    ('Capacitar a nuevos empleados en el área de soporte', 'Pendiente', '2024-01-01', '2024-03-31', 3, 2);
+
+INSERT INTO Evaluacion (estado, fecha_inicio, fecha_fin, puntaje, retroalimentacion, ID_empleado)
+VALUES
+    ('Finalizada', '2024-04-01', '2024-04-15', 90, 'Objetivo cumplido con éxito.', 3),
+    ('Pendiente', '2024-04-01', '2024-06-30', 0, 'Pendiente de evaluación', 2),
+    ('Finalizada', '2024-04-01', '2024-04-15', 85, 'Objetivo cumplido con éxito.', 5),
+    ('Pendiente', '2024-04-01', '2024-06-30', 0, 'Pendiente de evaluación', 6),
+    ('Pendiente', '2024-04-01', '2024-06-30', 0, 'Pendiente de evaluación', 3);
+
+INSERT INTO Evaluacion_objetivo (estado, ID_objetivo, ID_evaluacion)
+VALUES
+    ('Finalizado', 1, 1),
+    ('En progreso', 2, 2), 
+    ('Finalizado', 3, 3), 
+    ('En progreso', 4, 4), 
+    ('En progreso', 5, 5); 
+
+INSERT INTO Tipo_permiso (nombre)
+VALUES
+    ('Falta justificada'),
+    ('Vacaciones'),
+    ('Permiso'),
+    ('Tardanza justificada');
+
+INSERT INTO Permiso (fecha_inicio, fecha_final, estado, comentario, ID_empleado, ID_tipo_permiso)
+VALUES
+    ('2024-02-01', '2024-02-03', 'Aprobado', 'Vacaciones programadas', 1, 2),
+    ('2024-02-15', '2024-02-15', 'Aprobado', 'Permiso por asuntos personales', 3, 3),
+    ('2024-03-01', '2024-03-02', 'Pendiente', 'Solicitado', 5, 3),
+    ('2024-04-01', '2024-04-05', 'Aprobado', 'Vacaciones anuales', 6, 2),
+    ('2024-05-01', '2024-05-01', 'Pendiente', 'Permiso para cita médica', 4, 3);
+
+INSERT INTO Asistencia (fecha, estado, hora_entrada, hora_salida, ID_empleado)
+VALUES
+    ('2024-02-01', 'Presente', '09:00:00', '18:00:00', 1),
+    ('2024-02-02', 'Ausente', NULL, NULL, 2),
+    ('2024-02-01', 'Tarde', '09:30:00', '18:00:00', 3),
+    ('2024-02-01', 'Presente', '08:55:00', '17:55:00', 4),
+    ('2024-02-01', 'Presente', '09:00:00', '18:00:00', 5);
 ```
