@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import '../stylesheets/Login.css'; // Importa el archivo de estilos
+import useNavigate from 'react-router-dom';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Aquí puedes agregar la lógica para autenticar al usuario
     // Por ejemplo, puedes hacer una solicitud a un servidor para verificar las credenciales
     if (username === 'admin' && password === 'password') {
-      // Si las credenciales son correctas, redirige al usuario a la página principal
-      window.location.href = '/';
+      navigate('/menu');
     } else {
       setError('Credenciales incorrectas');
     }
