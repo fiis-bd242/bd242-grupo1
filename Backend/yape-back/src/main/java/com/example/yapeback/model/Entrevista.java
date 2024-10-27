@@ -1,8 +1,8 @@
-// src/main/java/com/example/yapeback/model/Entrevista.java
 package com.example.yapeback.model;
 
 import lombok.Data;
 import java.sql.Date;
+import java.util.List;
 
 @Data
 public class Entrevista {
@@ -14,5 +14,6 @@ public class Entrevista {
     private Date fecha;
     private String estado;
     private Integer puntaje_general;
-    private Feedback feedback; // Añadir este campo
+    private Feedback feedback;
+    private List<EntrevistaIndicador> indicadores;
 }

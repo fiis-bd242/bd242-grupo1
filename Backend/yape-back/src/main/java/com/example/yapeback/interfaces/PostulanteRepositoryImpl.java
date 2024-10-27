@@ -7,6 +7,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import com.example.yapeback.model.EntrevistaIndicador;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -352,14 +353,15 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
     // src/main/java/com/example/yapeback/interfaces/PostulanteRepositoryImpl.java
     @Override
     public List<Entrevista> findEntrevistasWithFeedbackByPostulanteId(Long idPostulante) {
-        String sql = "SELECT DISTINCT e.*, " +
-                "f.id_feedback, f.fecha AS feedback_fecha, " +
-                "o.id_observacion, o.descripcion, o.id_categoria, " +
-                "c.nombre AS categoria_nombre " +
+        String sql = "SELECT e.*, f.id_feedback, f.fecha AS feedback_fecha, " +
+                "o.id_observacion, o.descripcion, o.id_categoria, c.nombre AS categoria_nombre, " +
+                "pi.id_indicador, pi.puntaje, i.nombre AS indicador_nombre " +
                 "FROM entrevista e " +
                 "LEFT JOIN feedback f ON e.id_feedback = f.id_feedback " +
                 "LEFT JOIN observacion o ON f.id_feedback = o.id_feedback " +
-                "LEFT JOIN categoria_observacion c ON o.id_categoria = c.id_categoria " + // Updated table name
+                "LEFT JOIN categoria_observacion c ON o.id_categoria = c.id_categoria " +
+                "LEFT JOIN puntaje_indicador pi ON e.id_entrevista = pi.id_entrevista " +
+                "LEFT JOIN indicador i ON pi.id_indicador = i.id_indicador " +
                 "WHERE e.id_postulante = ?";
 
         Map<Long, Entrevista> entrevistaMap = new HashMap<>();
@@ -379,6 +381,7 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
                             e.setFecha(rs.getDate("fecha"));
                             e.setEstado(rs.getString("estado"));
                             e.setPuntaje_general(rs.getInt("puntaje_general"));
+                            e.setIndicadores(new ArrayList<>());
 
                             // Initialize feedback if it exists
                             Long feedbackId = rs.getLong("id_feedback");
@@ -391,7 +394,6 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
                                 e.setFeedback(feedback);
                             }
                         } catch (SQLException ex) {
-                            // Handle SQLException
                             ex.printStackTrace();
                         }
                         return e;
@@ -407,12 +409,26 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
                             observacion.setDescripcion(rs.getString("descripcion"));
                             observacion.setCategoriaNombre(rs.getString("categoria_nombre"));
 
-                            // Avoid duplicate observaciones
                             if (!entrevista.getFeedback().getObservaciones().contains(observacion)) {
                                 entrevista.getFeedback().getObservaciones().add(observacion);
                             }
                         } catch (SQLException ex) {
-                            // Handle SQLException
+                            ex.printStackTrace();
+                        }
+                    }
+
+                    // Add indicador if it exists
+                    if (rs.getLong("id_indicador") > 0 && !rs.wasNull()) {
+                        EntrevistaIndicador indicador = new EntrevistaIndicador();
+                        try {
+                            indicador.setId_entrevista(rs.getLong("id_entrevista"));
+                            indicador.setId_indicador(rs.getLong("id_indicador"));
+                            indicador.setPuntaje(rs.getInt("puntaje"));
+
+                            if (!entrevista.getIndicadores().contains(indicador)) {
+                                entrevista.getIndicadores().add(indicador);
+                            }
+                        } catch (SQLException ex) {
                             ex.printStackTrace();
                         }
                     }
@@ -431,6 +447,42 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
                 .stream()
                 .toList();
     }
+
+    public void actualizarPuntajesIndicadores(Long idEntrevista, List<EntrevistaIndicador> indicadores) {
+        String deleteSql = "DELETE FROM puntaje_indicador WHERE id_entrevista = ?";
+        jdbcTemplate.update(deleteSql, idEntrevista);
+
+        String insertSql = "INSERT INTO puntaje_indicador (id_entrevista, id_indicador, puntaje) VALUES (?, ?, ?)";
+        for (EntrevistaIndicador indicador : indicadores) {
+            jdbcTemplate.update(insertSql, idEntrevista, indicador.getId_indicador(), indicador.getPuntaje());
+        }
+
+        // Actualizar el puntaje general de la entrevista
+        actualizarPuntajeGeneral(idEntrevista);
+    }
+
+    public void actualizarFeedback(Long idEntrevista, Feedback feedback) {
+        String updateSql = "UPDATE feedback SET fecha = ? WHERE id_feedback = ?";
+        jdbcTemplate.update(updateSql, feedback.getFecha(), feedback.getId_feedback());
+
+        // Actualizar observaciones del feedback
+        String deleteObservacionesSql = "DELETE FROM observacion WHERE id_feedback = ?";
+        jdbcTemplate.update(deleteObservacionesSql, feedback.getId_feedback());
+
+        String insertObservacionesSql = "INSERT INTO observacion (id_feedback, id_categoria, descripcion) VALUES (?, ?, ?)";
+        for (Observacion observacion : feedback.getObservaciones()) {
+            jdbcTemplate.update(insertObservacionesSql, feedback.getId_feedback(), observacion.getId_categoria(), observacion.getDescripcion());
+        }
+    }
+
+    public void actualizarPuntajeGeneral(Long idEntrevista) {
+        String sql = "SELECT SUM(puntaje) FROM puntaje_indicador WHERE id_entrevista = ?";
+        Integer puntajeGeneral = jdbcTemplate.queryForObject(sql, Integer.class, idEntrevista);
+
+        String updateSql = "UPDATE entrevista SET puntaje_general = ? WHERE id_entrevista = ?";
+        jdbcTemplate.update(updateSql, puntajeGeneral, idEntrevista);
+    }
+
     private static final class EntrevistaWithFeedbackRowMapper implements RowMapper<Entrevista> {
         @Override
         public Entrevista mapRow(ResultSet rs, int rowNum) throws SQLException {
