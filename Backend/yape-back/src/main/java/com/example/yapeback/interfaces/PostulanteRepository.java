@@ -23,4 +23,7 @@ public interface PostulanteRepository {
     List<Entrevista> findEntrevistasByPostulanteId(Long idPostulante);
     List<Entrevista> findEntrevistasWithFeedbackByPostulanteId(Long idPostulante);
 
+    // Add the missing methods
+    void actualizarPuntajesIndicadores(Long idEntrevista, List<EntrevistaIndicador> indicadores);
+    void actualizarFeedback(Long idEntrevista, Feedback feedback);
 }

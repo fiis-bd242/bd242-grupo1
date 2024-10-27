@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.yapeback.model.Entrevista;
+import com.example.yapeback.model.EntrevistaIndicador;
 import java.util.stream.Collectors;
 
 import java.util.List;
@@ -79,7 +80,7 @@ public class PostulanteController {
     }
 
     @PutMapping("/feedback/{id}")
-    public ResponseEntity<Feedback> updateFeedback(@PathVariable Long id, @RequestBody Feedback feedbackDetails) {
+    public ResponseEntity<Feedback> modifyFeedback(@PathVariable Long id, @RequestBody Feedback feedbackDetails) {
         Feedback feedback = postulanteRepository.findFeedbackByEntrevistaId(id);
         if (feedback == null) {
             return ResponseEntity.notFound().build();
@@ -143,5 +144,17 @@ public class PostulanteController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(entrevistas);
+    }
+
+    @PutMapping("/entrevistas/{id}/indicadores")
+    public ResponseEntity<Void> updatePuntajesIndicadores(@PathVariable Long id, @RequestBody List<EntrevistaIndicador> indicadores) {
+        postulanteRepository.actualizarPuntajesIndicadores(id, indicadores);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/entrevistas/{id}/feedback")
+    public ResponseEntity<Void> updateFeedback(@PathVariable Long id, @RequestBody Feedback feedback) {
+        postulanteRepository.actualizarFeedback(id, feedback);
+        return ResponseEntity.noContent().build();
     }
 }
