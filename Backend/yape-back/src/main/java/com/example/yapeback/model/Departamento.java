@@ -9,6 +9,6 @@ public class Departamento {
     private Long id_departamento;
     private String descripcion;
     private Long id_departamento_padre;
-    private List<Departamento> subDepartments;
+    private List<Departamento> subDepartamentos;
     private List<Puesto> puestos;
 }
