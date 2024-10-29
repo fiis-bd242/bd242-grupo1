@@ -54,6 +54,6 @@ public class DepartamentoRepositoryImpl implements DepartamentoRepository {
     @Override
     public List<Puesto> findPuestosByDepartamentoId(Long idDepartamento) {
         String sql = "SELECT id_puesto, nombre, paga, id_departamento FROM puesto WHERE id_departamento = ?";
-        return jdbcTemplate.query(sql, new PuestoRepositoryImpl.PuestoRowMapper(), idDepartamento);
+        return jdbcTemplate.query(sql, new PuestoRepositoryImpl.PuestoRowMapper(jdbcTemplate), idDepartamento);
     }
 }

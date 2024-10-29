@@ -19,7 +19,13 @@ public class PuestoRepositoryImpl implements PuestoRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public static final class PuestoRowMapper implements RowMapper<Puesto> {
+    static class PuestoRowMapper implements RowMapper<Puesto> {
+        private final JdbcTemplate jdbcTemplate;
+
+        PuestoRowMapper(JdbcTemplate jdbcTemplate) {
+            this.jdbcTemplate = jdbcTemplate;
+        }
+
         @Override
         public Puesto mapRow(ResultSet rs, int rowNum) throws SQLException {
             Puesto puesto = new Puesto();
@@ -27,11 +33,27 @@ public class PuestoRepositoryImpl implements PuestoRepository {
             puesto.setNombre(rs.getString("nombre"));
             puesto.setPaga(rs.getDouble("paga"));
             puesto.setId_departamento(rs.getLong("id_departamento"));
+            puesto.setFunciones(findFuncionesByPuestoId(rs.getLong("id_puesto")));
+            puesto.setVacantes(findVacantesByPuestoId(rs.getLong("id_puesto")));
             return puesto;
+        }
+
+        private List<Funcion> findFuncionesByPuestoId(Long idPuesto) {
+            String sql = "SELECT f.id_funcion, f.nombre, f.descripcion " +
+                    "FROM funcion f " +
+                    "JOIN puesto_funcion pf ON f.id_funcion = pf.id_funcion " +
+                    "WHERE pf.id_puesto = ?";
+            return jdbcTemplate.query(sql, new FuncionRowMapper(), idPuesto);
+        }
+
+        private List<Vacante> findVacantesByPuestoId(Long idPuesto) {
+            String sql = "SELECT id_vacante, estado, fecha_fin, fecha_inicio, comentario, id_puesto " +
+                    "FROM vacante WHERE id_puesto = ?";
+            return jdbcTemplate.query(sql, new VacanteRowMapper(), idPuesto);
         }
     }
 
-    private static final class FuncionRowMapper implements RowMapper<Funcion> {
+    static class FuncionRowMapper implements RowMapper<Funcion> {
         @Override
         public Funcion mapRow(ResultSet rs, int rowNum) throws SQLException {
             Funcion funcion = new Funcion();
@@ -42,7 +64,7 @@ public class PuestoRepositoryImpl implements PuestoRepository {
         }
     }
 
-    private static final class VacanteRowMapper implements RowMapper<Vacante> {
+    static class VacanteRowMapper implements RowMapper<Vacante> {
         @Override
         public Vacante mapRow(ResultSet rs, int rowNum) throws SQLException {
             Vacante vacante = new Vacante();
@@ -59,10 +81,10 @@ public class PuestoRepositoryImpl implements PuestoRepository {
     @Override
     public List<Puesto> findAll() {
         String sql = "SELECT id_puesto, nombre, paga, id_departamento FROM puesto";
-        List<Puesto> puestos = jdbcTemplate.query(sql, new PuestoRowMapper());
+        List<Puesto> puestos = jdbcTemplate.query(sql, new PuestoRowMapper(jdbcTemplate));
         for (Puesto puesto : puestos) {
             puesto.setFunciones(findFuncionesByPuestoId(puesto.getId_puesto()));
-            puesto.setVacantes(findVacantesByPuestoId(puesto.getId_puesto())); // Añadir esta línea
+            puesto.setVacantes(findVacantesByPuestoId(puesto.getId_puesto()));
         }
         return puestos;
     }
@@ -70,10 +92,10 @@ public class PuestoRepositoryImpl implements PuestoRepository {
     @Override
     public Puesto findById(Long id) {
         String sql = "SELECT id_puesto, nombre, paga, id_departamento FROM puesto WHERE id_puesto = ?";
-        Puesto puesto = jdbcTemplate.queryForObject(sql, new PuestoRowMapper(), id);
+        Puesto puesto = jdbcTemplate.queryForObject(sql, new PuestoRowMapper(jdbcTemplate), id);
         if (puesto != null) {
             puesto.setFunciones(findFuncionesByPuestoId(id));
-            puesto.setVacantes(findVacantesByPuestoId(id)); // Añadir esta línea
+            puesto.setVacantes(findVacantesByPuestoId(id));
         }
         return puesto;
     }
