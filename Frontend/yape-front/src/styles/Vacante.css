@@ -1,0 +1,10 @@
+.page-title {
+    display: block;
+    text-align: left;
+    color: #5D5D5D; /* Ensure the text color contrasts with the background */
+    font-size: 24px; /* Adjust the font size as needed */
+}
+
+.time {
+    margin-left: 700px; /* Adds space between the title and the clock */
+}
