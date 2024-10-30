@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/MenuPrincipal.css';
+import { Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
 
 const MenuPrincipal = () => {
   const navigate = useNavigate();
@@ -67,14 +69,40 @@ const MenuPrincipal = () => {
         </button>
       </aside>
 
-      {/* Main Content */}
-      <main className="main-content">
+ {/* Main Content */}
+ <main className="main-content">
         <header className="header">
-          <h1 className="page-title">Puestos</h1>
+          <h1 className="page-title">Menú principal</h1>
           <div className="time">{time.toLocaleTimeString()}</div>
         </header>
 
-        {/* Contenido principal de Puestos */}
+        <div className="subtitle-container">
+          <h2 className="subtitle">¿Qué haremos hoy?</h2>
+        </div>
+
+        <div className="cards-grid">
+          {/* Puestos Card */}
+          <div className="card">
+            <div className="card-icon">
+              <Users className="icon" />
+            </div>
+            <h3 className="card-title">Puestos</h3>
+            <p className="card-description">
+              Visualiza, crea y edita los puestos
+            </p>
+          </div>
+
+          {/* Vacantes Card */}
+          <div className="card">
+            <div className="card-icon">
+              <div className="question-mark">?</div>
+            </div>
+            <h3 className="card-title">Vacantes</h3>
+            <p className="card-description">
+              Visualiza, crea y edita las vacantes
+            </p>
+          </div>
+        </div>
       </main>
     </div>
   );
