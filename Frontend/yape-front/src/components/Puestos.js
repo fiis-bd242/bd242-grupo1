@@ -1,29 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import '../styles/MenuPrincipal.css';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../styles/Puestos.css';
+import '../styles/MenuPrincipal.css';
 
-const MenuPrincipal = () => {
+const Puestos = () => {
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
-  const [employee, setEmployee] = useState({ nombre: '', apellido: '' });
 
   useEffect(() => {
-    const fetchEmployee = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/empleados/1');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        console.log('Employee data fetched:', data); // Añadido para verificar datos
-        setEmployee(data);
-      } catch (error) {
-        console.error('Error fetching employee:', error);
-      }
-    };
-
-    fetchEmployee();
-
     const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);
@@ -32,7 +16,7 @@ const MenuPrincipal = () => {
   }, []);
 
   const handleLogout = () => {
-    // Tu lógica de logout
+    navigate('/');
   };
 
   return (
@@ -41,25 +25,20 @@ const MenuPrincipal = () => {
       <aside className="sidebar">
         <div className="sidebar-content">
           <div className="logo-container">
-            <img
-              src="https://vectorseek.com/wp-content/uploads/2023/09/Yape-App-Logo-Vector.svg-.png"
-              alt="Logo"
-              className="logo"
-              onClick={() => navigate('/menu')}
-            />
+            <img src="https://vectorseek.com/wp-content/uploads/2023/09/Yape-App-Logo-Vector.svg-.png" alt="Logo" className="logo" onClick={() => navigate('/menu')} />
           </div>
           
           <div className="user-profile">
             <div className="avatar"></div>
             <div className="welcome-text">¡Bienvenido/a!</div>
-            <div className="user-name">{`${employee.apellido},`}</div>
-            <div className="user-name">{employee.nombre}</div>
+            <div className="user-name">PATERNO MATERNO,</div>
+            <div className="user-name">NOMBRES</div>
           </div>
 
           <nav className="nav-menu">
             <button className="nav-button" onClick={() => navigate('/menu/puestos')}>Puestos</button>
             <button className="nav-button" onClick={() => navigate('/menu/vacantes')}>Vacantes</button>
-          </nav>
+</nav>
         </div>
 
         <button className="logout-button" onClick={handleLogout}>
@@ -80,4 +59,4 @@ const MenuPrincipal = () => {
   );
 };
 
-export default MenuPrincipal;
+export default Puestos;

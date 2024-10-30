@@ -41,7 +41,9 @@
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Tres columnas iguales */
+  justify-content: center;
+  align-items: center;
+  grid-template-columns: repeat(2, 1fr); /* Tres columnas iguales */
   gap: 20px; /* Espacio entre las tarjetas */
   margin-top: 20px;
 }
@@ -170,6 +172,7 @@
 .subtitle {
   font-size: 1.125rem;
   color: #4b5563;
+  text-align: center;
 }
 
 .question-mark {
