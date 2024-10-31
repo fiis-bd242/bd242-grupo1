@@ -43,14 +43,14 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
     public Postulante save(Postulante postulante) {
         if (postulante.getId_postulante() == null) {
             // Insert logic
-            String sql = "INSERT INTO postulante (nombre, telefono, id_vacante) VALUES (?, ?, ?)";
-            jdbcTemplate.update(sql, postulante.getNombre(), postulante.getTelefono(), postulante.getId_vacante());
+            String sql = "INSERT INTO postulante (nombre, telefono, id_vacante, correo) VALUES (?, ?, ?, ?)";
+            jdbcTemplate.update(sql, postulante.getNombre(), postulante.getTelefono(), postulante.getId_vacante(), postulante.getCorreo());
             Long newId = jdbcTemplate.queryForObject("SELECT LASTVAL()", Long.class);
             postulante.setId_postulante(newId);
         } else {
             // Update logic
-            String sql = "UPDATE postulante SET nombre = ?, telefono = ?, id_vacante = ? WHERE id_postulante = ?";
-            jdbcTemplate.update(sql, postulante.getNombre(), postulante.getTelefono(), postulante.getId_vacante(), postulante.getId_postulante());
+            String sql = "UPDATE postulante SET nombre = ?, telefono = ?, id_vacante = ?, correo = ? WHERE id_postulante = ?";
+            jdbcTemplate.update(sql, postulante.getNombre(), postulante.getTelefono(), postulante.getId_vacante(), postulante.getId_postulante(), postulante.getCorreo());
         }
         return postulante;
     }
@@ -105,6 +105,7 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
             postulante.setNombre(rs.getString("nombre"));
             postulante.setTelefono(rs.getInt("telefono"));
             postulante.setId_vacante(rs.getLong("id_vacante"));
+            postulante.setCorreo(rs.getString("correo"));
             postulante.setIdiomas(findIdiomasByPostulanteId(rs.getLong("id_postulante")));
             postulante.setEducaciones(findEducacionesByPostulanteId(rs.getLong("id_postulante")));
             postulante.setHabilidades(findHabilidadesByPostulanteId(rs.getLong("id_postulante")));

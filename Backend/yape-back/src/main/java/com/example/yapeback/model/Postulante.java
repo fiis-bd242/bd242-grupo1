@@ -9,6 +9,7 @@ public class Postulante {
     private String nombre;
     private int telefono;
     private Long id_vacante;
+    private String correo;
     private List<Idioma> idiomas;
     private List<Educacion> educaciones;
     private List<Habilidad> habilidades;
