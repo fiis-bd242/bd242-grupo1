@@ -49,6 +49,7 @@ public class PostulanteController {
         postulante.setNombre(postulanteDetails.getNombre());
         postulante.setTelefono(postulanteDetails.getTelefono());
         postulante.setId_vacante(postulanteDetails.getId_vacante());
+        postulante.setCorreo(postulanteDetails.getCorreo());
         postulante.setIdiomas(postulanteDetails.getIdiomas());
         postulante.setEducaciones(postulanteDetails.getEducaciones());
         postulante.setHabilidades(postulanteDetails.getHabilidades());
