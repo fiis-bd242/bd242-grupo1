@@ -401,10 +401,12 @@ CREATE TABLE Convocatoria (
                               estado VARCHAR(50) CHECK (estado IN ('Abierta', 'Cerrada', 'En proceso')),
                               FOREIGN KEY (id_vacante) REFERENCES Vacante(id_vacante)
 );
+
 CREATE TABLE Postulante (
                             id_postulante SERIAL NOT NULL,
                             nombre VARCHAR(255) NOT NULL,
-			    telefono INTEGER NOT NULL,
+                            telefono INTEGER NOT NULL,
+                            correo VARCHAR(255) NOT NULL,
                             id_vacante INTEGER NOT NULL,
                             PRIMARY KEY (id_postulante),
                             FOREIGN KEY (id_vacante) REFERENCES Vacante(id_vacante)

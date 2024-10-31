@@ -269,11 +269,11 @@ VALUES
     (2, 'Indeed', '2024-09-15', '2024-10-30', 'Abierta');
 
 -- Tabla Postulante (sin cambios)
-INSERT INTO Postulante (nombre, telefono, id_vacante)
+INSERT INTO Postulante (nombre, telefono, id_vacante, correo)
 VALUES
-    ('Carlos Ramírez', 1351351, 1),
-    ('Lucía Flores', 3135165, 2),
-    ('Juan Pérez', 384311353, 3);
+    ('Carlos Ramírez', 1351351, 1, 'Correo1'),
+    ('Lucía Flores', 3135165, 2, 'Correo2'),
+    ('Juan Pérez', 384311353, 3, 'Correo3');
 
 -- Tabla Educacion (sin cambios)
 INSERT INTO Educacion (id_postulante, institucion, titulo, fecha_inicio, fecha_fin, en_curso)

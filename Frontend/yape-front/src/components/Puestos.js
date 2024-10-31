@@ -79,6 +79,7 @@ const Puestos = () => {
     funciones: [{ nombre: '', descripcion: '' }] 
   });
   const [isDeleting, setIsDeleting] = useState(false); // State to handle deletion
+  const [employee, setEmployee] = useState({ nombre: '', apellido: '' }); // Estado para los datos del empleado
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -98,7 +99,22 @@ const Puestos = () => {
       }
     };
 
+    const fetchEmployee = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/empleados/1');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        console.log('Employee data fetched:', data); // Añadido para verificar datos
+        setEmployee(data);
+      } catch (error) {
+        console.error('Error fetching employee:', error);
+      }
+    };
+
     fetchOrganigrama();
+    fetchEmployee();
 
     return () => {
       clearInterval(timer);
@@ -269,8 +285,8 @@ const Puestos = () => {
           <div className="user-profile">
             <div className="avatar"></div>
             <div className="welcome-text">¡Bienvenido/a!</div>
-            <div className="user-name">PATERNO MATERNO,</div>
-            <div className="user-name">NOMBRES</div>
+            <div className="user-name">{`${employee.apellido},`}</div>
+            <div className="user-name">{employee.nombre}</div>
           </div>
 
           <nav className="nav-menu">
