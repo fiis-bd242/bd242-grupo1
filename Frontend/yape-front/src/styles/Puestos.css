@@ -1,10 +1,299 @@
+/* Página Título */
 .page-title {
     display: block;
     text-align: left;
-    color: #5D5D5D; /* Ensure the text color contrasts with the background */
-    font-size: 24px; /* Adjust the font size as needed */
+    color: #5D5D5D;
+    font-size: 24px;
+    margin: 0 900px 0 0; /* Ajustado para mayor separación horizontal con el reloj */
 }
 
-.time {
-    margin-left: 700px; /* Adds space between the title and the clock */
+/* Organigrama styles */
+.organigrama {
+    display: flex;
+    flex-direction: column; /* Apila los departamentos en una columna */
+    gap: 20px;
+    align-items: center; /* Centra los departamentos horizontalmente */
+    width: 100%; /* Asegura que ocupe todo el ancho disponible */
+    height: calc(100vh - 80px); /* Ajusta según la altura del header */
+    overflow-y: auto; /* Habilita la barra de desplazamiento vertical */
+    padding: 20px; /* Añade padding para mejor apariencia */
+    box-sizing: border-box;
+}
+
+.puesto {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    padding-right: 4px; /* Reduce el padding derecho para acercar el botón */
+}
+
+.puesto:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Edit Button */
+.edit-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-size: 14px;
+    padding: 0;
+    margin-left: auto; /* Empuja el botón hacia la derecha */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-button:hover {
+    color: #FFD700; /* Cambia color al pasar el mouse */
+}
+/* Add Button */
+.add-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.add-button:hover {
+    background-color: #45a049;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 500px;
+    max-width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-height: 80vh; /* Limita la altura a un 80% de la ventana */
+    overflow-y: auto; /* Habilita la barra de desplazamiento vertical */
+}
+
+.modal h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.modal form {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal label {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
+    color: black;
+}
+
+.modal input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.funciones {
+    margin-bottom: 20px;
+}
+
+.funcion {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    position: relative;
+    background-color: #f9f9f9;
+}
+
+.funcion label {
+    margin-bottom: 8px;
+}
+
+.funcion button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: red;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.funcion button:hover {
+    background: darkred;
+}
+
+.funciones > button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    align-self: flex-start;
+}
+
+.funciones > button:hover {
+    background-color: #45a049;
+}
+
+/* Modal Buttons */
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-buttons button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modal-buttons button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.modal-buttons button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.modal-buttons button[type="button"] {
+    background-color: #f44336;
+    color: white;
+}
+
+.modal-buttons button[type="button"]:hover {
+    background-color: #d32f2f;
+}
+
+/* New Delete Button Style */
+.delete-button {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #c0392b;
+}
+
+/* Departamento Styles */
+.department {
+    padding: 24px; /* Ajusta según necesidad */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    color: white;
+    min-height: 150px; /* Establece una altura mínima */
+    width: 100%; /* Permite que el ancho se ajuste al contenido */
+    max-width: 1000px; /* Ancho máximo razonable */
+}
+
+.department:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.level-2 {
+    background-color: #1E90FF; /* DodgerBlue */
+}
+
+.level-3 {
+    background-color: #32CD32; /* LimeGreen */
+}
+
+.level-4 {
+    background-color: #FFD700; /* Gold */
+    color: black; /* Mejor contraste para colores claros */
+}
+
+.level-5 {
+    background-color: #ED8936; /* Naranja */
+}
+
+.level-6 {
+    background-color: #E53E3E; /* Rojo */
+}
+
+.level-default {
+    background-color: #A9A9A9; /* DarkGray */
+}
+
+/* Nombre del Departamento */
+.dept-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+    }
+
+    .main-content {
+        margin-left: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 150px;
+    }
+
+    .main-content {
+        margin-left: 150px;
+    }
+
+    .page-title {
+        font-size: 20px;
+    }
+
+    .puesto {
+        font-size: 12px;
+    }
+
+    .edit-button {
+        font-size: 12px;
+    }
 }

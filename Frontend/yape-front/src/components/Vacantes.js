@@ -6,11 +6,28 @@ import '../styles/MenuPrincipal.css';
 const Vacantes = () => {
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
+  const [vacantes, setVacantes] = useState([]);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);
+
+    const fetchVacantes = async () => {
+      try {
+        const response = await fetch('/vacantes');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        console.log('Vacantes data fetched:', data);
+        setVacantes(data);
+      } catch (error) {
+        console.error('Error fetching vacantes:', error);
+      }
+    };
+
+    fetchVacantes();
 
     return () => clearInterval(timer);
   }, []);
@@ -38,7 +55,7 @@ const Vacantes = () => {
           <nav className="nav-menu">
             <button className="nav-button" onClick={() => navigate('/menu/puestos')}>Puestos</button>
             <button className="nav-button" onClick={() => navigate('/menu/vacantes')}>Vacantes</button>
-</nav>
+          </nav>
         </div>
 
         <button className="logout-button" onClick={handleLogout}>
@@ -53,7 +70,16 @@ const Vacantes = () => {
           <div className="time">{time.toLocaleTimeString()}</div>
         </header>
 
-        {/* Contenido principal de Puestos */}
+        {/* Contenido principal de Vacantes */}
+        <div>
+          {/* Renderizar vacantes */}
+          {vacantes.map((vacante) => (
+            <div key={vacante.id}>
+              <h2>{vacante.titulo}</h2>
+              <p>{vacante.descripcion}</p>
+            </div>
+          ))}
+        </div>
       </main>
     </div>
   );
