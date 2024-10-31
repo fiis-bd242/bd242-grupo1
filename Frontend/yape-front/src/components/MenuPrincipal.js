@@ -82,7 +82,7 @@ const MenuPrincipal = () => {
 
         <div className="cards-grid">
           {/* Puestos Card */}
-          <div className="card">
+          <div className="card" onClick={() => navigate('/menu/puestos')}>
             <div className="card-icon">
               <Users className="icon" />
             </div>
@@ -93,7 +93,7 @@ const MenuPrincipal = () => {
           </div>
 
           {/* Vacantes Card */}
-          <div className="card">
+          <div className="card" onClick={() => navigate('/menu/vacantes')}>
             <div className="card-icon">
               <div className="question-mark">?</div>
             </div>
