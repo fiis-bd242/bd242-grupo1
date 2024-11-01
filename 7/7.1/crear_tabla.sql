@@ -388,9 +388,11 @@ CREATE TABLE Vacante (
                          fecha_inicio DATE NOT NULL,
                          comentario VARCHAR(100) NOT NULL,
                          id_puesto INTEGER NOT NULL,
+                         cantidad INTEGER NOT NULL,
                          PRIMARY KEY (id_vacante),
                          FOREIGN KEY (id_puesto) REFERENCES Puesto(id_puesto)
 );
+
 CREATE TABLE Convocatoria (
                               id_convocatoria SERIAL PRIMARY KEY,
                               id_vacante INT NOT NULL,
