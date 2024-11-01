@@ -20,17 +20,17 @@ const getDepthColor = (level) => {
   }
 };
 
-const DepartamentoNode = ({ departamento, level, onDepartmentClick, onAddPuesto, onEditPuesto }) => {
+const DepartamentoNode = ({ departamento, baseLevel, onDepartmentClick, onAddPuesto, onEditPuesto }) => {
   if (!departamento) return null;
 
   const handleClick = () => {
     if (departamento.subDepartamentos?.length > 0) {
-      onDepartmentClick(departamento);
+      onDepartmentClick(departamento, baseLevel);
     }
   };
 
   return (
-    <div className={`department ${getDepthColor(level)}`} onClick={handleClick}>
+    <div className={`department ${getDepthColor(baseLevel)}`} onClick={handleClick}>
       <div className="dept-name">
         {departamento.descripcion || 'Sin descripción'}
       </div>
@@ -73,7 +73,6 @@ const Puestos = () => {
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
   const [currentDepartments, setCurrentDepartments] = useState([]);
-  const [level, setLevel] = useState(2);
   const [history, setHistory] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalData, setModalData] = useState({ 
@@ -85,6 +84,7 @@ const Puestos = () => {
   });
   const [isDeleting, setIsDeleting] = useState(false);
   const [employee, setEmployee] = useState({ nombre: '', apellido: '' });
+  const [baseLevel, setBaseLevel] = useState(2); // Nivel base inicial
 
   // Función para obtener el organigrama de departamentos
   const fetchOrganigrama = async () => {
@@ -96,6 +96,8 @@ const Puestos = () => {
       const data = await response.json();
       console.log('Datos recibidos de la API (organigrama):', data);
       setCurrentDepartments(data.subDepartamentos || []);
+      setBaseLevel(2); // Reset al nivel base cuando se obtiene el organigrama inicial
+      setHistory([]); // Limpiar el historial
     } catch (error) {
       console.error('Error al obtener el organigrama:', error);
       setCurrentDepartments([]);
@@ -178,51 +180,69 @@ const Puestos = () => {
     setModalData({ ...modalData, funciones });
   };
 
+  // Modificar handleSubmit para mantener la navegación actual
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    if (!modalData.nombre || !modalData.paga || !modalData.id_departamento) {
-      alert('Por favor, completa todos los campos obligatorios.');
+
+    const selectedDepartment = currentDepartments.find(
+      (dept) => dept.id_departamento === modalData.id_departamento
+    );
+
+    if (!selectedDepartment) {
+      alert('Departamento no válido');
       return;
     }
-  
-    const puestoData = {
-      nombre: modalData.nombre,
-      paga: parseFloat(modalData.paga),
-      id_departamento: parseInt(modalData.id_departamento),
-      funciones: modalData.funciones
-    };
-  
+
     try {
       const response = await fetch('http://localhost:8080/puestos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(puestoData),
+        body: JSON.stringify({
+          nombre: modalData.nombre,
+          paga: parseFloat(modalData.paga),
+          id_departamento: selectedDepartment.id_departamento,
+          funciones: modalData.funciones
+        }),
       });
-  
+
       await response.json();
       
-      // Reset form states
+      // Reset form state
       setModalData({
         id_puesto: null,
         nombre: '',
         paga: '',
-        id_departamento: modalData.id_departamento,
+        id_departamento: selectedDepartment.id_departamento,
         funciones: [{ nombre: '', descripcion: '' }]
       });
       setModalOpen(false);
       setIsDeleting(false);
-  
-      // Fetch updated data
+
+      // Obtener el organigrama actualizado
       const organigramaResponse = await fetch('http://localhost:8080/departamentos/1/organigrama');
       const updatedData = await organigramaResponse.json();
-      setCurrentDepartments(updatedData.subDepartamentos || []);
-  
-      // Show success message
+
+      // Si estamos en la vista principal
+      if (history.length === 0) {
+        setCurrentDepartments(updatedData.subDepartamentos || []);
+      } 
+      // Si estamos en un subdepartamento
+      else {
+        // Reconstruir la ruta de navegación
+        let currentDepts = updatedData.subDepartamentos;
+        for (let i = 0; i < history.length; i++) {
+          const historicDept = history[i].departments[0];
+          const nextDept = currentDepts.find(d => d.id_departamento === historicDept.id_departamento);
+          if (nextDept && nextDept.subDepartamentos) {
+            currentDepts = nextDept.subDepartamentos;
+          }
+        }
+        setCurrentDepartments(currentDepts);
+      }
+
       alert('Puesto creado exitosamente');
-  
     } catch (error) {
       console.error('Error:', error);
       alert('Error al crear el puesto');
@@ -267,23 +287,27 @@ const Puestos = () => {
     }
   };
 
-  const handleDepartmentClick = (dept) => {
+  const handleDepartmentClick = (dept, currentBaseLevel) => {
     if (dept.subDepartamentos?.length > 0) {
       setHistory(prevHistory => [
         ...prevHistory,
-        { departments: currentDepartments, level }
+        { 
+          departments: currentDepartments,
+          level: currentBaseLevel
+        }
       ]);
-      setCurrentDepartments(dept.subDepartamentos || []);
-      setLevel(prevLevel => prevLevel + 1);
+      setCurrentDepartments(dept.subDepartamentos);
+      setBaseLevel(currentBaseLevel + 1);
     }
   };
 
   const handleBack = () => {
     if (history.length === 0) return;
+    
     const lastState = history[history.length - 1];
-    setCurrentDepartments(lastState.departments || []);
-    setLevel(lastState.level || 2);
-    setHistory(prevHistory => prevHistory.slice(0, prevHistory.length - 1));
+    setCurrentDepartments(lastState.departments);
+    setBaseLevel(lastState.level);
+    setHistory(prevHistory => prevHistory.slice(0, -1));
   };
 
   const handleLogout = () => {
@@ -344,7 +368,7 @@ const Puestos = () => {
                 <DepartamentoNode
                   key={dept.id_departamento}
                   departamento={dept}
-                  level={level}
+                  baseLevel={baseLevel}
                   onDepartmentClick={handleDepartmentClick}
                   onAddPuesto={handleAddPuesto}
                   onEditPuesto={handleEditPuesto}
