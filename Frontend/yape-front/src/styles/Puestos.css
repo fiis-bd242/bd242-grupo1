@@ -213,9 +213,17 @@
     background-color: #c0392b;
 }
 
+.puestos {
+    display: flex;
+    flex-direction: column;
+    gap: 16px; /* Aumenta el espacio entre puestos */
+    width: 100%;
+    padding: 8px 0;
+}
+
 /* Departamento Styles */
 .department {
-    padding: 24px; /* Ajusta según necesidad */
+    padding: 24px;
     border-radius: 8px;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -223,9 +231,10 @@
     flex-direction: column;
     box-sizing: border-box;
     color: white;
-    min-height: 150px; /* Establece una altura mínima */
-    width: 100%; /* Permite que el ancho se ajuste al contenido */
-    max-width: 1000px; /* Ancho máximo razonable */
+    width: 100%;
+    max-width: 1000px;
+    height: fit-content; /* Permite que crezca según el contenido */
+    margin-bottom: 20px;
 }
 
 .department:hover {
@@ -290,7 +299,8 @@
     }
 
     .puesto {
-        font-size: 12px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .edit-button {
