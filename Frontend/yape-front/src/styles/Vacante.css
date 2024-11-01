@@ -1,10 +1,205 @@
+/* Vacante.css */
+
+/* Estilo para el título de la página */
 .page-title {
     display: block;
     text-align: left;
-    color: #5D5D5D; /* Ensure the text color contrasts with the background */
-    font-size: 24px; /* Adjust the font size as needed */
+    color: #5D5D5D; /* Asegúrate de que el color del texto contraste con el fondo */
+    font-size: 24px; /* Ajusta el tamaño de la fuente según sea necesario */
 }
 
+/* Estilo para la hora */
 .time {
-    margin-left: 700px; /* Adds space between the title and the clock */
+    /* Eliminamos el margen izquierdo existente */
+    margin-left: 0;
+    font-size: 18px;
+    color: #4b5563;
+}
+
+/* Estilo para el encabezado utilizando Flexbox */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Estilo para la lista de vacantes con scroll */
+.vacantes-list {
+    max-height: 500px; /* Ajusta según sea necesario */
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding-right: 10px;
+}
+
+/* Estilo para cada vacante */
+.vacante {
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra para darle profundidad */
+    transition: transform 0.2s; /* Transición para efecto hover */
+}
+
+.vacante:hover {
+    transform: scale(1.02); /* Aumenta ligeramente el tamaño al hacer hover */
+}
+
+.vacante h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: #333;
+}
+
+/* Asegúrate de que el contenido principal no esté detrás de la barra lateral */
+.main-content {
+    margin-left: 256px; /* Asegura que el contenido no se superponga con la barra lateral */
+    padding: 20px;
+}
+
+/* Estilo para los botones de filtro */
+.filter-buttons {
+    text-align: right; /* Alinea el botón a la derecha */
+    margin-bottom: 20px;
+}
+
+.filter-buttons button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px; /* Bordes redondeados */
+    transition: background-color 0.3s; /* Transición para efecto hover */
+    font-size: 16px;
+}
+
+.filter-buttons button:hover {
+    background-color: #0056b3;
+}
+
+/* Estilo para el botón de crear vacante */
+.create-button {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.create-button button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px; /* Bordes redondeados */
+    transition: background-color 0.3s; /* Transición para efecto hover */
+    font-size: 16px;
+}
+
+.create-button button:hover {
+    background-color: #218838;
+}
+
+/* Estilo para los botones dentro de cada vacante */
+.vacante button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background-color 0.3s;
+    font-size: 14px;
+}
+
+.vacante button:hover {
+    background-color: #5a6268;
+}
+
+/* Estilos para el modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Asegura que el modal esté por encima de otros elementos */
+}
+
+.modal {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.modal form {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal label {
+    margin-bottom: 15px;
+    color: #555;
+}
+
+.modal input[type="text"],
+.modal input[type="date"],
+.modal select,
+.modal textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.modal textarea {
+    resize: vertical;
+    height: 80px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.modal-buttons button[type="submit"] {
+    background-color: #28a745;
+    color: white;
+}
+
+.modal-buttons button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+.modal-buttons button[type="button"] {
+    background-color: #dc3545;
+    color: white;
+}
+
+.modal-buttons button[type="button"]:hover {
+    background-color: #c82333;
 }

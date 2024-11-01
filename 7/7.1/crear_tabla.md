@@ -384,7 +384,7 @@ CREATE TABLE Pre_test (
 
 CREATE TABLE Vacante (
                          id_vacante SERIAL NOT NULL,
-                         estado VARCHAR(50) CHECK (estado IN ('Abierta', 'Cerrada')),
+                         estado VARCHAR(50) CHECK (estado IN ('Abierta', 'Cerrada', 'Vencida')) NOT NULL,
                          fecha_fin DATE NOT NULL,
                          fecha_inicio DATE NOT NULL,
                          comentario VARCHAR(100) NOT NULL,
@@ -392,6 +392,7 @@ CREATE TABLE Vacante (
                          PRIMARY KEY (id_vacante),
                          FOREIGN KEY (id_puesto) REFERENCES Puesto(id_puesto)
 );
+
 CREATE TABLE Convocatoria (
                               id_convocatoria SERIAL PRIMARY KEY,
                               id_vacante INT NOT NULL,
