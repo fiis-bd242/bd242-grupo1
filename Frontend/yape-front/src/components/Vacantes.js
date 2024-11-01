@@ -198,14 +198,22 @@ const Vacantes = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const today = new Date().toISOString().split('T')[0];
+        
+    if (formData.fecha_fin < today) {
+      alert('La fecha de fin debe ser posterior a la fecha actual');
+      return;
+    }
+
     const nuevoFormData = {
       estado: 'Abierta',
       fecha_inicio: today,
       fecha_fin: formData.fecha_fin,
       comentario: formData.comentario,
-      id_puesto: formData.id_puesto,
+      id_puesto: parseInt(formData.id_puesto),
     };
+
     try {
+      // Create new vacancy
       const response = await fetch('http://localhost:8080/vacantes', {
         method: 'POST',
         headers: {
@@ -213,13 +221,30 @@ const Vacantes = () => {
         },
         body: JSON.stringify(nuevoFormData),
       });
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      closeModal(); // Cierra la ventana emergente
-      window.location.reload(); // Refresca la página
+
+      await response.json();
+      
+      // Reset form states
+      setFormData({
+        comentario: '',
+        id_puesto: '',
+        fecha_fin: '',
+      });
+      setIsModalOpen(false);
+      setSelectedDepartamento('');
+      setFilteredPuestos([]);
+
+      // Fetch updated vacantes
+      const vacantesResponse = await fetch('http://localhost:8080/vacantes');
+      const updatedVacantes = await vacantesResponse.json();
+      setVacantes(updatedVacantes);
+      
+      // Show success message
+      alert('Vacante creada exitosamente');
+
     } catch (error) {
-      console.error('Error creando vacante:', error);
+      console.error('Error:', error);
+      alert('Error al crear la vacante');
     }
   };
 
