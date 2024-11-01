@@ -1,0 +1,28 @@
+// src/main/java/com/example/yapeback/servicios_batch/ScheduledTasks.java
+package com.example.yapeback.servicios_batch;
+
+import com.example.yapeback.interfaces.VacanteRepository;
+import com.example.yapeback.model.Vacante;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+public class ScheduledTasks {
+
+    @Autowired
+    private VacanteRepository vacanteRepository;
+
+    @Scheduled(cron = "0 0 0 * * ?") // Runs every day at midnight
+    public void updateVacanteStatus() {
+        List<Vacante> vacantes = vacanteRepository.findAll();
+        for (Vacante vacante : vacantes) {
+            if (vacante.getFecha_fin().before(new java.util.Date()) && !"vencida".equals(vacante.getEstado())) {
+                vacante.setEstado("Vencida");
+                vacanteRepository.save(vacante);
+            }
+        }
+    }
+}

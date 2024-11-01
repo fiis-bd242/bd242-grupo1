@@ -383,7 +383,7 @@ CREATE TABLE Pre_test (
 
 CREATE TABLE Vacante (
                          id_vacante SERIAL NOT NULL,
-                         estado VARCHAR(50) CHECK (estado IN ('Abierta', 'Cerrada')),
+                         estado VARCHAR(50) CHECK (estado IN ('Abierta', 'Cerrada', 'Vencida')) NOT NULL,
                          fecha_fin DATE NOT NULL,
                          fecha_inicio DATE NOT NULL,
                          comentario VARCHAR(100) NOT NULL,
