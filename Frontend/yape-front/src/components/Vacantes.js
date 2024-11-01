@@ -197,21 +197,13 @@ const Vacantes = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0];
     const nuevoFormData = {
       estado: 'Abierta',
       fecha_inicio: today,
       fecha_fin: formData.fecha_fin,
       comentario: formData.comentario,
       id_puesto: formData.id_puesto,
-      convocatorias: [
-        {
-          medio_publicacion: 'Internet',
-          fecha_inicio: today,
-          fecha_fin: formData.fecha_fin,
-          estado: 'Abierta',
-        },
-      ],
     };
     try {
       const response = await fetch('http://localhost:8080/vacantes', {
@@ -224,12 +216,8 @@ const Vacantes = () => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      const data = await response.json();
-      closeModal();
-      // Refrescar la lista de vacantes
-      const responseVacantes = await fetch('http://localhost:8080/vacantes');
-      const dataVacantes = await responseVacantes.json();
-      setVacantes(dataVacantes);
+      closeModal(); // Cierra la ventana emergente
+      window.location.reload(); // Refresca la página
     } catch (error) {
       console.error('Error creando vacante:', error);
     }
@@ -384,9 +372,6 @@ const Vacantes = () => {
                 .slice(0, hiddenVacantes[id_puesto] ? undefined : 1)
                 .map((vacante) => (
                   <div key={vacante.id_vacante}>
-                    <p>Descripción: {vacante.comentario}</p>
-                    <p>Estado: {vacante.estado}</p>
-                    {/* Añadir más detalles según sea necesario */}
                   </div>
                 ))}
               {groupedPuestos[id_puesto].length > 1 && (
