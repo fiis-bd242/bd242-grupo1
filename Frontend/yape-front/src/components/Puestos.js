@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+// Puestos.js
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/Puestos.css';
+import '../styles/Puestos.css'; // Asegúrate de que el archivo CSS exista y sea correcto
 
 const getDepthColor = (level) => {
   switch (level) {
@@ -36,20 +37,24 @@ const DepartamentoNode = ({ departamento, level, onDepartmentClick, onAddPuesto,
 
       {/* Puestos del departamento */}
       <div className="puestos">
-        {departamento.puestos?.map(puesto => (
-          <div key={puesto.id_puesto} className="puesto">
-            {puesto.nombre || 'Sin nombre'}
-            <button
-              className="edit-button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEditPuesto(puesto, departamento.id_departamento);
-              }}
-            >
-              ✏️
-            </button>
-          </div>
-        ))}
+        {departamento.puestos && departamento.puestos.length > 0 ? (
+          departamento.puestos.map(puesto => (
+            <div key={puesto.id_puesto} className="puesto">
+              {puesto.nombre || 'Sin nombre'}
+              <button
+                className="edit-button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditPuesto(puesto, departamento.id_departamento);
+                }}
+              >
+                ✏️
+              </button>
+            </div>
+          ))
+        ) : (
+          <p>No hay puestos disponibles.</p>
+        )}
         <button
           className="add-button"
           onClick={(e) => {
@@ -78,40 +83,44 @@ const Puestos = () => {
     id_departamento: null, 
     funciones: [{ nombre: '', descripcion: '' }] 
   });
-  const [isDeleting, setIsDeleting] = useState(false); // State to handle deletion
-  const [employee, setEmployee] = useState({ nombre: '', apellido: '' }); // Estado para los datos del empleado
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [employee, setEmployee] = useState({ nombre: '', apellido: '' });
+
+  // Función para obtener el organigrama de departamentos
+  const fetchOrganigrama = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/departamentos/1/organigrama');
+      if (!response.ok) {
+        throw new Error(`Error HTTP! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Datos recibidos de la API (organigrama):', data);
+      setCurrentDepartments(data.subDepartamentos || []);
+    } catch (error) {
+      console.error('Error al obtener el organigrama:', error);
+      setCurrentDepartments([]);
+    }
+  };
+
+  // Función para obtener los datos del empleado
+  const fetchEmployee = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/empleados/1');
+      if (!response.ok) {
+        throw new Error(`Error HTTP! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Datos recibidos de la API (empleado):', data);
+      setEmployee(data);
+    } catch (error) {
+      console.error('Error al obtener los datos del empleado:', error);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);
-
-    const fetchOrganigrama = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/departamentos/1/organigrama');
-        if (!response.ok) {
-          throw new Error('Error en la respuesta de la red');
-        }
-        const data = await response.json();
-        setCurrentDepartments(data.subDepartamentos || []);
-      } catch (error) {
-        console.error('Error fetching organigrama:', error);
-      }
-    };
-
-    const fetchEmployee = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/empleados/1');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        console.log('Employee data fetched:', data); // Añadido para verificar datos
-        setEmployee(data);
-      } catch (error) {
-        console.error('Error fetching employee:', error);
-      }
-    };
 
     fetchOrganigrama();
     fetchEmployee();
@@ -129,7 +138,7 @@ const Puestos = () => {
       id_departamento, 
       funciones: [{ nombre: '', descripcion: '' }] 
     });
-    setIsDeleting(false); // Ensure delete option is hidden
+    setIsDeleting(false);
     setModalOpen(true);
   };
 
@@ -139,9 +148,9 @@ const Puestos = () => {
       nombre: puesto.nombre, 
       paga: puesto.paga, 
       id_departamento, 
-      funciones: puesto.funciones 
+      funciones: puesto.funciones || [{ nombre: '', descripcion: '' }] 
     });
-    setIsDeleting(true); // Show delete option
+    setIsDeleting(true);
     setModalOpen(true);
   };
 
@@ -171,46 +180,52 @@ const Puestos = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const method = modalData.id_puesto ? 'PUT' : 'POST';
-    const url = modalData.id_puesto ? `http://localhost:8080/puestos/${modalData.id_puesto}` : 'http://localhost:8080/puestos';
-    
+  
+    if (!modalData.nombre || !modalData.paga || !modalData.id_departamento) {
+      alert('Por favor, completa todos los campos obligatorios.');
+      return;
+    }
+  
+    const puestoData = {
+      nombre: modalData.nombre,
+      paga: parseFloat(modalData.paga),
+      id_departamento: parseInt(modalData.id_departamento),
+      funciones: modalData.funciones
+    };
+  
     try {
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombre: modalData.nombre,
-          paga: parseFloat(modalData.paga),
-          id_departamento: modalData.id_departamento,
-          funciones: modalData.funciones
-        }),
+      const response = await fetch('http://localhost:8080/puestos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(puestoData),
       });
-
-      if (!response.ok) {
-        throw new Error('Error al guardar el puesto');
-      }
-
-      const data = await response.json();
-      // Actualizar el estado sin re-fetch
-      setCurrentDepartments(prev => prev.map(dept => {
-        if (dept.id_departamento === modalData.id_departamento) {
-          if (modalData.id_puesto) {
-            return {
-              ...dept,
-              puestos: dept.puestos.map(p => p.id_puesto === data.id_puesto ? data : p)
-            };
-          } else {
-            return {
-              ...dept,
-              puestos: [...(dept.puestos || []), data]
-            };
-          }
-        }
-        return dept;
-      }));
+  
+      await response.json();
+      
+      // Reset form states
+      setModalData({
+        id_puesto: null,
+        nombre: '',
+        paga: '',
+        id_departamento: modalData.id_departamento,
+        funciones: [{ nombre: '', descripcion: '' }]
+      });
       setModalOpen(false);
+      setIsDeleting(false);
+  
+      // Fetch updated data
+      const organigramaResponse = await fetch('http://localhost:8080/departamentos/1/organigrama');
+      const updatedData = await organigramaResponse.json();
+      setCurrentDepartments(updatedData.subDepartamentos || []);
+  
+      // Show success message
+      alert('Puesto creado exitosamente');
+  
     } catch (error) {
-      console.error(error);
+      console.error('Error:', error);
+      alert('Error al crear el puesto');
     }
   };
 
@@ -226,22 +241,29 @@ const Puestos = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Error al eliminar el puesto');
+        throw new Error(`Error HTTP! status: ${response.status}`);
       }
 
-      // Actualizar el estado para eliminar el puesto
-      setCurrentDepartments(prev => prev.map(dept => {
-        if (dept.id_departamento === modalData.id_departamento) {
-          return {
-            ...dept,
-            puestos: dept.puestos.filter(p => p.id_puesto !== modalData.id_puesto)
-          };
-        }
-        return dept;
-      }));
+      // Resetear formulario y cerrar modal
+      setModalData({
+        id_puesto: null,
+        nombre: '',
+        paga: '',
+        id_departamento: null,
+        funciones: [{ nombre: '', descripcion: '' }]
+      });
       setModalOpen(false);
+      setIsDeleting(false);
+
+      // Actualizar la lista de departamentos y puestos
+      fetchOrganigrama();
+
+      // Mostrar mensaje de éxito
+      alert('Puesto eliminado exitosamente.');
+
     } catch (error) {
-      console.error(error);
+      console.error('Error:', error);
+      alert('Error al eliminar el puesto.');
     }
   };
 
@@ -251,7 +273,7 @@ const Puestos = () => {
         ...prevHistory,
         { departments: currentDepartments, level }
       ]);
-      setCurrentDepartments(dept.subDepartamentos);
+      setCurrentDepartments(dept.subDepartamentos || []);
       setLevel(prevLevel => prevLevel + 1);
     }
   };
@@ -259,12 +281,13 @@ const Puestos = () => {
   const handleBack = () => {
     if (history.length === 0) return;
     const lastState = history[history.length - 1];
-    setCurrentDepartments(lastState.departments);
-    setLevel(lastState.level);
+    setCurrentDepartments(lastState.departments || []);
+    setLevel(lastState.level || 2);
     setHistory(prevHistory => prevHistory.slice(0, prevHistory.length - 1));
   };
 
   const handleLogout = () => {
+    // Implementar lógica de logout, por ejemplo, limpiar tokens y redirigir
     navigate('/');
   };
 
@@ -316,16 +339,20 @@ const Puestos = () => {
 
           {/* Organigrama */}
           <div className="organigrama">
-            {currentDepartments.map(dept => (
-              <DepartamentoNode
-                key={dept.id_departamento}
-                departamento={dept}
-                level={level}
-                onDepartmentClick={handleDepartmentClick}
-                onAddPuesto={handleAddPuesto}
-                onEditPuesto={handleEditPuesto}
-              />
-            ))}
+            {currentDepartments.length > 0 ? (
+              currentDepartments.map(dept => (
+                <DepartamentoNode
+                  key={dept.id_departamento}
+                  departamento={dept}
+                  level={level}
+                  onDepartmentClick={handleDepartmentClick}
+                  onAddPuesto={handleAddPuesto}
+                  onEditPuesto={handleEditPuesto}
+                />
+              ))
+            ) : (
+              <p>No hay departamentos disponibles.</p>
+            )}
           </div>
         </div>
       </main>
@@ -347,7 +374,7 @@ const Puestos = () => {
                 />
               </label>
               <label>
-                Monto:
+                Paga:
                 <input 
                   type="number" 
                   name="paga" 
@@ -356,37 +383,75 @@ const Puestos = () => {
                   required 
                 />
               </label>
+              
+              {/* Campo Departamento */}
+              {modalData.id_puesto ? (
+                <label>
+                  Departamento:
+                  <select
+                    name="id_departamento"
+                    value={modalData.id_departamento}
+                    onChange={handleModalChange}
+                    required
+                  >
+                    <option value="">Seleccione un departamento</option>
+                    {currentDepartments.map(dept => (
+                      <option key={dept.id_departamento} value={dept.id_departamento}>
+                        {dept.descripcion}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                <label>
+                  Departamento:
+                  <input 
+                    type="text" 
+                    value={
+                      currentDepartments.find(dept => dept.id_departamento === modalData.id_departamento)?.descripcion || 
+                      'Departamento Seleccionado'
+                    } 
+                    disabled 
+                  />
+                </label>
+              )}
+
               <div className="funciones">
                 <h3>Funciones:</h3>
-                {modalData.funciones.map((funcion, index) => (
-                  <div key={index} className="funcion">
-                    <label>
-                      Nombre:
-                      <input 
-                        type="text" 
-                        data-field="nombre" 
-                        value={funcion.nombre} 
-                        onChange={(e) => handleModalChange(e, index, 'funciones')} 
-                        required 
-                      />
-                    </label>
-                    <label>
-                      Descripción:
-                      <input 
-                        type="text" 
-                        data-field="descripcion" 
-                        value={funcion.descripcion} 
-                        onChange={(e) => handleModalChange(e, index, 'funciones')} 
-                        required 
-                      />
-                    </label>
-                    {modalData.funciones.length > 1 && (
-                      <button type="button" onClick={() => removeFuncion(index)}>Eliminar</button>
-                    )}
-                  </div>
-                ))}
+                {modalData.funciones.length > 0 ? (
+                  modalData.funciones.map((funcion, index) => (
+                    <div key={index} className="funcion">
+                      <label>
+                        Nombre:
+                        <input 
+                          type="text" 
+                          data-field="nombre" 
+                          value={funcion.nombre} 
+                          onChange={(e) => handleModalChange(e, index, 'funciones')} 
+                          required 
+                        />
+                      </label>
+                      <label>
+                        Descripción:
+                        <input 
+                          type="text" 
+                          data-field="descripcion" 
+                          value={funcion.descripcion} 
+                          onChange={(e) => handleModalChange(e, index, 'funciones')} 
+                          required 
+                        />
+                      </label>
+                      {modalData.funciones.length > 1 && (
+                        <button type="button" onClick={() => removeFuncion(index)}>Eliminar</button>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p>No hay funciones disponibles.</p>
+                )}
                 <button type="button" onClick={addFuncion}>Agregar Función</button>
               </div>
+              
               <div className="modal-buttons">
                 {isDeleting && (
                   <button type="button" className="delete-button" onClick={handleDeletePuesto}>
