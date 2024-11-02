@@ -30,8 +30,9 @@ public class VacanteRepositoryImpl implements VacanteRepository {
             vacante.setFecha_inicio(rs.getDate("fecha_inicio"));
             vacante.setComentario(rs.getString("comentario"));
             vacante.setId_puesto(rs.getLong("id_puesto"));
+            vacante.setCantidad(rs.getInt("cantidad"));
             vacante.setConvocatorias(findConvocatoriasByVacanteId(rs.getLong("id_vacante")));
-            vacante.setPostulantes(findPostulantesByVacanteId(rs.getLong("id_vacante"))); // Añadir esta línea
+            vacante.setPostulantes(findPostulantesByVacanteId(rs.getLong("id_vacante")));
             return vacante;
         }
 
@@ -40,7 +41,7 @@ public class VacanteRepositoryImpl implements VacanteRepository {
             return jdbcTemplate.query(sql, new ConvocatoriaRowMapper(), id_vacante);
         }
 
-        private List<Postulante> findPostulantesByVacanteId(Long id_vacante) { // Añadir este método
+        private List<Postulante> findPostulantesByVacanteId(Long id_vacante) {
             String sql = "SELECT * FROM postulante WHERE id_vacante = ?";
             return jdbcTemplate.query(sql, new PostulanteRowMapper(), id_vacante);
         }
@@ -60,7 +61,7 @@ public class VacanteRepositoryImpl implements VacanteRepository {
         }
     }
 
-    private static final class PostulanteRowMapper implements RowMapper<Postulante> { // Añadir esta clase
+    private static final class PostulanteRowMapper implements RowMapper<Postulante> {
         @Override
         public Postulante mapRow(ResultSet rs, int rowNum) throws SQLException {
             Postulante postulante = new Postulante();
@@ -68,36 +69,52 @@ public class VacanteRepositoryImpl implements VacanteRepository {
             postulante.setNombre(rs.getString("nombre"));
             postulante.setTelefono(rs.getInt("telefono"));
             postulante.setId_vacante(rs.getLong("id_vacante"));
+            postulante.setCorreo(rs.getString("correo"));
             return postulante;
         }
     }
 
     @Override
     public List<Vacante> findAll() {
-        String sql = "SELECT id_vacante, estado, fecha_fin, fecha_inicio, comentario, id_puesto FROM vacante";
+        String sql = "SELECT id_vacante, estado, fecha_fin, fecha_inicio, comentario, id_puesto, cantidad FROM vacante";
         return jdbcTemplate.query(sql, new VacanteRowMapper());
     }
 
     @Override
     public Vacante findById(Long id) {
-        String sql = "SELECT id_vacante, estado, fecha_fin, fecha_inicio, comentario, id_puesto FROM vacante WHERE id_vacante = ?";
+        String sql = "SELECT id_vacante, estado, fecha_fin, fecha_inicio, comentario, id_puesto, cantidad FROM vacante WHERE id_vacante = ?";
         return jdbcTemplate.queryForObject(sql, new VacanteRowMapper(), id);
     }
 
     @Override
     public Vacante save(Vacante vacante) {
         if (vacante.getId_vacante() == null) {
-            String sql = "INSERT INTO vacante (estado, fecha_fin, fecha_inicio, comentario, id_puesto) VALUES (?, ?, ?, ?, ?)";
-            jdbcTemplate.update(sql, vacante.getEstado(), vacante.getFecha_fin(), vacante.getFecha_inicio(), vacante.getComentario(), vacante.getId_puesto());
+            String sql = "INSERT INTO vacante (estado, fecha_fin, fecha_inicio, comentario, id_puesto, cantidad) VALUES (?, ?, ?, ?, ?, ?)";
+            jdbcTemplate.update(sql, vacante.getEstado(), vacante.getFecha_fin(), vacante.getFecha_inicio(), vacante.getComentario(), vacante.getId_puesto(), vacante.getCantidad());
             Long newId = jdbcTemplate.queryForObject("SELECT LASTVAL()", Long.class);
             vacante.setId_vacante(newId);
         } else {
-            String sql = "UPDATE vacante SET estado = ?, fecha_fin = ?, fecha_inicio = ?, comentario = ?, id_puesto = ? WHERE id_vacante = ?";
-            jdbcTemplate.update(sql, vacante.getEstado(), vacante.getFecha_fin(), vacante.getFecha_inicio(), vacante.getComentario(), vacante.getId_puesto(), vacante.getId_vacante());
+            String sql = "UPDATE vacante SET estado = ?, fecha_fin = ?, fecha_inicio = ?, comentario = ?, id_puesto = ?, cantidad = ? WHERE id_vacante = ?";
+            jdbcTemplate.update(sql, vacante.getEstado(), vacante.getFecha_fin(), vacante.getFecha_inicio(), vacante.getComentario(), vacante.getId_puesto(), vacante.getCantidad(), vacante.getId_vacante());
         }
         saveConvocatorias(vacante);
-        savePostulantes(vacante); // Añadir esta línea
+        savePostulantes(vacante);
         return vacante;
+    }
+
+    // src/main/java/com/example/yapeback/interfaces/VacanteRepositoryImpl.java
+    @Override
+    public Convocatoria saveConvocatoria(Convocatoria convocatoria) {
+        if (convocatoria.getId_convocatoria() == null) {
+            String sql = "INSERT INTO convocatoria (id_vacante, medio_publicacion, fecha_inicio, fecha_fin, estado) VALUES (?, ?, ?, ?, ?)";
+            jdbcTemplate.update(sql, convocatoria.getId_vacante(), convocatoria.getMedio_publicacion(), convocatoria.getFecha_inicio(), convocatoria.getFecha_fin(), convocatoria.getEstado());
+            Long newId = jdbcTemplate.queryForObject("SELECT LASTVAL()", Long.class);
+            convocatoria.setId_convocatoria(newId);
+        } else {
+            String sql = "UPDATE convocatoria SET id_vacante = ?, medio_publicacion = ?, fecha_inicio = ?, fecha_fin = ?, estado = ? WHERE id_convocatoria = ?";
+            jdbcTemplate.update(sql, convocatoria.getId_vacante(), convocatoria.getMedio_publicacion(), convocatoria.getFecha_inicio(), convocatoria.getFecha_fin(), convocatoria.getEstado(), convocatoria.getId_convocatoria());
+        }
+        return convocatoria;
     }
 
     @Override
@@ -105,7 +122,7 @@ public class VacanteRepositoryImpl implements VacanteRepository {
         String deleteConvocatoriasSql = "DELETE FROM convocatoria WHERE id_vacante = ?";
         jdbcTemplate.update(deleteConvocatoriasSql, id);
 
-        String deletePostulantesSql = "DELETE FROM postulante WHERE id_vacante = ?"; // Añadir esta línea
+        String deletePostulantesSql = "DELETE FROM postulante WHERE id_vacante = ?";
         jdbcTemplate.update(deletePostulantesSql, id);
 
         String deleteVacanteSql = "DELETE FROM vacante WHERE id_vacante = ?";
@@ -115,45 +132,55 @@ public class VacanteRepositoryImpl implements VacanteRepository {
     private void saveConvocatorias(Vacante vacante) {
         for (Convocatoria convocatoria : vacante.getConvocatorias()) {
             if (convocatoria.getId_convocatoria() == null) {
-                String insertConvocatoriaSql = "INSERT INTO convocatoria (id_vacante, medio_publicacion, fecha_inicio, fecha_fin, estado) VALUES (?, ?, ?, ?, ?)";
-                jdbcTemplate.update(insertConvocatoriaSql, vacante.getId_vacante(), convocatoria.getMedio_publicacion(), convocatoria.getFecha_inicio(), convocatoria.getFecha_fin(), convocatoria.getEstado());
-                Long newId = jdbcTemplate.queryForObject("SELECT LASTVAL()", Long.class);
-                convocatoria.setId_convocatoria(newId);
+                String sql = "INSERT INTO convocatoria (id_vacante, medio_publicacion, fecha_inicio, fecha_fin, estado) VALUES (?, ?, ?, ?, ?)";
+                jdbcTemplate.update(sql, vacante.getId_vacante(), convocatoria.getMedio_publicacion(), convocatoria.getFecha_inicio(), convocatoria.getFecha_fin(), convocatoria.getEstado());
             } else {
-                String updateConvocatoriaSql = "UPDATE convocatoria SET medio_publicacion = ?, fecha_inicio = ?, fecha_fin = ?, estado = ? WHERE id_convocatoria = ?";
-                jdbcTemplate.update(updateConvocatoriaSql, convocatoria.getMedio_publicacion(), convocatoria.getFecha_inicio(), convocatoria.getFecha_fin(), convocatoria.getEstado(), convocatoria.getId_convocatoria());
+                String sql = "UPDATE convocatoria SET medio_publicacion = ?, fecha_inicio = ?, fecha_fin = ?, estado = ? WHERE id_convocatoria = ?";
+                jdbcTemplate.update(sql, convocatoria.getMedio_publicacion(), convocatoria.getFecha_inicio(), convocatoria.getFecha_fin(), convocatoria.getEstado(), convocatoria.getId_convocatoria());
             }
         }
     }
 
-    private void savePostulantes(Vacante vacante) { // Añadir este método
+    private void savePostulantes(Vacante vacante) {
         for (Postulante postulante : vacante.getPostulantes()) {
             if (postulante.getId_postulante() == null) {
-                String insertPostulanteSql = "INSERT INTO postulante (nombre, telefono, id_vacante) VALUES (?, ?, ?)";
-                jdbcTemplate.update(insertPostulanteSql, postulante.getNombre(), postulante.getTelefono(), vacante.getId_vacante());
-                Long newId = jdbcTemplate.queryForObject("SELECT LASTVAL()", Long.class);
-                postulante.setId_postulante(newId);
+                String sql = "INSERT INTO postulante (nombre, telefono, id_vacante, correo) VALUES (?, ?, ?, ?)";
+                jdbcTemplate.update(sql, postulante.getNombre(), postulante.getTelefono(), vacante.getId_vacante(), postulante.getCorreo());
             } else {
-                String updatePostulanteSql = "UPDATE postulante SET nombre = ?, telefono = ?, id_vacante = ? WHERE id_postulante = ?";
-                jdbcTemplate.update(updatePostulanteSql, postulante.getNombre(), postulante.getTelefono(), vacante.getId_vacante(), postulante.getId_postulante());
+                String sql = "UPDATE postulante SET nombre = ?, telefono = ?, id_vacante = ?, correo = ? WHERE id_postulante = ?";
+                jdbcTemplate.update(sql, postulante.getNombre(), postulante.getTelefono(), vacante.getId_vacante(), postulante.getCorreo(), postulante.getId_postulante());
             }
         }
     }
 
+    @Override
     public void deleteConvocatoriaById(Long id) {
         String sql = "DELETE FROM convocatoria WHERE id_convocatoria = ?";
         jdbcTemplate.update(sql, id);
     }
 
+    @Override
     public void deleteConvocatoriaByVacanteId(Long idVacante, Long idConvocatoria) {
         String sql = "DELETE FROM convocatoria WHERE id_vacante = ? AND id_convocatoria = ?";
         jdbcTemplate.update(sql, idVacante, idConvocatoria);
     }
 
-    // src/main/java/com/example/yapeback/interfaces/VacanteRepositoryImpl.java
     @Override
     public List<Postulante> findPostulantesByVacanteId(Long idVacante) {
-        String sql = "SELECT * FROM postulante WHERE id_vacante = ?";
+        String sql = "SELECT id_postulante, nombre, telefono, id_vacante, correo FROM postulante WHERE id_vacante = ?";
         return jdbcTemplate.query(sql, new PostulanteRowMapper(), idVacante);
+    }
+
+    // src/main/java/com/example/yapeback/interfaces/VacanteRepositoryImpl.java
+    @Override
+    public Convocatoria findConvocatoriaById(Long id) {
+        String sql = "SELECT * FROM convocatoria WHERE id_convocatoria = ?";
+        return jdbcTemplate.queryForObject(sql, new ConvocatoriaRowMapper(), id);
+    }
+
+    @Override
+    public List<Convocatoria> findAllConvocatorias() {
+        String sql = "SELECT * FROM convocatoria";
+        return jdbcTemplate.query(sql, new ConvocatoriaRowMapper());
     }
 }

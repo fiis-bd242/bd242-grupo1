@@ -23,7 +23,43 @@ const Vacantes = () => {
   const [formData, setFormData] = useState({
     comentario: '',
     id_puesto: '',
+    fecha_fin: '',
+    cantidad: 1  // Add default value for cantidad
   });
+
+  // Add these states near the top of the component
+  const [selectedVacante, setSelectedVacante] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    comentario: '',
+    id_puesto: '',
+    fecha_fin: '',
+    cantidad: 1,
+    estado: ''
+  });
+
+  // Añadir nuevos estados al inicio del componente
+  const [showConvocatoriasModal, setShowConvocatoriasModal] = useState(false);
+  const [convocatorias, setConvocatorias] = useState([]);
+  const [showConvocatoriaEditModal, setShowConvocatoriaEditModal] = useState(false);
+  const [selectedConvocatoria, setSelectedConvocatoria] = useState(null);
+  const [convocatoriaFormData, setConvocatoriaFormData] = useState({
+    medio_publicacion: '',
+    fecha_inicio: new Date().toISOString().split('T')[0],
+    fecha_fin: '',
+    estado: 'Abierta' // Valor por defecto que coincide con la DB
+  });
+
+  // Agregar nuevo estado para almacenar la información de si una vacante se puede eliminar
+  const [deletableVacantes, setDeletableVacantes] = useState({});
+
+  // Añadir nuevo estado para almacenar las funciones de los puestos
+  const [puestosFunciones, setPuestosFunciones] = useState({});
+
+  // Nuevo estado para almacenar los postulantes
+  const [postulantes, setPostulantes] = useState([]);
+  const [showPostulantesModal, setShowPostulantesModal] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -38,6 +74,14 @@ const Vacantes = () => {
         }
         const data = await response.json();
         setVacantes(data);
+
+        // Verificar cada vacante directamente con la información que ya tenemos
+        const deletableStatus = {};
+        data.forEach(vacante => {
+          deletableStatus[vacante.id_vacante] = checkDeletableVacante(vacante);
+        });
+        console.log('Deletable status:', deletableStatus); // Para debugging
+        setDeletableVacantes(deletableStatus);
       } catch (error) {
         console.error('Error fetching vacantes:', error);
       }
@@ -174,6 +218,8 @@ const Vacantes = () => {
     setFormData({
       comentario: '',
       id_puesto: '',
+      fecha_fin: '',
+      cantidad: 1
     });
     setSelectedDepartamento('');
     setFilteredPuestos([]);
@@ -210,6 +256,7 @@ const Vacantes = () => {
       fecha_fin: formData.fecha_fin,
       comentario: formData.comentario,
       id_puesto: parseInt(formData.id_puesto),
+      cantidad: parseInt(formData.cantidad) // Add cantidad to the request
     };
 
     try {
@@ -229,6 +276,7 @@ const Vacantes = () => {
         comentario: '',
         id_puesto: '',
         fecha_fin: '',
+        cantidad: 1
       });
       setIsModalOpen(false);
       setSelectedDepartamento('');
@@ -246,6 +294,258 @@ const Vacantes = () => {
       console.error('Error:', error);
       alert('Error al crear la vacante');
     }
+  };
+
+  // Add these handlers
+  const handleVacanteClick = (vacante) => {
+    setSelectedVacante(vacante);
+    setShowPopup(true);
+  };
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
+    setSelectedVacante(null);
+  };
+
+  const handleEditClick = () => {
+    setEditFormData({
+      comentario: selectedVacante.comentario,
+      id_puesto: selectedVacante.id_puesto,
+      fecha_fin: selectedVacante.fecha_fin.split('T')[0],
+      cantidad: selectedVacante.cantidad,
+      estado: selectedVacante.estado
+    });
+    setShowEditModal(true);
+    setShowPopup(false);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    const today = new Date().toISOString().split('T')[0];
+        
+    if (editFormData.fecha_fin < today) {
+      alert('La fecha de fin debe ser posterior a la fecha actual');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8080/vacantes/${selectedVacante.id_vacante}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...selectedVacante,
+          ...editFormData,
+          id_puesto: parseInt(editFormData.id_puesto),
+          cantidad: parseInt(editFormData.cantidad)
+        }),
+      });
+
+      if (response.ok) {
+        // Actualizar la lista de vacantes
+        const vacantesResponse = await fetch('http://localhost:8080/vacantes');
+        const updatedVacantes = await vacantesResponse.json();
+        setVacantes(updatedVacantes);
+        
+        setShowEditModal(false);
+        setSelectedVacante(null);
+        alert('Vacante actualizada exitosamente');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al actualizar la vacante');
+    }
+  };
+
+  const handleBackToPopup = () => {
+    setShowEditModal(false);
+    setShowPopup(true);
+  };
+
+  // Agregar esta nueva función después de handleEditSubmit
+  const handleDelete = async (e, vacanteId) => {
+    e.stopPropagation(); // Prevenir que se abra el popup al hacer click en eliminar
+    if (window.confirm('¿Está seguro que desea eliminar esta vacante?')) {
+      try {
+        const response = await fetch(`http://localhost:8080/vacantes/${vacanteId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          // Actualizar la lista de vacantes
+          const vacantesResponse = await fetch('http://localhost:8080/vacantes');
+          const updatedVacantes = await vacantesResponse.json();
+          setVacantes(updatedVacantes);
+          alert('Vacante eliminada exitosamente');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar la vacante');
+      }
+    }
+  };
+
+  // Añadir nuevas funciones para manejar convocatorias
+  const handleVerConvocatorias = async () => {
+    // Usar las convocatorias que ya vienen en la vacante seleccionada
+    setConvocatorias(selectedVacante.convocatorias);
+    await fetchPuestoFunciones(selectedVacante.id_puesto);
+    setShowConvocatoriasModal(true);
+    setShowPopup(false);
+  };
+
+  const handleCreateConvocatoria = () => {
+    setConvocatoriaFormData({
+      medio_publicacion: '',
+      fecha_inicio: new Date().toISOString().split('T')[0],
+      fecha_fin: '',
+      estado: 'Abierta'
+    });
+    setSelectedConvocatoria(null);
+    setShowConvocatoriaEditModal(true);
+  };
+
+  const handleEditConvocatoria = (convocatoria) => {
+    setConvocatoriaFormData({
+      medio_publicacion: convocatoria.medio_publicacion,
+      fecha_inicio: convocatoria.fecha_inicio.split('T')[0],
+      fecha_fin: convocatoria.fecha_fin.split('T')[0],
+      estado: convocatoria.estado
+    });
+    setSelectedConvocatoria(convocatoria);
+    setShowConvocatoriaEditModal(true);
+  };
+
+  const handleDeleteConvocatoria = async (id) => {
+    if (window.confirm('¿Está seguro que desea eliminar esta convocatoria?')) {
+      try {
+        const response = await fetch(`http://localhost:8080/vacantes/convocatorias/${id}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          // Actualizar la lista de convocatorias directamente desde la vacante
+          const vacantesResponse = await fetch('http://localhost:8080/vacantes');
+          const updatedVacantes = await vacantesResponse.json();
+          const updatedVacante = updatedVacantes.find(v => v.id_vacante === selectedVacante.id_vacante);
+          setConvocatorias(updatedVacante.convocatorias);
+          alert('Convocatoria eliminada exitosamente');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar la convocatoria');
+      }
+    }
+  };
+
+  const handleConvocatoriaSubmit = async (e) => {
+    e.preventDefault();
+    const method = selectedConvocatoria ? 'PUT' : 'POST';
+    const url = selectedConvocatoria 
+      ? `http://localhost:8080/vacantes/convocatorias/${selectedConvocatoria.id_convocatoria}`
+      : `http://localhost:8080/vacantes/${selectedVacante.id_vacante}/convocatorias`;
+
+    const payload = {
+      medio_publicacion: convocatoriaFormData.medio_publicacion,
+      fecha_inicio: convocatoriaFormData.fecha_inicio,
+      fecha_fin: convocatoriaFormData.fecha_fin,
+      estado: convocatoriaFormData.estado // Mantener el estado tal cual está
+    };
+
+    if (selectedConvocatoria) {
+      payload.id_vacante = selectedVacante.id_vacante;
+    }
+
+    try {
+      console.log('Enviando convocatoria:', payload); // Para debugging
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Error del servidor: ${errorData}`);
+      }
+
+      // Actualizar la lista de convocatorias
+      const vacantesResponse = await fetch('http://localhost:8080/vacantes');
+      const updatedVacantes = await vacantesResponse.json();
+      const updatedVacante = updatedVacantes.find(v => v.id_vacante === selectedVacante.id_vacante);
+      setConvocatorias(updatedVacante.convocatorias);
+      
+      setShowConvocatoriaEditModal(false);
+      alert(selectedConvocatoria ? 'Convocatoria actualizada exitosamente' : 'Convocatoria creada exitosamente');
+    } catch (error) {
+      console.error('Error:', error);
+      alert(`Error al guardar la convocatoria: ${error.message}`);
+    }
+  };
+
+  // Agregar función para verificar si una vacante se puede eliminar
+  const checkDeletableVacante = (vacante) => {
+    // Una vacante es eliminable solo si no tiene postulantes ni convocatorias
+    return vacante.postulantes.length === 0 && vacante.convocatorias.length === 0;
+  };
+
+  // Añadir función para obtener las funciones de un puesto
+  const fetchPuestoFunciones = async (id_puesto) => {
+    try {
+      const response = await fetch(`http://localhost:8080/puestos/${id_puesto}`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setPuestosFunciones(prev => ({
+        ...prev,
+        [id_puesto]: data.funciones || []
+      }));
+    } catch (error) {
+      console.error('Error fetching puesto funciones:', error);
+      setPuestosFunciones(prev => ({
+        ...prev,
+        [id_puesto]: []
+      }));
+    }
+  };
+
+  // Función para obtener los postulantes de una vacante
+  const fetchPostulantes = async (vacanteId) => {
+    try {
+      // Obtener los IDs de los postulantes para la vacante
+      const responseIds = await fetch(`http://localhost:8080/vacantes/${vacanteId}/postulantes`);
+      if (!responseIds.ok) throw new Error('Error al obtener los IDs de los postulantes');
+      const postulantesIds = await responseIds.json(); // Asumiendo que devuelve un array de IDs
+
+      // Obtener los detalles de cada postulante
+      const postulantesPromises = postulantesIds.map(id => 
+        fetch(`http://localhost:8080/api/postulantes/${id}`)
+          .then(res => res.json())
+      );
+      const postulantesData = await Promise.all(postulantesPromises);
+
+      // Ordenar los postulantes por puntaje general de forma descendente
+      postulantesData.sort((a, b) => b.puntaje_general - a.puntaje_general);
+
+      setPostulantes(postulantesData);
+      setShowPostulantesModal(true);
+    } catch (error) {
+      console.error('Error al obtener los postulantes:', error);
+      alert('Hubo un error al obtener los postulantes.');
+    }
+  };
+
+  // Actualizar el manejador del botón "Postulantes"
+  const handleVerPostulantes = (vacante) => {
+    fetchPostulantes(vacante.id_vacante);
+    setShowPopup(false);
   };
 
   return (
@@ -377,6 +677,17 @@ const Vacantes = () => {
                     ))}
                   </select>
                 </label>
+                <label>
+                  Cantidad de vacantes:
+                  <input
+                    type="number"
+                    name="cantidad"
+                    value={formData.cantidad}
+                    onChange={handleChange}
+                    min="1"
+                    required
+                  />
+                </label>
                 <div className="modal-buttons">
                   <button type="submit">Crear</button>
                   <button type="button" onClick={closeModal}>
@@ -391,22 +702,329 @@ const Vacantes = () => {
         {/* Contenido principal de Vacantes con scroll */}
         <div className="vacantes-list">
           {Object.keys(groupedPuestos).map((id_puesto) => (
-            <div key={id_puesto} className="vacante">
+            <div 
+              key={id_puesto} 
+              className="vacante"
+            >
               <h2>{getNombrePuesto(id_puesto)}</h2>
               {groupedPuestos[id_puesto]
                 .slice(0, hiddenVacantes[id_puesto] ? undefined : 1)
                 .map((vacante) => (
-                  <div key={vacante.id_vacante}>
+                  <div 
+                    key={vacante.id_vacante} 
+                    className="vacante-item"
+                  >
+                    <div 
+                      className="vacante-content"
+                      onClick={() => handleVacanteClick(vacante)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <p>Cantidad de vacantes: {vacante.cantidad}</p>
+                      <p>Estado: {vacante.estado}</p>
+                    </div>
+                    {deletableVacantes[vacante.id_vacante] && (
+                      <button 
+                        className="delete-button"
+                        onClick={(e) => handleDelete(e, vacante.id_vacante)}
+                        title="Esta vacante se puede eliminar porque no tiene postulantes ni convocatorias"
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    )}
                   </div>
                 ))}
               {groupedPuestos[id_puesto].length > 1 && (
-                <button onClick={() => toggleHidden(id_puesto)}>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleHidden(id_puesto);
+                  }}
+                >
                   {hiddenVacantes[id_puesto] ? 'Mostrar Más' : 'Ocultar'}
                 </button>
               )}
             </div>
           ))}
         </div>
+
+        {/* Add the popup */}
+        {showPopup && selectedVacante && (
+          <>
+            <div className="popup-overlay" onClick={handleClosePopup}></div>
+            <div className="vacante-popup">
+              <button className="close-popup" onClick={handleClosePopup}>&times;</button>
+              <h2>{getNombrePuesto(selectedVacante.id_puesto)}</h2>
+              <div className="popup-columns">
+                <div className="popup-column">
+                  <i className="fas fa-edit popup-icon"></i>
+                  <h3>Editar</h3>
+                  <button 
+                    className="popup-button"
+                    onClick={handleEditClick}
+                  >
+                    Editar Vacante
+                  </button>
+                </div>
+                <div className="popup-column">
+                  <i className="fas fa-users popup-icon"></i>
+                  <h3>Postulantes</h3>
+                  <button 
+                    className="popup-button"
+                    onClick={() => handleVerPostulantes(selectedVacante)}
+                  >
+                    Ver Postulantes
+                  </button>
+                </div>
+                <div className="popup-column">
+                  <i className="fas fa-bullhorn popup-icon"></i>
+                  <h3>Convocatorias</h3>
+                  <button 
+                    className="popup-button"
+                    onClick={handleVerConvocatorias}
+                  >
+                    Ver Convocatorias
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Añadir el modal de edición */}
+        {showEditModal && selectedVacante && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2>Editar Vacante</h2>
+              <form onSubmit={handleEditSubmit}>
+                <label>
+                  Estado:
+                  <select
+                    name="estado"
+                    value={editFormData.estado}
+                    onChange={(e) => setEditFormData({...editFormData, estado: e.target.value})}
+                    required
+                  >
+                    <option value="Abierta">Abierta</option>
+                    <option value="Cerrada">Cerrada</option>
+                    <option value="Vencida">Vencida</option>
+                  </select>
+                </label>
+                <label>
+                  Fecha Inicio:
+                  <input
+                    type="date"
+                    value={selectedVacante.fecha_inicio.split('T')[0]}
+                    disabled
+                  />
+                </label>
+                <label>
+                  Fecha Fin:
+                  <input
+                    type="date"
+                    name="fecha_fin"
+                    value={editFormData.fecha_fin}
+                    onChange={(e) => setEditFormData({...editFormData, fecha_fin: e.target.value})}
+                    required
+                  />
+                </label>
+                <label>
+                  Comentario:
+                  <textarea
+                    name="comentario"
+                    value={editFormData.comentario}
+                    onChange={(e) => setEditFormData({...editFormData, comentario: e.target.value})}
+                  ></textarea>
+                </label>
+                <label>
+                  Puesto:
+                  <select
+                    name="id_puesto"
+                    value={editFormData.id_puesto}
+                    onChange={(e) => setEditFormData({...editFormData, id_puesto: e.target.value})}
+                    required
+                  >
+                    <option value="">Seleccione un puesto</option>
+                    {puestos.map((puesto) => (
+                      <option key={puesto.id_puesto} value={puesto.id_puesto}>
+                        {puesto.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Cantidad de vacantes:
+                  <input
+                    type="number"
+                    name="cantidad"
+                    value={editFormData.cantidad}
+                    onChange={(e) => setEditFormData({...editFormData, cantidad: e.target.value})}
+                    min="1"
+                    required
+                  />
+                </label>
+                <div className="modal-buttons">
+                  <button type="button" onClick={handleBackToPopup}>
+                    Volver
+                  </button>
+                  <button type="submit">Guardar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Añadir los nuevos modales al final del componente antes del último </main> */}
+        {showConvocatoriasModal && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2>Convocatorias</h2>
+              <div className="convocatorias-list">
+                {convocatorias.map((convocatoria) => {
+                  const funciones = puestosFunciones[selectedVacante.id_puesto] || [];
+                  
+                  return (
+                    <div key={convocatoria.id_convocatoria} className="convocatoria-item">
+                      <h3>Medio de Publicación: {convocatoria.medio_publicacion}</h3>
+                      <p>Fecha Inicio: {new Date(convocatoria.fecha_inicio).toLocaleDateString()}</p>
+                      <p>Fecha Fin: {new Date(convocatoria.fecha_fin).toLocaleDateString()}</p>
+                      <p>Estado: {convocatoria.estado}</p>
+                      <div className="convocatoria-slogan">
+                        <p>
+                          Únete a Yape para el puesto de {getNombrePuesto(selectedVacante.id_puesto)}. 
+                        </p>
+                        <p>Las funciones para este rol son:</p>
+                        <ul>
+                          {funciones.map((funcion, index) => (
+                            <li key={index}>
+                              <strong>{funcion.nombre}:</strong> {funcion.descripcion}
+                            </li>
+                          ))}
+                        </ul>
+                        <p>Postula hasta el {new Date(convocatoria.fecha_fin).toLocaleDateString()}.</p>
+                      </div>
+                      <div className="convocatoria-buttons">
+                        <button onClick={() => handleEditConvocatoria(convocatoria)}>
+                          Editar
+                        </button>
+                        <button 
+                          className="delete-button"
+                          onClick={() => handleDeleteConvocatoria(convocatoria.id_convocatoria)}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="modal-buttons">
+                <button type="submit" onClick={handleCreateConvocatoria}>
+                  Nueva Convocatoria
+                </button>
+                <button 
+                  type="button" 
+                  className="secondary-button"
+                  onClick={() => {
+                    setShowConvocatoriasModal(false);
+                    setShowPopup(true);
+                  }}
+                >
+                  Volver
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showConvocatoriaEditModal && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2>{selectedConvocatoria ? 'Editar Convocatoria' : 'Nueva Convocatoria'}</h2>
+              <form onSubmit={handleConvocatoriaSubmit}>
+                <label>
+                  Medio de Publicación:
+                  <input
+                    type="text"
+                    value={convocatoriaFormData.medio_publicacion}
+                    onChange={(e) => setConvocatoriaFormData({
+                      ...convocatoriaFormData,
+                      medio_publicacion: e.target.value
+                    })}
+                    required
+                  />
+                </label>
+                <label>
+                  Fecha Inicio:
+                  <input
+                    type="date"
+                    value={convocatoriaFormData.fecha_inicio}
+                    onChange={(e) => setConvocatoriaFormData({
+                      ...convocatoriaFormData,
+                      fecha_inicio: e.target.value
+                    })}
+                    required
+                  />
+                </label>
+                <label>
+                  Fecha Fin:
+                  <input
+                    type="date"
+                    value={convocatoriaFormData.fecha_fin}
+                    onChange={(e) => setConvocatoriaFormData({
+                      ...convocatoriaFormData,
+                      fecha_fin: e.target.value
+                    })}
+                    required
+                  />
+                </label>
+                <label>
+                  Estado:
+                  <select
+                    value={convocatoriaFormData.estado}
+                    onChange={(e) => setConvocatoriaFormData({
+                      ...convocatoriaFormData,
+                      estado: e.target.value
+                    })}
+                    required
+                  >
+                    <option value="Abierta">Abierta</option>
+                    <option value="Cerrada">Cerrada</option>
+                    <option value="En proceso">En proceso</option>
+                  </select>
+                </label>
+                <div className="modal-buttons">
+                  <button type="button" onClick={() => setShowConvocatoriaEditModal(false)}>
+                    Cancelar
+                  </button>
+                  <button type="submit">
+                    {selectedConvocatoria ? 'Guardar' : 'Crear'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Agregar el modal para mostrar los postulantes */}
+        {showPostulantesModal && (
+          <div className="modal-overlay" onClick={() => setShowPostulantesModal(false)}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <h2>Postulantes</h2>
+              <div className="postulantes-list">
+                {postulantes.map(postulante => (
+                  <button key={postulante.id_postulante} className="postulante-button">
+                    {postulante.nombre}
+                  </button>
+                ))}
+              </div>
+              <div className="modal-buttons">
+                <button type="button" onClick={() => setShowPostulantesModal(false)}>
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
