@@ -15,4 +15,5 @@ public class Postulante {
     private List<Habilidad> habilidades;
     private List<ExperienciaLaboral> experienciasLaborales;
     private OfertaLaboral ofertaLaboral;
+    private Integer puntaje_general;
 }

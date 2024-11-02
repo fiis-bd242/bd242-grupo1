@@ -411,6 +411,7 @@ CREATE TABLE Postulante (
                             telefono INTEGER NOT NULL,
                             correo VARCHAR(255) NOT NULL,
                             id_vacante INTEGER NOT NULL,
+                            puntaje_general INTEGER NOT NULL,
                             PRIMARY KEY (id_postulante),
                             FOREIGN KEY (id_vacante) REFERENCES Vacante(id_vacante)
 );
