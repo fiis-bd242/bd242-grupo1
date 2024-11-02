@@ -1,4 +1,3 @@
-// src/main/java/com/example/yapeback/interfaces/PostulanteRepository.java
 package com.example.yapeback.interfaces;
 
 import com.example.yapeback.model.*;
@@ -10,12 +9,19 @@ public interface PostulanteRepository {
     Postulante save(Postulante postulante);
     void deleteById(Long id);
     List<Idioma> findIdiomasByPostulanteId(Long idPostulante);
+    void saveIdioma(Long idPostulante, Idioma idioma);
+    void deleteIdiomasByPostulanteId(Long idPostulante);
+    void saveEducacion(Long idPostulante, Educacion educacion);
+    void deleteEducacionesByPostulanteId(Long idPostulante);
+    void saveHabilidad(Long idPostulante, Habilidad habilidad);
+    void deleteHabilidadesByPostulanteId(Long idPostulante);
+    void saveExperiencia(Long idPostulante, ExperienciaLaboral experiencia);
+    void deleteExperienciasByPostulanteId(Long idPostulante);
     List<Educacion> findEducacionesByPostulanteId(Long idPostulante);
-    List<Habilidad> findHabilidadesByPostulanteId(Long idPostulante);
-    List<ExperienciaLaboral> findExperienciasByPostulanteId(Long idPostulante);
-    List<HabilidadExperiencia> findHabilidadesByExperienciaId(Long idExperiencia);
+    List<Habilidad> findHabilidadesByPostulanteId(Long idPostulante); // Add this method
     Feedback findFeedbackByEntrevistaId(Long idEntrevista);
     Feedback saveFeedback(Feedback feedback);
+    void actualizarPuntajeGeneral(Long idEntrevista);
     void deleteFeedbackById(Long id);
     List<Observacion> findObservacionesByFeedbackId(Long idFeedback);
     Observacion saveObservacion(Observacion observacion);
@@ -23,7 +29,9 @@ public interface PostulanteRepository {
     List<Entrevista> findEntrevistasByPostulanteId(Long idPostulante);
     List<Entrevista> findEntrevistasWithFeedbackByPostulanteId(Long idPostulante);
 
-    // Add the missing methods
-    void actualizarPuntajesIndicadores(Long idEntrevista, List<EntrevistaIndicador> indicadores);
-    void actualizarFeedback(Long idEntrevista, Feedback feedback);
+    // Agregar estos métodos
+    List<Feedback> findFeedbacksByPostulanteId(Long idPostulante);
+    Long saveIdiomaAndGetId(String nombre);
+    Long saveHabilidadExperienciaAndGetId(String nombre, Long idExperiencia);
+    Long saveExperienciaAndGetId(Long idPostulante, ExperienciaLaboral experiencia);
 }

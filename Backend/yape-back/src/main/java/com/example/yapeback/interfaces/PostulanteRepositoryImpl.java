@@ -1,4 +1,3 @@
-// src/main/java/com/example/yapeback/interfaces/PostulanteRepositoryImpl.java
 package com.example.yapeback.interfaces;
 
 import com.example.yapeback.model.*;
@@ -7,7 +6,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import com.example.yapeback.model.EntrevistaIndicador;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,7 +17,6 @@ import java.util.stream.Collectors;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-
 
 @Repository
 public class PostulanteRepositoryImpl implements PostulanteRepository {
@@ -42,13 +39,11 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
     @Override
     public Postulante save(Postulante postulante) {
         if (postulante.getId_postulante() == null) {
-            // Insert logic
             String sql = "INSERT INTO postulante (nombre, telefono, id_vacante, correo, puntaje_general) VALUES (?, ?, ?, ?, ?)";
             jdbcTemplate.update(sql, postulante.getNombre(), postulante.getTelefono(), postulante.getId_vacante(), postulante.getCorreo(), postulante.getPuntaje_general());
             Long newId = jdbcTemplate.queryForObject("SELECT LASTVAL()", Long.class);
             postulante.setId_postulante(newId);
         } else {
-            // Update logic
             String sql = "UPDATE postulante SET nombre = ?, telefono = ?, id_vacante = ?, correo = ?, puntaje_general = ? WHERE id_postulante = ?";
             jdbcTemplate.update(sql, postulante.getNombre(), postulante.getTelefono(), postulante.getId_vacante(), postulante.getCorreo(), postulante.getPuntaje_general(), postulante.getId_postulante());
         }
@@ -57,8 +52,68 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
 
     @Override
     public void deleteById(Long id) {
-        String sql = "DELETE FROM postulante WHERE id_postulante = ?";
+        try {
+            // 1. Primero eliminamos las entrevistas y sus relaciones
+            List<Entrevista> entrevistas = findEntrevistasByPostulanteId(id);
+            for (Entrevista entrevista : entrevistas) {
+                // Eliminar feedback asociado antes de actualizar entrevista
+                if (entrevista.getId_feedback() != null) {
+                    deleteFeedbackById(entrevista.getId_feedback());
+                }
+                String sqlUpdate = "DELETE FROM entrevista WHERE id_entrevista = ?";
+                jdbcTemplate.update(sqlUpdate, entrevista.getId_entrevista());
+            }
+
+            // 2. Eliminar idiomas relacionados
+            deleteIdiomasByPostulanteId(id);
+
+            // 3. Eliminar educaciones
+            deleteEducacionesByPostulanteId(id);
+
+            // 4. Eliminar habilidades
+            deleteHabilidadesByPostulanteId(id);
+
+            // 5. Eliminar experiencias laborales y sus habilidades
+            deleteExperienciasByPostulanteId(id);
+
+            // 6. Eliminar oferta laboral y sus beneficios
+            OfertaLaboral ofertaLaboral = findOfertaLaboralByPostulanteId(id);
+            if (ofertaLaboral != null) {
+                String deleteBeneficiosSQL = "DELETE FROM oferta_laboral_beneficio WHERE id_oferta = ?";
+                jdbcTemplate.update(deleteBeneficiosSQL, ofertaLaboral.getId_oferta());
+
+                String deleteOfertaSQL = "DELETE FROM oferta_laboral WHERE id_postulante = ?";
+                jdbcTemplate.update(deleteOfertaSQL, id);
+            }
+
+            // 7. Finalmente eliminar el postulante
+            String sql = "DELETE FROM postulante WHERE id_postulante = ?";
+            jdbcTemplate.update(sql, id);
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Error al eliminar el postulante y sus relaciones: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void deleteFeedbackById(Long id) {
+        String deleteObservacionesSql = "DELETE FROM observacion WHERE id_feedback = ?";
+        jdbcTemplate.update(deleteObservacionesSql, id);
+        
+        String deleteFeedbackSql = "DELETE FROM feedback WHERE id_feedback = ?";
+        jdbcTemplate.update(deleteFeedbackSql, id);
+
+        String sql = "DELETE FROM feedback WHERE id_feedback = ?";
         jdbcTemplate.update(sql, id);
+    }
+
+    private OfertaLaboral findOfertaLaboralByPostulanteId(Long idPostulante) {
+        try {
+            String sql = "SELECT * FROM oferta_laboral WHERE id_postulante = ?";
+            return jdbcTemplate.queryForObject(sql, new OfertaLaboralRowMapper(), idPostulante);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override
@@ -68,27 +123,86 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
     }
 
     @Override
+    public void saveIdioma(Long idPostulante, Idioma idioma) {
+        // Si no existe el idioma, crearlo
+        if (idioma.getId_idioma() == null) {
+            String sqlIdioma = "INSERT INTO idioma (nombre) VALUES (?) RETURNING id_idioma";
+            Long idIdioma = jdbcTemplate.queryForObject(sqlIdioma, Long.class, idioma.getNombre());
+            idioma.setId_idioma(idIdioma);
+        }
+        
+        // Crear la relación idioma_postulante
+        String sql = "INSERT INTO idioma_postulante (id_postulante, id_idioma) VALUES (?, ?)";
+        jdbcTemplate.update(sql, idPostulante, idioma.getId_idioma());
+    }
+
+    @Override
+    public void deleteIdiomasByPostulanteId(Long idPostulante) {
+        String sql = "DELETE FROM idioma_postulante WHERE id_postulante = ?";
+        jdbcTemplate.update(sql, idPostulante);
+    }
+
+    @Override
+    public void saveEducacion(Long idPostulante, Educacion educacion) {
+        String sql = "INSERT INTO educacion (id_postulante, titulo, institucion, fecha_inicio, fecha_fin, en_curso) VALUES (?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, idPostulante, educacion.getTitulo(), educacion.getInstitucion(), educacion.getFecha_inicio(), educacion.getFecha_fin(), educacion.isEn_curso());
+    }
+
+    @Override
+    public void deleteEducacionesByPostulanteId(Long idPostulante) {
+        String sql = "DELETE FROM educacion WHERE id_postulante = ?";
+        jdbcTemplate.update(sql, idPostulante);
+    }
+
+    @Override
+    public void saveHabilidad(Long idPostulante, Habilidad habilidad) {
+        String sql = "INSERT INTO habilidad_postulante (id_postulante, nombre, nivel) VALUES (?, ?, ?)";
+        jdbcTemplate.update(sql, idPostulante, habilidad.getNombre(), habilidad.getNivel());
+    }
+
+    @Override
+    public void deleteHabilidadesByPostulanteId(Long idPostulante) {
+        String sql = "DELETE FROM habilidad_postulante WHERE id_postulante = ?";
+        jdbcTemplate.update(sql, idPostulante);
+    }
+
+    @Override
+    public void saveExperiencia(Long idPostulante, ExperienciaLaboral experiencia) {
+        String sql = "INSERT INTO experiencia_laboral (id_postulante, empresa, puesto, fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?, ?) RETURNING id_experiencia";
+        Long idExperiencia = jdbcTemplate.queryForObject(sql, Long.class, 
+            idPostulante, experiencia.getEmpresa(), experiencia.getPuesto(), 
+            experiencia.getFecha_inicio(), experiencia.getFecha_fin());
+        
+        // Guardar las habilidades de la experiencia
+        if (experiencia.getHabilidades() != null) {
+            for (HabilidadExperiencia habilidad : experiencia.getHabilidades()) {
+                String sqlHabilidad = "INSERT INTO habilidad_experiencia (nombre, id_experiencia) VALUES (?, ?)";
+                jdbcTemplate.update(sqlHabilidad, habilidad.getNombre(), idExperiencia);
+            }
+        }
+    }
+
+    @Override
+    public void deleteExperienciasByPostulanteId(Long idPostulante) {
+        // Primero obtener todas las experiencias del postulante
+        String selectSql = "SELECT id_experiencia FROM experiencia_laboral WHERE id_postulante = ?";
+        List<Long> experienciaIds = jdbcTemplate.queryForList(selectSql, Long.class, idPostulante);
+        
+        // Eliminar las habilidades asociadas a cada experiencia
+        String deleteHabilidadesSql = "DELETE FROM habilidad_experiencia WHERE id_experiencia = ?";
+        for (Long expId : experienciaIds) {
+            jdbcTemplate.update(deleteHabilidadesSql, expId);
+        }
+        
+        // Finalmente eliminar las experiencias
+        String deleteExperienciasSql = "DELETE FROM experiencia_laboral WHERE id_postulante = ?";
+        jdbcTemplate.update(deleteExperienciasSql, idPostulante);
+    }
+
+    @Override
     public List<Educacion> findEducacionesByPostulanteId(Long idPostulante) {
         String sql = "SELECT * FROM educacion WHERE id_postulante = ?";
         return jdbcTemplate.query(sql, new EducacionRowMapper(), idPostulante);
-    }
-
-    @Override
-    public List<Habilidad> findHabilidadesByPostulanteId(Long idPostulante) {
-        String sql = "SELECT * FROM habilidad_postulante WHERE id_postulante = ?";
-        return jdbcTemplate.query(sql, new HabilidadRowMapper(), idPostulante);
-    }
-
-    @Override
-    public List<ExperienciaLaboral> findExperienciasByPostulanteId(Long idPostulante) {
-        String sql = "SELECT * FROM experiencia_laboral WHERE id_postulante = ?";
-        return jdbcTemplate.query(sql, new ExperienciaLaboralRowMapper(), idPostulante);
-    }
-
-    @Override
-    public List<HabilidadExperiencia> findHabilidadesByExperienciaId(Long idExperiencia) {
-        String sql = "SELECT * FROM habilidad_experiencia WHERE id_experiencia = ?";
-        return jdbcTemplate.query(sql, new HabilidadExperienciaRowMapper(), idExperiencia);
     }
 
     private class PostulanteRowMapper implements RowMapper<Postulante> {
@@ -143,6 +257,12 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
                 return null;
             }
         }
+    }
+
+    @Override
+    public List<Habilidad> findHabilidadesByPostulanteId(Long idPostulante) {
+        String sql = "SELECT * FROM habilidad_postulante WHERE id_postulante = ?";
+        return jdbcTemplate.query(sql, new HabilidadRowMapper(), idPostulante);
     }
 
     private class IdiomaRowMapper implements RowMapper<Idioma> {
@@ -246,28 +366,28 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
 
     @Override
     public Feedback findFeedbackByEntrevistaId(Long idEntrevista) {
-        String sql = "SELECT * FROM feedback WHERE id_entrevista = ?";
-        return jdbcTemplate.queryForObject(sql, new FeedbackRowMapper(jdbcTemplate), idEntrevista);
+        String sql = "SELECT f.* FROM feedback f JOIN entrevista e ON f.id_feedback = e.id_feedback WHERE e.id_entrevista = ?";
+        return jdbcTemplate.queryForObject(sql, new FeedbackRowMapper(), idEntrevista);
+    }
+
+    @Override
+    public List<Feedback> findFeedbacksByPostulanteId(Long idPostulante) {
+        String sql = "SELECT * FROM feedback WHERE id_postulante = ?";
+        return jdbcTemplate.query(sql, new FeedbackRowMapper(), idPostulante);
     }
 
     @Override
     public Feedback saveFeedback(Feedback feedback) {
         if (feedback.getId_feedback() == null) {
-            String sql = "INSERT INTO feedback (id_entrevista, fecha) VALUES (?, ?)";
-            jdbcTemplate.update(sql, feedback.getId_entrevista(), feedback.getFecha());
+            String sql = "INSERT INTO feedback (fecha) VALUES (?)";
+            jdbcTemplate.update(sql, feedback.getFecha());
             Long newId = jdbcTemplate.queryForObject("SELECT LASTVAL()", Long.class);
             feedback.setId_feedback(newId);
         } else {
-            String sql = "UPDATE feedback SET id_entrevista = ?, fecha = ? WHERE id_feedback = ?";
-            jdbcTemplate.update(sql, feedback.getId_entrevista(), feedback.getFecha(), feedback.getId_feedback());
+            String sql = "UPDATE feedback SET fecha = ? WHERE id_feedback = ?";
+            jdbcTemplate.update(sql, feedback.getFecha(), feedback.getId_feedback());
         }
         return feedback;
-    }
-
-    @Override
-    public void deleteFeedbackById(Long id) {
-        String sql = "DELETE FROM feedback WHERE id_feedback = ?";
-        jdbcTemplate.update(sql, id);
     }
 
     @Override
@@ -296,13 +416,7 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
         jdbcTemplate.update(sql, id);
     }
 
-    private static final class FeedbackRowMapper implements RowMapper<Feedback> {
-        private final JdbcTemplate jdbcTemplate;
-
-        public FeedbackRowMapper(JdbcTemplate jdbcTemplate) {
-            this.jdbcTemplate = jdbcTemplate;
-        }
-
+    private class FeedbackRowMapper implements RowMapper<Feedback> {
         @Override
         public Feedback mapRow(ResultSet rs, int rowNum) throws SQLException {
             Feedback feedback = new Feedback();
@@ -310,11 +424,6 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
             feedback.setFecha(rs.getDate("fecha"));
             feedback.setObservaciones(findObservacionesByFeedbackId(rs.getLong("id_feedback")));
             return feedback;
-        }
-
-        private List<Observacion> findObservacionesByFeedbackId(Long idFeedback) {
-            String sql = "SELECT * FROM observacion WHERE id_feedback = ?";
-            return jdbcTemplate.query(sql, new ObservacionRowMapper(), idFeedback);
         }
     }
 
@@ -332,8 +441,8 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
 
     @Override
     public List<Entrevista> findEntrevistasByPostulanteId(Long idPostulante) {
-        String sql = "SELECT * FROM entrevista WHERE id_postulante = ?";
-        return jdbcTemplate.query(sql, new EntrevistaRowMapper(), idPostulante);
+        String sql = "SELECT * FROM entrevistas WHERE id_postulante = ?";
+        return jdbcTemplate.query(sql, new Object[]{idPostulante}, new EntrevistaRowMapper());
     }
 
     private static final class EntrevistaRowMapper implements RowMapper<Entrevista> {
@@ -341,13 +450,9 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
         public Entrevista mapRow(ResultSet rs, int rowNum) throws SQLException {
             Entrevista entrevista = new Entrevista();
             entrevista.setId_entrevista(rs.getLong("id_entrevista"));
-            entrevista.setId_postulante(rs.getLong("id_postulante"));
-            entrevista.setId_empleado(rs.getLong("id_empleado"));
-            entrevista.setId_feedback(rs.getLong("id_feedback"));
-            entrevista.setId_tipo_entrevista(rs.getLong("id_tipo_entrevista"));
-            entrevista.setFecha(rs.getDate("fecha"));
+            entrevista.setFecha(rs.getDate("fecha").toLocalDate());
             entrevista.setEstado(rs.getString("estado"));
-            entrevista.setPuntaje_general(rs.getInt("puntaje_general"));
+// ...map other fields...
             return entrevista;
         }
     }
@@ -364,90 +469,18 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
                 "LEFT JOIN categoria_observacion c ON o.id_categoria = c.id_categoria " +
                 "LEFT JOIN puntaje_indicador pi ON e.id_entrevista = pi.id_entrevista " +
                 "LEFT JOIN indicador i ON pi.id_indicador = i.id_indicador " +
-                "WHERE e.id_postulante = ?";
+                "WHERE e.id_postulante = ? AND e.estado = 'Hecha'";
 
         Map<Long, Entrevista> entrevistaMap = new HashMap<>();
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
-                    Long entrevistaId = rs.getLong("id_entrevista");
-
-                    // Get or create entrevista
-                    Entrevista entrevista = entrevistaMap.computeIfAbsent(entrevistaId, k -> {
-                        Entrevista e = new Entrevista();
-                        try {
-                            e.setId_entrevista(rs.getLong("id_entrevista"));
-                            e.setId_postulante(rs.getLong("id_postulante"));
-                            e.setId_empleado(rs.getLong("id_empleado"));
-                            e.setId_feedback(rs.getLong("id_feedback"));
-                            e.setId_tipo_entrevista(rs.getLong("id_tipo_entrevista"));
-                            e.setFecha(rs.getDate("fecha"));
-                            e.setEstado(rs.getString("estado"));
-                            e.setPuntaje_general(rs.getInt("puntaje_general"));
-                            e.setIndicadores(new ArrayList<>());
-
-                            // Initialize feedback if it exists
-                            Long feedbackId = rs.getLong("id_feedback");
-                            if (!rs.wasNull()) {
-                                Feedback feedback = new Feedback();
-                                feedback.setId_feedback(feedbackId);
-                                feedback.setFecha(rs.getDate("feedback_fecha"));
-                                feedback.setId_entrevista(entrevistaId);
-                                feedback.setObservaciones(new ArrayList<>());
-                                e.setFeedback(feedback);
-                            }
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
-                        }
-                        return e;
-                    });
-
-                    // Add observacion if it exists
-                    if (entrevista.getFeedback() != null && rs.getLong("id_observacion") > 0 && !rs.wasNull()) {
-                        Observacion observacion = new Observacion();
-                        try {
-                            observacion.setId_observacion(rs.getLong("id_observacion"));
-                            observacion.setId_feedback(rs.getLong("id_feedback"));
-                            observacion.setId_categoria(rs.getLong("id_categoria"));
-                            observacion.setDescripcion(rs.getString("descripcion"));
-                            observacion.setCategoriaNombre(rs.getString("categoria_nombre"));
-
-                            if (!entrevista.getFeedback().getObservaciones().contains(observacion)) {
-                                entrevista.getFeedback().getObservaciones().add(observacion);
-                            }
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-
-                    // Add indicador if it exists
-                    if (rs.getLong("id_indicador") > 0 && !rs.wasNull()) {
-                        EntrevistaIndicador indicador = new EntrevistaIndicador();
-                        try {
-                            indicador.setId_entrevista(rs.getLong("id_entrevista"));
-                            indicador.setId_indicador(rs.getLong("id_indicador"));
-                            indicador.setPuntaje(rs.getInt("puntaje"));
-
-                            if (!entrevista.getIndicadores().contains(indicador)) {
-                                entrevista.getIndicadores().add(indicador);
-                            }
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-
-                    return entrevista;
-                }, idPostulante)
+        try {
+            return jdbcTemplate.query(sql, new Object[]{idPostulante}, new EntrevistaWithFeedbackRowMapper())
                 .stream()
                 .filter(Objects::nonNull)
-                .collect(Collectors.toMap(
-                        Entrevista::getId_entrevista,
-                        Function.identity(),
-                        (existing, replacement) -> existing,
-                        LinkedHashMap::new
-                ))
-                .values()
-                .stream()
-                .toList();
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Error querying entrevistas with feedback", e);
+        }
     }
 
     public void actualizarPuntajesIndicadores(Long idEntrevista, List<EntrevistaIndicador> indicadores) {
@@ -477,43 +510,76 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
         }
     }
 
+    // src/main/java/com/example/yapeback/interfaces/PostulanteRepositoryImpl.java
+    @Override
     public void actualizarPuntajeGeneral(Long idEntrevista) {
         String sql = "SELECT SUM(puntaje) FROM puntaje_indicador WHERE id_entrevista = ?";
         Integer puntajeGeneral = jdbcTemplate.queryForObject(sql, Integer.class, idEntrevista);
 
         String updateSql = "UPDATE entrevista SET puntaje_general = ? WHERE id_entrevista = ?";
-        jdbcTemplate.update(updateSql, puntajeGeneral, idEntrevista);
+        jdbcTemplate.update(updateSql, puntajeGeneral, idEntrevista); // Corregido aquí
     }
 
     private static final class EntrevistaWithFeedbackRowMapper implements RowMapper<Entrevista> {
         @Override
         public Entrevista mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Entrevista entrevista = new Entrevista();
-            entrevista.setId_entrevista(rs.getLong("id_entrevista"));
-            entrevista.setId_postulante(rs.getLong("id_postulante"));
-            entrevista.setId_empleado(rs.getLong("id_empleado"));
-            entrevista.setId_feedback(rs.getLong("id_feedback"));
-            entrevista.setId_tipo_entrevista(rs.getLong("id_tipo_entrevista"));
-            entrevista.setFecha(rs.getDate("fecha"));
-            entrevista.setEstado(rs.getString("estado"));
-            entrevista.setPuntaje_general(rs.getInt("puntaje_general"));
+            try {
+                Entrevista entrevista = new Entrevista();
+                entrevista.setId_entrevista(rs.getLong("id_entrevista"));
+                entrevista.setId_postulante(rs.getLong("id_postulante"));
+                entrevista.setId_empleado(rs.getLong("id_empleado"));
+                entrevista.setId_feedback(rs.getLong("id_feedback"));
+                entrevista.setId_tipo_entrevista(rs.getLong("id_tipo_entrevista"));
+                // Convert java.sql.Date to LocalDate
+                java.sql.Date sqlDate = rs.getDate("fecha");
+                if (sqlDate != null) {
+                    entrevista.setFecha(sqlDate.toLocalDate());
+                }
+                entrevista.setEstado(rs.getString("estado"));
+                entrevista.setPuntaje_general(rs.getInt("puntaje_general"));
 
-            Feedback feedback = new Feedback();
-            feedback.setId_feedback(rs.getLong("id_feedback"));
-            feedback.setFecha(rs.getDate("fecha"));
-            feedback.setId_entrevista(rs.getLong("id_entrevista"));
+                Feedback feedback = new Feedback();
+                feedback.setId_feedback(rs.getLong("id_feedback"));
+                // Convert fecha for feedback as well
+                java.sql.Date feedbackDate = rs.getDate("fecha");
+                if (feedbackDate != null) {
+                    feedback.setFecha(java.sql.Date.valueOf(feedbackDate.toLocalDate()));
+                }
 
-            Observacion observacion = new Observacion();
-            observacion.setId_observacion(rs.getLong("id_observacion"));
-            observacion.setId_feedback(rs.getLong("id_feedback"));
-            observacion.setId_categoria(rs.getLong("id_categoria"));
-            observacion.setDescripcion(rs.getString("descripcion"));
-            observacion.setCategoriaNombre(rs.getString("categoria_nombre"));
+                Observacion observacion = new Observacion();
+                observacion.setId_observacion(rs.getLong("id_observacion"));
+                observacion.setId_feedback(rs.getLong("id_feedback"));
+                observacion.setId_categoria(rs.getLong("id_categoria"));
+                observacion.setDescripcion(rs.getString("descripcion"));
+                observacion.setCategoriaNombre(rs.getString("categoria_nombre"));
 
-            feedback.setObservaciones(List.of(observacion));
-            entrevista.setFeedback(feedback);
+                feedback.setObservaciones(List.of(observacion));
+                entrevista.setFeedback(feedback);
 
-            return entrevista;
+                return entrevista;
+            } catch (SQLException e) {
+                throw new RuntimeException("Error mapping entrevista row", e);
+            }
         }
+    }
+
+    @Override
+    public Long saveIdiomaAndGetId(String nombre) {
+        String sqlIdioma = "INSERT INTO idioma (nombre) VALUES (?) RETURNING id_idioma";
+        return jdbcTemplate.queryForObject(sqlIdioma, Long.class, nombre);
+    }
+
+    @Override
+    public Long saveHabilidadExperienciaAndGetId(String nombre, Long idExperiencia) {
+        String sql = "INSERT INTO habilidad_experiencia (nombre, id_experiencia) VALUES (?, ?) RETURNING id_habilidad_experiencia";
+        return jdbcTemplate.queryForObject(sql, Long.class, nombre, idExperiencia);
+    }
+
+    @Override
+    public Long saveExperienciaAndGetId(Long idPostulante, ExperienciaLaboral experiencia) {
+        String sql = "INSERT INTO experiencia_laboral (id_postulante, empresa, puesto, fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?, ?) RETURNING id_experiencia";
+        return jdbcTemplate.queryForObject(sql, Long.class, 
+            idPostulante, experiencia.getEmpresa(), experiencia.getPuesto(), 
+            experiencia.getFecha_inicio(), experiencia.getFecha_fin());
     }
 }

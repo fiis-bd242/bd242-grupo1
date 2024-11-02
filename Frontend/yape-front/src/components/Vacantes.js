@@ -94,6 +94,11 @@ const Vacantes = () => {
     experienciasLaborales: []
   });
 
+  // Estados para el popup de detalles del postulante
+  const [entrevistas, setEntrevistas] = useState([]); // Initialize as empty array
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date());
@@ -695,16 +700,30 @@ const Vacantes = () => {
 
   // También actualizar cuando se selecciona un postulante para ver detalles
   const handlePostulanteClick = async (postulante) => {
+    setLoading(true);
+    setError(null);
     try {
-      const response = await fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}`);
-      if (!response.ok) throw new Error('Error al obtener los detalles del postulante');
+      // Primero obtenemos los detalles del postulante
+      const detallesResponse = await fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}`);
+      if (!detallesResponse.ok) throw new Error('Error al obtener los detalles del postulante');
       
-      const detallesPostulante = await response.json();
+      const detallesPostulante = await detallesResponse.json();
       setSelectedPostulante(detallesPostulante);
-      setShowPostulanteDetailsModal(true);
+
+      // Luego obtenemos las entrevistas
+      const entrevistasResponse = await fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}/entrevistas-hechas`);
+      if (!entrevistasResponse.ok) throw new Error('Error al obtener las entrevistas');
+      
+      const entrevistasData = await entrevistasResponse.json();
+      setEntrevistas(entrevistasData || []); // Asegurarse de que siempre sea un array
+      setError(null);
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al obtener los detalles del postulante');
+      setError('Error al obtener los datos del postulante');
+      setEntrevistas([]); // Reset entrevistas en caso de error
+    } finally {
+      setLoading(false);
+      setShowPostulanteDetailsModal(true);
     }
   };
 
@@ -1321,6 +1340,33 @@ const Vacantes = () => {
                   <h2>Evaluación</h2>
                   <p>Puntaje General: {selectedPostulante.puntaje_general}</p>
                   {/* Add evaluation content here */}
+                  <div className="entrevistas-section">
+                    <h3>Entrevistas</h3>
+                    {loading ? (
+                      <p>Cargando entrevistas...</p>
+                    ) : error ? (
+                      <p className="error-message">{error}</p>
+                    ) : entrevistas.length > 0 ? (
+                      <ul className="entrevistas-list">
+                        {entrevistas.map(entrevista => (
+                          <li key={entrevista.id_entrevista} className="entrevista-item">
+                            <p><strong>Fecha:</strong> {new Date(entrevista.fecha).toLocaleDateString()}</p>
+                            <p><strong>Estado:</strong> {entrevista.estado}</p>
+                            {/* Añadir más detalles de la entrevista según necesites */}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>No hay entrevistas realizadas</p>
+                    )}
+                    
+                    <button
+                      className="gestionar-entrevistas-button"
+                      onClick={() => navigate(`/gestionar-entrevistas/${selectedPostulante.id_postulante}`)}
+                    >
+                      Gestionar Entrevistas
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1497,16 +1543,24 @@ const Vacantes = () => {
                           onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { empresa: e.target.value }, setFormData, formData)}
                           placeholder="Empresa"
                         />
-                        <input
-                          type="date"
-                          value={experiencia.fecha_inicio}
-                          onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { fecha_inicio: e.target.value }, setFormData, formData)}
-                        />
-                        <input
-                          type="date"
-                          value={experiencia.fecha_fin}
-                          onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { fecha_fin: e.target.value }, setFormData, formData)}
-                        />
+                        <div className="date-inputs">
+                          <div className="date-field">
+                            <label>Fecha de inicio:</label>
+                            <input
+                              type="date"
+                              value={experiencia.fecha_inicio}
+                              onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { fecha_inicio: e.target.value }, setFormData, formData)}
+                            />
+                          </div>
+                          <div className="date-field">
+                            <label>Fecha de fin:</label>
+                            <input
+                              type="date"
+                              value={experiencia.fecha_fin}
+                              onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { fecha_fin: e.target.value }, setFormData, formData)}
+                            />
+                          </div>
+                        </div>
                         <div className="habilidades-experiencia">
                           {experiencia.habilidades?.map((habilidad, habIndex) => (
                             <div key={habIndex}>
@@ -1721,16 +1775,24 @@ const Vacantes = () => {
                           onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { empresa: e.target.value }, setEditPostulanteData, editPostulanteData)}
                           placeholder="Empresa"
                         />
-                        <input
-                          type="date"
-                          value={experiencia.fecha_inicio}
-                          onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { fecha_inicio: e.target.value }, setEditPostulanteData, editPostulanteData)}
-                        />
-                        <input
-                          type="date"
-                          value={experiencia.fecha_fin}
-                          onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { fecha_fin: e.target.value }, setEditPostulanteData, editPostulanteData)}
-                        />
+                        <div className="date-inputs">
+                          <div className="date-field">
+                            <label>Fecha de inicio:</label>
+                            <input
+                              type="date"
+                              value={experiencia.fecha_inicio}
+                              onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { fecha_inicio: e.target.value }, setEditPostulanteData, editPostulanteData)}
+                            />
+                          </div>
+                          <div className="date-field">
+                            <label>Fecha de fin:</label>
+                            <input
+                              type="date"
+                              value={experiencia.fecha_fin}
+                              onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { fecha_fin: e.target.value }, setEditPostulanteData, editPostulanteData)}
+                            />
+                          </div>
+                        </div>
                         <div className="habilidades-experiencia">
                           {experiencia.habilidades?.map((habilidad, habIndex) => (
                             <div key={habIndex}>
