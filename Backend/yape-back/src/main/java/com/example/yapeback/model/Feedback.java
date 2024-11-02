@@ -7,6 +7,5 @@ import java.sql.Date;
 public class Feedback {
     private Long id_feedback;
     private Date fecha;
-    private Long id_entrevista;
     private List<Observacion> observaciones;
 }

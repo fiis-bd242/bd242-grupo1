@@ -797,3 +797,99 @@
 .array-field input[type="text"] {
   margin-bottom: 10px;
 }
+
+/* Styles for the Postulante Table */
+.vacante-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.vacante-table th, .vacante-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.vacante-table th {
+    background-color: #f2f2f2;
+}
+
+/* Styles for Action Buttons */
+.vacante-table button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.manage-button {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.generate-slogan-button {
+    background-color: #ffc107;
+    color: white;
+}
+
+.hire-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.vacante-table button:hover {
+    opacity: 0.8;
+}
+
+/* ...existing CSS... */
+
+.entrevistas-section {
+    margin-top: 20px;
+}
+
+.entrevistas-list {
+    list-style-type: none;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.entrevista-item {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.gestionar-entrevistas-button {
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.gestionar-entrevistas-button:hover {
+    background-color: #005a9e;
+}
+
+/* ...existing CSS... */
+
+.experiencia-laboral .form-group {
+  margin-bottom: 15px;
+}
+
+.experiencia-laboral label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.experiencia-laboral input[type="date"] {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
