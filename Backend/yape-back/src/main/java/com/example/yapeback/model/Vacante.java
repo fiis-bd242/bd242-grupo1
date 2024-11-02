@@ -14,4 +14,5 @@ public class Vacante {
     private Long id_puesto;
     private List<Convocatoria> convocatorias;
     private List<Postulante> postulantes;
+    private Integer cantidad;
 }

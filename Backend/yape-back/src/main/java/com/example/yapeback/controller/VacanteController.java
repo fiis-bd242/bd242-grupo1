@@ -1,6 +1,7 @@
 // src/main/java/com/example/yapeback/controller/VacanteController.java
 package com.example.yapeback.controller;
 
+import com.example.yapeback.model.Convocatoria; // Add this import
 import com.example.yapeback.model.Postulante;
 import com.example.yapeback.model.Vacante;
 import com.example.yapeback.service.VacanteService;
@@ -29,6 +30,18 @@ public class VacanteController {
         Vacante vacante = vacanteService.findById(id);
         if (vacante != null) {
             return new ResponseEntity<>(vacante, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/{id}/convocatorias")
+    public ResponseEntity<Convocatoria> createConvocatoria(@PathVariable Long id, @RequestBody Convocatoria convocatoria) {
+        Vacante existingVacante = vacanteService.findById(id);
+        if (existingVacante != null) {
+            convocatoria.setId_vacante(id);
+            Convocatoria newConvocatoria = vacanteService.saveConvocatoria(convocatoria);
+            return new ResponseEntity<>(newConvocatoria, HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -74,6 +87,18 @@ public class VacanteController {
         List<Postulante> postulantes = vacanteService.findPostulantesByVacanteId(id);
         if (postulantes != null) {
             return new ResponseEntity<>(postulantes, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/convocatorias/{id}")
+    public ResponseEntity<Convocatoria> updateConvocatoria(@PathVariable Long id, @RequestBody Convocatoria convocatoria) {
+        Convocatoria existingConvocatoria = vacanteService.findConvocatoriaById(id);
+        if (existingConvocatoria != null) {
+            convocatoria.setId_convocatoria(id);
+            Convocatoria updatedConvocatoria = vacanteService.saveConvocatoria(convocatoria);
+            return new ResponseEntity<>(updatedConvocatoria, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

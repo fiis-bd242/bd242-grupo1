@@ -1,8 +1,8 @@
-
 // src/main/java/com/example/yapeback/service/VacanteService.java
 package com.example.yapeback.service;
 
 import com.example.yapeback.interfaces.VacanteRepository;
+import com.example.yapeback.model.Convocatoria; // Add this import
 import com.example.yapeback.model.Postulante;
 import com.example.yapeback.model.Vacante;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,5 +46,14 @@ public class VacanteService {
 
     public List<Postulante> findPostulantesByVacanteId(Long idVacante) {
         return vacanteRepository.findPostulantesByVacanteId(idVacante);
+    }
+
+    public Convocatoria saveConvocatoria(Convocatoria convocatoria) {
+        return vacanteRepository.saveConvocatoria(convocatoria);
+    }
+
+
+    public Convocatoria findConvocatoriaById(Long id) {
+        return vacanteRepository.findConvocatoriaById(id);
     }
 }
