@@ -43,14 +43,14 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
     public Postulante save(Postulante postulante) {
         if (postulante.getId_postulante() == null) {
             // Insert logic
-            String sql = "INSERT INTO postulante (nombre, telefono, id_vacante, correo) VALUES (?, ?, ?, ?)";
-            jdbcTemplate.update(sql, postulante.getNombre(), postulante.getTelefono(), postulante.getId_vacante(), postulante.getCorreo());
+            String sql = "INSERT INTO postulante (nombre, telefono, id_vacante, correo, puntaje_general) VALUES (?, ?, ?, ?, ?)";
+            jdbcTemplate.update(sql, postulante.getNombre(), postulante.getTelefono(), postulante.getId_vacante(), postulante.getCorreo(), postulante.getPuntaje_general());
             Long newId = jdbcTemplate.queryForObject("SELECT LASTVAL()", Long.class);
             postulante.setId_postulante(newId);
         } else {
             // Update logic
-            String sql = "UPDATE postulante SET nombre = ?, telefono = ?, id_vacante = ?, correo = ? WHERE id_postulante = ?";
-            jdbcTemplate.update(sql, postulante.getNombre(), postulante.getTelefono(), postulante.getId_vacante(), postulante.getId_postulante(), postulante.getCorreo());
+            String sql = "UPDATE postulante SET nombre = ?, telefono = ?, id_vacante = ?, correo = ?, puntaje_general = ? WHERE id_postulante = ?";
+            jdbcTemplate.update(sql, postulante.getNombre(), postulante.getTelefono(), postulante.getId_vacante(), postulante.getCorreo(), postulante.getPuntaje_general(), postulante.getId_postulante());
         }
         return postulante;
     }
@@ -106,6 +106,7 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
             postulante.setTelefono(rs.getInt("telefono"));
             postulante.setId_vacante(rs.getLong("id_vacante"));
             postulante.setCorreo(rs.getString("correo"));
+            postulante.setPuntaje_general(rs.getInt("puntaje_general"));
             postulante.setIdiomas(findIdiomasByPostulanteId(rs.getLong("id_postulante")));
             postulante.setEducaciones(findEducacionesByPostulanteId(rs.getLong("id_postulante")));
             postulante.setHabilidades(findHabilidadesByPostulanteId(rs.getLong("id_postulante")));

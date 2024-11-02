@@ -136,7 +136,7 @@
     padding: 30px;
     border-radius: 8px;
     width: 90%;
-    max-width: 600px; /* Aumentar ancho si es necesario */
+    max-width: 800px; /* Aumentar ancho si es necesario */
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     position: relative;
 }
@@ -310,6 +310,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.5em;
+    color: #555;
 }
 
 .close-popup:hover {
@@ -450,8 +452,8 @@
 
 /* Estilos para cada botón de postulante */
 .postulante-button {
-    background-color: #17a2b8; /* Color azul para los botones */
-    color: white;
+    background-color: #28a745; /* Cambiar el fondo a verde */
+    color: white; /* Cambiar el color del texto a blanco para contraste */
     border: none;
     padding: 10px 15px;
     cursor: pointer;
@@ -459,8 +461,343 @@
     text-align: left;
     transition: background-color 0.3s;
     font-size: 16px;
+    text-align: left;
+    width: 100%;
 }
 
 .postulante-button:hover {
-    background-color: #138496; /* Color más oscuro al pasar el cursor */
+    background-color: #218838; /* Verde más oscuro al hover */
+}
+
+/* Estilo para los botones de edición y eliminación en postulantes */
+.postulante-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.postulante-item button {
+    margin-left: 5px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 14px;
+}
+
+.postulante-item button:hover {
+    /* ...existing hover styles if any... */
+}
+
+.postulante-item button:first-of-type {
+    background-color: #ffc107; /* Color para el botón Editar */
+    color: white;
+}
+
+.postulante-item button:first-of-type:hover {
+    background-color: #e0a800; /* Hover para Editar */
+}
+
+.postulante-item button:last-of-type {
+    background-color: #dc3545; /* Color para el botón Eliminar */
+    color: white;
+}
+
+.postulante-item button:last-of-type:hover {
+    background-color: #c82333; /* Hover para Eliminar */
+}
+
+/* Estilo para los botones en los modales de crear y editar postulantes */
+.modal-buttons button {
+    margin: 5px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modal-buttons button[type="submit"] {
+    background-color: #28a745; /* Verde para guardar/crear */
+    color: white;
+}
+
+.modal-buttons button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+.modal-buttons button[type="button"] {
+    background-color: #6c757d; /* Gris para cancelar */
+    color: white;
+}
+
+.modal-buttons button[type="button"]:hover {
+    background-color: #5a6268;
+}
+
+/* Estilos para el modal de detalles del postulante */
+.modal {
+    /* ...existing modal styles... */
+    max-width: 800px; /* Mayor ancho para detalles */
+}
+
+.modal h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+.modal h3 {
+    margin-top: 20px;
+    color: #555;
+}
+
+.modal p, .modal li {
+    color: #444;
+    line-height: 1.6;
+}
+
+.modal ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.close-popup {
+    /* ...existing close-popup styles... */
+    font-size: 1.5em;
+    color: #555;
+}
+
+.postulante-button {
+    /* ...existing postulante-button styles... */
+    text-align: left;
+    width: 100%;
+}
+
+.postulante-button:hover {
+    /* ...existing hover styles... */
+    background-color: #218838; /* Verde más oscuro al hover */
+}
+
+/* Styles for the large modal */
+.modal-large {
+  width: 90%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Container for the two columns */
+.postulante-details-container {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+/* Styles for the info column */
+.postulante-info-column {
+  padding-right: 20px;
+  border-right: 1px solid #ddd;
+}
+
+/* Styles for the evaluation column */
+.evaluation-column {
+  padding-left: 20px;
+}
+
+/* Styles for information sections */
+.info-section {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.info-section h3 {
+  color: #333;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 5px;
+}
+
+/* Styles for education items */
+.education-item {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.education-item:last-child {
+  border-bottom: none;
+}
+
+/* Styles for experience items */
+.experience-item {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.skill-level {
+  color: #666;
+  font-style: italic;
+}
+
+/* Ensure the close button is visible */
+.modal-large .close-popup {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+
+/* Make postulante items clickable */
+.postulante-item span:hover {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+/* Styles for the form sections */
+.form-sections {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 20px;
+}
+
+.form-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.form-section h3 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.array-field {
+  border: 1px solid #dee2e6;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  background: white;
+}
+
+.array-field input,
+.array-field select {
+  margin-bottom: 10px;
+}
+
+.habilidades-experiencia {
+  margin-left: 20px;
+  padding-left: 20px;
+  border-left: 2px solid #dee2e6;
+}
+
+/* Add space between form fields */
+.form-section input + input,
+.form-section input + select,
+.form-section select + input {
+  margin-left: 10px;
+}
+
+/* Style for add buttons */
+.form-section > button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+/* Style for remove buttons */
+.array-field button[type="button"] {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.array-field button[type="button"]:hover {
+  background-color: #c82333;
+}
+
+/* Checkbox styling */
+.array-field label {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.array-field input[type="checkbox"] {
+  margin-right: 5px;
+}
+
+/* Styles for education fields */
+.date-inputs {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+
+.date-field {
+  flex: 1;
+}
+
+.date-field label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+  font-size: 0.9em;
+}
+
+.education-status {
+  margin: 10px 0;
+}
+
+.status-indicator {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.status-indicator.en-curso {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.status-indicator.finalizado {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.array-field .remove-button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* Adjust spacing for education items */
+.array-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.array-field input[type="text"] {
+  margin-bottom: 10px;
 }

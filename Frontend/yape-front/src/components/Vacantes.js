@@ -24,7 +24,14 @@ const Vacantes = () => {
     comentario: '',
     id_puesto: '',
     fecha_fin: '',
-    cantidad: 1  // Add default value for cantidad
+    cantidad: 1,  // Add default value for cantidad
+    nombre: '',
+    correo: '',
+    telefono: '',
+    idiomas: [],
+    educaciones: [],
+    habilidades: [],
+    experienciasLaborales: []
   });
 
   // Add these states near the top of the component
@@ -36,7 +43,15 @@ const Vacantes = () => {
     id_puesto: '',
     fecha_fin: '',
     cantidad: 1,
-    estado: ''
+    estado: '',
+    id_postulante: '',
+    nombre: '',
+    correo: '',
+    telefono: '',
+    idiomas: [],
+    educaciones: [],
+    habilidades: [],
+    experienciasLaborales: []
   });
 
   // Añadir nuevos estados al inicio del componente
@@ -60,6 +75,24 @@ const Vacantes = () => {
   // Nuevo estado para almacenar los postulantes
   const [postulantes, setPostulantes] = useState([]);
   const [showPostulantesModal, setShowPostulantesModal] = useState(false);
+
+  // Nuevo estado para almacenar la vacante seleccionada para detalles
+  const [selectedPostulante, setSelectedPostulante] = useState(null);
+  const [showPostulanteDetailsModal, setShowPostulanteDetailsModal] = useState(false);
+
+  // Nuevos estados para manejar crear y editar postulantes
+  const [isCreatePostulanteModalOpen, setIsCreatePostulanteModalOpen] = useState(false);
+  const [isEditPostulanteModalOpen, setIsEditPostulanteModalOpen] = useState(false);
+  const [editPostulanteData, setEditPostulanteData] = useState({
+    id_postulante: '',
+    nombre: '',
+    correo: '',
+    telefono: '',
+    idiomas: [],
+    educaciones: [],
+    habilidades: [],
+    experienciasLaborales: []
+  });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -219,7 +252,14 @@ const Vacantes = () => {
       comentario: '',
       id_puesto: '',
       fecha_fin: '',
-      cantidad: 1
+      cantidad: 1,
+      nombre: '',
+      correo: '',
+      telefono: '',
+      idiomas: [],
+      educaciones: [],
+      habilidades: [],
+      experienciasLaborales: []
     });
     setSelectedDepartamento('');
     setFilteredPuestos([]);
@@ -276,7 +316,14 @@ const Vacantes = () => {
         comentario: '',
         id_puesto: '',
         fecha_fin: '',
-        cantidad: 1
+        cantidad: 1,
+        nombre: '',
+        correo: '',
+        telefono: '',
+        idiomas: [],
+        educaciones: [],
+        habilidades: [],
+        experienciasLaborales: []
       });
       setIsModalOpen(false);
       setSelectedDepartamento('');
@@ -519,26 +566,41 @@ const Vacantes = () => {
   // Función para obtener los postulantes de una vacante
   const fetchPostulantes = async (vacanteId) => {
     try {
-      // Obtener los IDs de los postulantes para la vacante
-      const responseIds = await fetch(`http://localhost:8080/vacantes/${vacanteId}/postulantes`);
-      if (!responseIds.ok) throw new Error('Error al obtener los IDs de los postulantes');
-      const postulantesIds = await responseIds.json(); // Asumiendo que devuelve un array de IDs
+      // Primero obtener la lista de postulantes de la vacante
+      const response = await fetch(`http://localhost:8080/vacantes/${vacanteId}/postulantes`);
+      if (!response.ok) throw new Error(`Error al obtener los postulantes: ${response.statusText}`);
+      
+      const postulantesBasicos = await response.json();
+      
+      if (!Array.isArray(postulantesBasicos)) {
+        throw new Error('La respuesta no es un array de postulantes');
+      }
 
-      // Obtener los detalles de cada postulante
-      const postulantesPromises = postulantesIds.map(id => 
-        fetch(`http://localhost:8080/api/postulantes/${id}`)
-          .then(res => res.json())
+      // Obtener los detalles completos de cada postulante
+      const postulantesDetallados = await Promise.all(
+        postulantesBasicos.map(async (postulante) => {
+          const detallesResponse = await fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}`);
+          if (!detallesResponse.ok) {
+            console.error(`Error al obtener detalles del postulante ${postulante.id_postulante}`);
+            return postulante;
+          }
+          return await detallesResponse.json();
+        })
       );
-      const postulantesData = await Promise.all(postulantesPromises);
 
       // Ordenar los postulantes por puntaje general de forma descendente
-      postulantesData.sort((a, b) => b.puntaje_general - a.puntaje_general);
+      const postulantesOrdenados = postulantesDetallados.sort((a, b) => {
+        // Si no existe puntaje_general, asignar 0
+        const puntajeA = a.puntaje_general || 0;
+        const puntajeB = b.puntaje_general || 0;
+        return puntajeB - puntajeA;
+      });
 
-      setPostulantes(postulantesData);
+      setPostulantes(postulantesOrdenados);
       setShowPostulantesModal(true);
     } catch (error) {
       console.error('Error al obtener los postulantes:', error);
-      alert('Hubo un error al obtener los postulantes.');
+      alert(`Hubo un error al obtener los postulantes: ${error.message}`);
     }
   };
 
@@ -546,6 +608,160 @@ const Vacantes = () => {
   const handleVerPostulantes = (vacante) => {
     fetchPostulantes(vacante.id_vacante);
     setShowPopup(false);
+  };
+
+  const closePostulanteDetailsModal = () => {
+    setShowPostulanteDetailsModal(false);
+    setSelectedPostulante(null);
+  };
+
+  // Funciones para abrir y cerrar modales
+  const openCreatePostulanteModal = () => setIsCreatePostulanteModalOpen(true);
+  const closeCreatePostulanteModal = () => setIsCreatePostulanteModalOpen(false);
+
+  const openEditPostulanteModal = (postulante) => {
+    setEditPostulanteData(postulante);
+    setIsEditPostulanteModalOpen(true);
+  };
+  const closeEditPostulanteModal = () => setIsEditPostulanteModalOpen(false);
+
+  // Función para crear un nuevo postulante
+  const handleCreatePostulante = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`http://localhost:8080/api/postulantes`, { // Actualizado
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData), // Asegúrate de tener formData definido
+      });
+      if (response.ok) {
+        alert('Postulante creado exitosamente');
+        // Actualizar la lista de postulantes
+        fetchPostulantes(selectedVacante.id_vacante);
+        closeCreatePostulanteModal();
+      }
+    } catch (error) {
+      console.error('Error al crear postulante:', error);
+      alert('Error al crear el postulante');
+    }
+  };
+
+  // Función para editar un postulante
+  const handleEditPostulante = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`http://localhost:8080/api/postulantes/${editPostulanteData.id_postulante}`, { // Actualizado
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editPostulanteData),
+      });
+      if (response.ok) {
+        alert('Postulante actualizado exitosamente');
+        // Actualizar la lista de postulantes
+        fetchPostulantes(selectedVacante.id_vacante);
+        closeEditPostulanteModal();
+      }
+    } catch (error) {
+      console.error('Error al actualizar postulante:', error);
+      alert('Error al actualizar el postulante');
+    }
+  };
+
+  // Función para eliminar un postulante
+  const handleDeletePostulante = async (postulanteId) => {
+    if (window.confirm('¿Está seguro que desea eliminar este postulante?')) {
+      try {
+        const response = await fetch(`http://localhost:8080/api/postulantes/${postulanteId}`, { // Actualizado
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          alert('Postulante eliminado exitosamente');
+          // Actualizar la lista de postulantes
+          fetchPostulantes(selectedVacante.id_vacante);
+        }
+      } catch (error) {
+        console.error('Error al eliminar postulante:', error);
+        alert('Error al eliminar el postulante');
+      }
+    }
+  };
+
+  // También actualizar cuando se selecciona un postulante para ver detalles
+  const handlePostulanteClick = async (postulante) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}`);
+      if (!response.ok) throw new Error('Error al obtener los detalles del postulante');
+      
+      const detallesPostulante = await response.json();
+      setSelectedPostulante(detallesPostulante);
+      setShowPostulanteDetailsModal(true);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al obtener los detalles del postulante');
+    }
+  };
+
+  // Función auxiliar para manejar arrays en los forms
+  const handleArrayFieldChange = (fieldName, index, value, formSetter, currentData) => {
+    const newArray = [...(currentData[fieldName] || [])];
+    newArray[index] = { ...newArray[index], ...value };
+    formSetter({ ...currentData, [fieldName]: newArray });
+  };
+
+  // Función para agregar nuevo elemento a un array
+  const handleAddArrayField = (fieldName, formSetter, currentData) => {
+    const newField = {};
+    switch (fieldName) {
+      case 'idiomas':
+        newField.nombre = '';
+        break;
+      case 'educaciones':
+        newField.titulo = '';
+        newField.institucion = '';
+        newField.fecha_inicio = '';
+        newField.fecha_fin = '';
+        newField.en_curso = false;
+        break;
+      case 'habilidades':
+        newField.nombre = '';
+        newField.nivel = 'Básico';
+        break;
+      case 'experienciasLaborales':
+        newField.puesto = '';
+        newField.empresa = '';
+        newField.fecha_inicio = '';
+        newField.fecha_fin = '';
+        newField.habilidades = [];
+        break;
+      default:
+        console.warn(`Campo no reconocido: ${fieldName}`);
+        break;
+    }
+    formSetter({
+      ...currentData,
+      [fieldName]: [...(currentData[fieldName] || []), newField]
+    });
+  };
+
+  // Función para eliminar elemento de un array
+  const handleRemoveArrayField = (fieldName, index, formSetter, currentData) => {
+    const newArray = currentData[fieldName].filter((_, i) => i !== index);
+    formSetter({ ...currentData, [fieldName]: newArray });
+  };
+
+  // Agregar esta función auxiliar
+  const isEnCurso = (fecha_fin) => {
+    if (!fecha_fin) return true;
+    const today = new Date();
+    const endDate = new Date(fecha_fin);
+    return endDate > today;
   };
 
   return (
@@ -701,7 +917,7 @@ const Vacantes = () => {
 
         {/* Contenido principal de Vacantes con scroll */}
         <div className="vacantes-list">
-          {Object.keys(groupedPuestos).map((id_puesto) => (
+          {Object.keys(groupedPuestos || {}).map((id_puesto) => (
             <div 
               key={id_puesto} 
               className="vacante"
@@ -850,7 +1066,7 @@ const Vacantes = () => {
                       </option>
                     ))}
                   </select>
-                </label>
+                </label>  
                 <label>
                   Cantidad de vacantes:
                   <input
@@ -1010,21 +1226,561 @@ const Vacantes = () => {
           <div className="modal-overlay" onClick={() => setShowPostulantesModal(false)}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
               <h2>Postulantes</h2>
+              <button onClick={openCreatePostulanteModal}>Crear Postulante</button>
               <div className="postulantes-list">
-                {postulantes.map(postulante => (
-                  <button key={postulante.id_postulante} className="postulante-button">
-                    {postulante.nombre}
-                  </button>
+                {(postulantes || []).map(postulante => (
+                  <div key={postulante.id_postulante} className="postulante-item">
+                    <span 
+                      onClick={() => handlePostulanteClick(postulante)}
+                      style={{ cursor: 'pointer', flex: 1 }}
+                    >
+                      {postulante.nombre}
+                    </span>
+                    <button onClick={() => openEditPostulanteModal(postulante)}>Editar</button>
+                    <button onClick={() => handleDeletePostulante(postulante.id_postulante)}>Eliminar</button>
+                  </div>
                 ))}
               </div>
               <div className="modal-buttons">
                 <button type="button" onClick={() => setShowPostulantesModal(false)}>
+                  Volver
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Update the postulante details modal */}
+        {showPostulanteDetailsModal && selectedPostulante && (
+          <div className="modal-overlay" onClick={closePostulanteDetailsModal}>
+            <div className="modal modal-large" onClick={(e) => e.stopPropagation()}>
+              <button className="close-popup" onClick={closePostulanteDetailsModal}>&times;</button>
+              
+              <div className="postulante-details-container">
+                {/* Column 1: Postulante Information */}
+                <div className="postulante-info-column">
+                  <h2>Información del Postulante</h2>
+                  
+                  <div className="info-section">
+                    <h3>Datos Personales</h3>
+                    <p><strong>Nombre:</strong> {selectedPostulante.nombre}</p>
+                    <p><strong>Teléfono:</strong> {selectedPostulante.telefono}</p>
+                    <p><strong>Correo:</strong> {selectedPostulante.correo}</p>
+                  </div>
+
+                  <div className="info-section">
+                    <h3>Idiomas</h3>
+                    <ul>
+                      {(selectedPostulante.idiomas || []).map(idioma => (
+                        <li key={idioma.id_idioma}>{idioma.nombre}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="info-section">
+                    <h3>Educación</h3>
+                    {(selectedPostulante.educaciones || []).map(educacion => (
+                      <div key={educacion.id_educacion} className="education-item">
+                        <p><strong>{educacion.titulo}</strong></p>
+                        <p>{educacion.institucion}</p>
+                        <p>{educacion.fecha_inicio} - {educacion.en_curso ? 'En curso' : educacion.fecha_fin}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="info-section">
+                    <h3>Habilidades</h3>
+                    <ul>
+                      {(selectedPostulante.habilidades || []).map(habilidad => (
+                        <li key={habilidad.id_habilidad_postulante}>
+                          {habilidad.nombre} - <span className="skill-level">{habilidad.nivel}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="info-section">
+                    <h3>Experiencia Laboral</h3>
+                    {(selectedPostulante.experienciasLaborales || []).map(experiencia => (
+                      <div key={experiencia.id_experiencia} className="experience-item">
+                        <p><strong>{experiencia.puesto}</strong> en {experiencia.empresa}</p>
+                        <p>{experiencia.fecha_inicio} - {experiencia.fecha_fin}</p>
+                        <p><strong>Habilidades desarrolladas:</strong></p>
+                        <ul>
+                          {(experiencia.habilidades || []).map(habilidad => (
+                            <li key={habilidad.id_habilidad_experiencia}>{habilidad.nombre}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Column 2: Evaluation Section (to be implemented) */}
+                <div className="evaluation-column">
+                  <h2>Evaluación</h2>
+                  <p>Puntaje General: {selectedPostulante.puntaje_general}</p>
+                  {/* Add evaluation content here */}
+                </div>
+              </div>
+
+              <div className="modal-buttons">
+                <button type="button" onClick={closePostulanteDetailsModal}>
                   Cerrar
                 </button>
               </div>
             </div>
           </div>
         )}
+
+        {/* Modal para crear postulante */}
+        {isCreatePostulanteModalOpen && (
+          <div className="modal-overlay">
+            <div className="modal modal-large">
+              <h2>Crear Nuevo Postulante</h2>
+              <form onSubmit={handleCreatePostulante}>
+                <div className="form-sections">
+                  <div className="form-section">
+                    <h3>Datos Personales</h3>
+                    <label>
+                      Nombre:
+                      <input
+                        type="text"
+                        name="nombre"
+                        value={formData.nombre}
+                        onChange={handleChange}
+                        required
+                      />
+                    </label>
+                    <label>
+                      Correo:
+                      <input
+                        type="email"
+                        name="correo"
+                        value={formData.correo}
+                        onChange={handleChange}
+                        required
+                      />
+                    </label>
+                    <label>
+                      Teléfono:
+                      <input
+                        type="text"
+                        name="telefono"
+                        value={formData.telefono}
+                        onChange={handleChange}
+                        required
+                      />
+                    </label>
+                  </div>
+
+                  <div className="form-section">
+                    <h3>Idiomas</h3>
+                    {formData.idiomas.map((idioma, index) => (
+                      <div key={index} className="array-field">
+                        <input
+                          type="text"
+                          value={idioma.nombre}
+                          onChange={(e) => handleArrayFieldChange('idiomas', index, { nombre: e.target.value }, setFormData, formData)}
+                          placeholder="Nombre del idioma"
+                        />
+                        <button type="button" onClick={() => handleRemoveArrayField('idiomas', index, setFormData, formData)}>
+                          Eliminar
+                        </button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => handleAddArrayField('idiomas', setFormData, formData)}>
+                      Agregar Idioma
+                    </button>
+                  </div>
+
+                  <div className="form-section">
+                    <h3>Educación</h3>
+                    {formData.educaciones.map((educacion, index) => (
+                      <div key={index} className="array-field">
+                        <input
+                          type="text"
+                          value={educacion.titulo}
+                          onChange={(e) => handleArrayFieldChange('educaciones', index, { titulo: e.target.value }, setFormData, formData)}
+                          placeholder="Título"
+                        />
+                        <input
+                          type="text"
+                          value={educacion.institucion}
+                          onChange={(e) => handleArrayFieldChange('educaciones', index, { institucion: e.target.value }, setFormData, formData)}
+                          placeholder="Institución"
+                        />
+                        <div className="date-inputs">
+                          <div className="date-field">
+                            <label>Fecha de inicio:</label>
+                            <input
+                              type="date"
+                              value={educacion.fecha_inicio}
+                              onChange={(e) => handleArrayFieldChange('educaciones', index, { 
+                                fecha_inicio: e.target.value,
+                                en_curso: isEnCurso(educacion.fecha_fin)
+                              }, setFormData, formData)}
+                            />
+                          </div>
+                          <div className="date-field">
+                            <label>Fecha de fin:</label>
+                            <input
+                              type="date"
+                              value={educacion.fecha_fin}
+                              onChange={(e) => handleArrayFieldChange('educaciones', index, { 
+                                fecha_fin: e.target.value,
+                                en_curso: isEnCurso(e.target.value)
+                              }, setFormData, formData)}
+                            />
+                          </div>
+                        </div>
+                        <div className="education-status">
+                          <span className={`status-indicator ${educacion.en_curso ? 'en-curso' : 'finalizado'}`}>
+                            {educacion.en_curso ? 'En curso' : 'Finalizado'}
+                          </span>
+                        </div>
+                        <button 
+                          type="button" 
+                          className="remove-button"
+                          onClick={() => handleRemoveArrayField('educaciones', index, setFormData, formData)}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => handleAddArrayField('educaciones', setFormData, formData)}>
+                      Agregar Educación
+                    </button>
+                  </div>
+
+                  <div className="form-section">
+                    <h3>Habilidades</h3>
+                    {formData.habilidades.map((habilidad, index) => (
+                      <div key={index} className="array-field">
+                        <input
+                          type="text"
+                          value={habilidad.nombre}
+                          onChange={(e) => handleArrayFieldChange('habilidades', index, { nombre: e.target.value }, setFormData, formData)}
+                          placeholder="Nombre de la habilidad"
+                        />
+                        <select
+                          value={habilidad.nivel}
+                          onChange={(e) => handleArrayFieldChange('habilidades', index, { nivel: e.target.value }, setFormData, formData)}
+                        >
+                          <option value="Básico">Básico</option>
+                          <option value="Intermedio">Intermedio</option>
+                          <option value="Avanzado">Avanzado</option>
+                        </select>
+                        <button type="button" onClick={() => handleRemoveArrayField('habilidades', index, setFormData, formData)}>
+                          Eliminar
+                        </button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => handleAddArrayField('habilidades', setFormData, formData)}>
+                      Agregar Habilidad
+                    </button>
+                  </div>
+
+                  <div className="form-section">
+                    <h3>Experiencia Laboral</h3>
+                    {formData.experienciasLaborales.map((experiencia, index) => (
+                      <div key={index} className="array-field">
+                        <input
+                          type="text"
+                          value={experiencia.puesto}
+                          onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { puesto: e.target.value }, setFormData, formData)}
+                          placeholder="Puesto"
+                        />
+                        <input
+                          type="text"
+                          value={experiencia.empresa}
+                          onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { empresa: e.target.value }, setFormData, formData)}
+                          placeholder="Empresa"
+                        />
+                        <input
+                          type="date"
+                          value={experiencia.fecha_inicio}
+                          onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { fecha_inicio: e.target.value }, setFormData, formData)}
+                        />
+                        <input
+                          type="date"
+                          value={experiencia.fecha_fin}
+                          onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { fecha_fin: e.target.value }, setFormData, formData)}
+                        />
+                        <div className="habilidades-experiencia">
+                          {experiencia.habilidades?.map((habilidad, habIndex) => (
+                            <div key={habIndex}>
+                              <input
+                                type="text"
+                                value={habilidad.nombre}
+                                onChange={(e) => {
+                                  const newHabilidades = [...experiencia.habilidades];
+                                  newHabilidades[habIndex] = { ...habilidad, nombre: e.target.value };
+                                  handleArrayFieldChange('experienciasLaborales', index, { habilidades: newHabilidades }, setFormData, formData);
+                                }}
+                                placeholder="Habilidad"
+                              />
+                              <button type="button" onClick={() => {
+                                const newHabilidades = experiencia.habilidades.filter((_, i) => i !== habIndex);
+                                handleArrayFieldChange('experienciasLaborales', index, { habilidades: newHabilidades }, setFormData, formData);
+                              }}>
+                                Eliminar Habilidad
+                              </button>
+                            </div>
+                          ))}
+                          <button type="button" onClick={() => {
+                            const newHabilidades = [...(experiencia.habilidades || []), { nombre: '' }];
+                            handleArrayFieldChange('experienciasLaborales', index, { habilidades: newHabilidades }, setFormData, formData);
+                          }}>
+                            Agregar Habilidad
+                          </button>
+                        </div>
+                        <button type="button" onClick={() => handleRemoveArrayField('experienciasLaborales', index, setFormData, formData)}>
+                          Eliminar Experiencia
+                        </button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => handleAddArrayField('experienciasLaborales', setFormData, formData)}>
+                      Agregar Experiencia Laboral
+                    </button>
+                  </div>
+                </div>
+
+                <div className="modal-buttons">
+                  <button type="submit">Crear</button>
+                  <button type="button" onClick={closeCreatePostulanteModal}>
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal para editar postulante */}
+        {isEditPostulanteModalOpen && (
+          <div className="modal-overlay">
+            <div className="modal modal-large">
+              <h2>Editar Postulante</h2>
+              <form onSubmit={handleEditPostulante}>
+                <div className="form-sections">
+                  <div className="form-section">
+                    <h3>Datos Personales</h3>
+                    <label>
+                      Nombre:
+                      <input
+                        type="text"
+                        name="nombre"
+                        value={editPostulanteData.nombre}
+                        onChange={(e) => setEditPostulanteData({ ...editPostulanteData, nombre: e.target.value })}
+                        required
+                      />
+                    </label>
+                    <label>
+                      Correo:
+                      <input
+                        type="email"
+                        name="correo"
+                        value={editPostulanteData.correo}
+                        onChange={(e) => setEditPostulanteData({ ...editPostulanteData, correo: e.target.value })}
+                        required
+                      />
+                    </label>
+                    <label>
+                      Teléfono:
+                      <input
+                        type="text"
+                        name="telefono"
+                        value={editPostulanteData.telefono}
+                        onChange={(e) => setEditPostulanteData({ ...editPostulanteData, telefono: e.target.value })}
+                        required
+                      />
+                    </label>
+                  </div>
+
+                  <div className="form-section">
+                    <h3>Idiomas</h3>
+                    {editPostulanteData.idiomas.map((idioma, index) => (
+                      <div key={index} className="array-field">
+                        <input
+                          type="text"
+                          value={idioma.nombre}
+                          onChange={(e) => handleArrayFieldChange('idiomas', index, { nombre: e.target.value }, setEditPostulanteData, editPostulanteData)}
+                          placeholder="Nombre del idioma"
+                        />
+                        <button type="button" onClick={() => handleRemoveArrayField('idiomas', index, setEditPostulanteData, editPostulanteData)}>
+                          Eliminar
+                        </button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => handleAddArrayField('idiomas', setEditPostulanteData, editPostulanteData)}>
+                      Agregar Idioma
+                    </button>
+                  </div>
+
+                  <div className="form-section">
+                    <h3>Educación</h3>
+                    {editPostulanteData.educaciones.map((educacion, index) => (
+                      <div key={index} className="array-field">
+                        <input
+                          type="text"
+                          value={educacion.titulo}
+                          onChange={(e) => handleArrayFieldChange('educaciones', index, { titulo: e.target.value }, setEditPostulanteData, editPostulanteData)}
+                          placeholder="Título"
+                        />
+                        <input
+                          type="text"
+                          value={educacion.institucion}
+                          onChange={(e) => handleArrayFieldChange('educaciones', index, { institucion: e.target.value }, setEditPostulanteData, editPostulanteData)}
+                          placeholder="Institución"
+                        />
+                        <div className="date-inputs">
+                          <div className="date-field">
+                            <label>Fecha de inicio:</label>
+                            <input
+                              type="date"
+                              value={educacion.fecha_inicio}
+                              onChange={(e) => handleArrayFieldChange('educaciones', index, { 
+                                fecha_inicio: e.target.value,
+                                en_curso: isEnCurso(educacion.fecha_fin)
+                              }, setEditPostulanteData, editPostulanteData)}
+                            />
+                          </div>
+                          <div className="date-field">
+                            <label>Fecha de fin:</label>
+                            <input
+                              type="date"
+                              value={educacion.fecha_fin}
+                              onChange={(e) => handleArrayFieldChange('educaciones', index, { 
+                                fecha_fin: e.target.value,
+                                en_curso: isEnCurso(e.target.value)
+                              }, setEditPostulanteData, editPostulanteData)}
+                            />
+                          </div>
+                        </div>
+                        <div className="education-status">
+                          <span className={`status-indicator ${educacion.en_curso ? 'en-curso' : 'finalizado'}`}>
+                            {educacion.en_curso ? 'En curso' : 'Finalizado'}
+                          </span>
+                        </div>
+                        <button 
+                          type="button" 
+                          className="remove-button"
+                          onClick={() => handleRemoveArrayField('educaciones', index, setEditPostulanteData, editPostulanteData)}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => handleAddArrayField('educaciones', setEditPostulanteData, editPostulanteData)}>
+                      Agregar Educación
+                    </button>
+                  </div>
+
+                  <div className="form-section">
+                    <h3>Habilidades</h3>
+                    {editPostulanteData.habilidades.map((habilidad, index) => (
+                      <div key={index} className="array-field">
+                        <input
+                          type="text"
+                          value={habilidad.nombre}
+                          onChange={(e) => handleArrayFieldChange('habilidades', index, { nombre: e.target.value }, setEditPostulanteData, editPostulanteData)}
+                          placeholder="Nombre de la habilidad"
+                        />
+                        <select
+                          value={habilidad.nivel}
+                          onChange={(e) => handleArrayFieldChange('habilidades', index, { nivel: e.target.value }, setEditPostulanteData, editPostulanteData)}
+                        >
+                          <option value="Básico">Básico</option>
+                          <option value="Intermedio">Intermedio</option>
+                          <option value="Avanzado">Avanzado</option>
+                        </select>
+                        <button type="button" onClick={() => handleRemoveArrayField('habilidades', index, setEditPostulanteData, editPostulanteData)}>
+                          Eliminar
+                        </button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => handleAddArrayField('habilidades', setEditPostulanteData, editPostulanteData)}>
+                      Agregar Habilidad
+                    </button>
+                  </div>
+
+                  <div className="form-section">
+                    <h3>Experiencia Laboral</h3>
+                    {editPostulanteData.experienciasLaborales.map((experiencia, index) => (
+                      <div key={index} className="array-field">
+                        <input
+                          type="text"
+                          value={experiencia.puesto}
+                          onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { puesto: e.target.value }, setEditPostulanteData, editPostulanteData)}
+                          placeholder="Puesto"
+                        />
+                        <input
+                          type="text"
+                          value={experiencia.empresa}
+                          onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { empresa: e.target.value }, setEditPostulanteData, editPostulanteData)}
+                          placeholder="Empresa"
+                        />
+                        <input
+                          type="date"
+                          value={experiencia.fecha_inicio}
+                          onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { fecha_inicio: e.target.value }, setEditPostulanteData, editPostulanteData)}
+                        />
+                        <input
+                          type="date"
+                          value={experiencia.fecha_fin}
+                          onChange={(e) => handleArrayFieldChange('experienciasLaborales', index, { fecha_fin: e.target.value }, setEditPostulanteData, editPostulanteData)}
+                        />
+                        <div className="habilidades-experiencia">
+                          {experiencia.habilidades?.map((habilidad, habIndex) => (
+                            <div key={habIndex}>
+                              <input
+                                type="text"
+                                value={habilidad.nombre}
+                                onChange={(e) => {
+                                  const newHabilidades = [...experiencia.habilidades];
+                                  newHabilidades[habIndex] = { ...habilidad, nombre: e.target.value };
+                                  handleArrayFieldChange('experienciasLaborales', index, { habilidades: newHabilidades }, setEditPostulanteData, editPostulanteData);
+                                }}
+                                placeholder="Habilidad"
+                              />
+                              <button type="button" onClick={() => {
+                                const newHabilidades = experiencia.habilidades.filter((_, i) => i !== habIndex);
+                                handleArrayFieldChange('experienciasLaborales', index, { habilidades: newHabilidades }, setEditPostulanteData, editPostulanteData);
+                              }}>
+                                Eliminar Habilidad
+                              </button>
+                            </div>
+                          ))}
+                          <button type="button" onClick={() => {
+                            const newHabilidades = [...(experiencia.habilidades || []), { nombre: '' }];
+                            handleArrayFieldChange('experienciasLaborales', index, { habilidades: newHabilidades }, setEditPostulanteData, editPostulanteData);
+                          }}>
+                            Agregar Habilidad
+                          </button>
+                        </div>
+                        <button type="button" onClick={() => handleRemoveArrayField('experienciasLaborales', index, setEditPostulanteData, editPostulanteData)}>
+                          Eliminar Experiencia
+                        </button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => handleAddArrayField('experienciasLaborales', setEditPostulanteData, editPostulanteData)}>
+                      Agregar Experiencia Laboral
+                    </button>
+                  </div>
+                </div>
+
+                <div className="modal-buttons">
+                  <button type="submit">Guardar</button>
+                  <button type="button" onClick={closeEditPostulanteModal}>
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
       </main>
     </div>
   );
