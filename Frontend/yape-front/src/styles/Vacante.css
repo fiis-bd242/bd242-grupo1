@@ -488,10 +488,6 @@
     font-size: 14px;
 }
 
-.postulante-item button:hover {
-    /* ...existing hover styles if any... */
-}
-
 .postulante-item button:first-of-type {
     background-color: #ffc107; /* Color para el botón Editar */
     color: white;
