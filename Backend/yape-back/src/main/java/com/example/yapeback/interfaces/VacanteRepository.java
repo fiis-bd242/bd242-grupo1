@@ -12,6 +12,7 @@ public interface VacanteRepository {
     Vacante save(Vacante vacante);
     void deleteById(Long id);
     void deleteConvocatoriaById(Long id);
+
     void deleteConvocatoriaByVacanteId(Long idVacante, Long idConvocatoria);
     Convocatoria saveConvocatoria(Convocatoria convocatoria);
     List<Postulante> findPostulantesByVacanteId(Long idVacante);

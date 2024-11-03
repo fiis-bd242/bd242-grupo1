@@ -6,10 +6,13 @@ import com.example.yapeback.interfaces.PostulanteRepository;
 import com.example.yapeback.interfaces.VacanteRepository;
 import com.example.yapeback.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.yapeback.repository.EntrevistaWithFeedbackRowMapper;
 
 import java.util.List;
+import java.util.Collections;
 
 @Service
 public class PostulanteService {
@@ -17,30 +20,37 @@ public class PostulanteService {
     private final PostulanteRepository postulanteRepository;
     private final EmpleadoRepository empleadoRepository;
     private final VacanteRepository vacanteRepository;
+    private final JdbcTemplate jdbcTemplate; // Añade este campo
 
     @Autowired
     public PostulanteService(PostulanteRepository postulanteRepository,
                              EmpleadoRepository empleadoRepository,
-                             VacanteRepository vacanteRepository) {
+                             VacanteRepository vacanteRepository,
+                             JdbcTemplate jdbcTemplate) { // Añade JdbcTemplate en el constructor
         this.postulanteRepository = postulanteRepository;
         this.empleadoRepository = empleadoRepository;
         this.vacanteRepository = vacanteRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public List<Empleado> getAllEmpleados() {
-        return empleadoRepository.findAll();
+        List<Empleado> empleados = empleadoRepository.findAll();
+        return empleados != null ? empleados : Collections.emptyList();
     }
 
     public List<Feedback> findFeedbacksByPostulanteId(Long idPostulante) {
-        return postulanteRepository.findFeedbacksByPostulanteId(idPostulante);
+        List<Feedback> feedbacks = postulanteRepository.findFeedbacksByPostulanteId(idPostulante);
+        return feedbacks != null ? feedbacks : Collections.emptyList();
     }
 
     public List<Postulante> findAll() {
-        return postulanteRepository.findAll();
+        List<Postulante> postulantes = postulanteRepository.findAll();
+        return postulantes != null ? postulantes : Collections.emptyList();
     }
 
     public Postulante findById(Long id) {
-        return postulanteRepository.findById(id);
+        Postulante postulante = postulanteRepository.findById(id);
+        return postulante != null ? postulante : new Postulante();
     }
 
     public Postulante save(Postulante postulante) {
@@ -93,7 +103,9 @@ public class PostulanteService {
         List<Feedback> feedbacks = postulanteRepository.findFeedbacksByPostulanteId(id);
         StringBuilder summary = new StringBuilder();
         for (Feedback feedback : feedbacks) {
-            summary.append(feedback.getDescripcion()).append(" ");
+            for (Observacion observacion : feedback.getObservaciones()) {
+                summary.append(observacion.getDescripcion()).append(" ");
+            }
         }
 
         return "Excelente candidato: " + summary.toString().trim();
@@ -129,15 +141,18 @@ public class PostulanteService {
     }
 
     public List<Entrevista> findEntrevistasHechasByPostulanteId(Long idPostulante) {
-        return postulanteRepository.findEntrevistasWithFeedbackByPostulanteId(idPostulante);
+        List<Entrevista> entrevistas = postulanteRepository.findEntrevistasWithFeedbackByPostulanteId(idPostulante);
+        return entrevistas != null ? entrevistas : Collections.emptyList();
     }
 
     public List<TipoEntrevista> findAllTiposEntrevista() {
-        return postulanteRepository.findAllTiposEntrevista();
+        List<TipoEntrevista> tiposEntrevista = postulanteRepository.findAllTiposEntrevista();
+        return tiposEntrevista != null ? tiposEntrevista : Collections.emptyList();
     }
 
     public List<EntrevistaIndicador> findIndicadoresByEntrevistaId(Long id) {
-        return postulanteRepository.findIndicadoresByEntrevistaId(id);
+        List<EntrevistaIndicador> indicadores = postulanteRepository.findIndicadoresByEntrevistaId(id);
+        return indicadores != null ? indicadores : Collections.emptyList();
     }
 
     public Entrevista createEntrevistaWithIndicadores(Entrevista entrevista) {
@@ -153,6 +168,15 @@ public class PostulanteService {
     }
 
     public List<Entrevista> findEntrevistasByPostulanteId(Long idPostulante) {
-        return postulanteRepository.findEntrevistasByPostulanteId(idPostulante);
+        List<Entrevista> entrevistas = postulanteRepository.findEntrevistasByPostulanteId(idPostulante);
+        return entrevistas != null ? entrevistas : Collections.emptyList();
+    }
+
+    public List<Entrevista> findEntrevistasWithFeedbackByPostulanteId(Long postulanteId) {
+        String sql = "SELECT e.*, f.fecha AS feedback_fecha FROM Entrevista e " +
+                "JOIN Feedback f ON e.id_feedback = f.id_feedback " +
+                "WHERE e.id_postulante = ?";
+        List<Entrevista> entrevistas = jdbcTemplate.query(sql, new Object[]{postulanteId}, new EntrevistaWithFeedbackRowMapper(postulanteRepository));
+        return entrevistas != null ? entrevistas : Collections.emptyList();
     }
 }

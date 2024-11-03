@@ -10,7 +10,12 @@ public class FeedbackRowMapper implements RowMapper<Feedback> {
     public Feedback mapRow(ResultSet rs, int rowNum) throws SQLException {
         Feedback feedback = new Feedback();
         feedback.setId_feedback(rs.getLong("id_feedback"));
-        feedback.setFecha(rs.getDate("fecha"));
+
+        java.sql.Date sqlDate = rs.getDate("fecha");
+        if (sqlDate != null) {
+            feedback.setFecha(sqlDate.toLocalDate());
+        }
+
         // Map other necessary fields
         return feedback;
     }

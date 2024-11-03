@@ -19,7 +19,7 @@ public interface PostulanteRepository {
     void saveExperiencia(Long idPostulante, ExperienciaLaboral experiencia);
     void deleteExperienciasByPostulanteId(Long idPostulante);
     List<Educacion> findEducacionesByPostulanteId(Long idPostulante);
-    List<Habilidad> findHabilidadesByPostulanteId(Long idPostulante); // Add this method
+    List<Habilidad> findHabilidadesByPostulanteId(Long idPostulante);
     Feedback findFeedbackByEntrevistaId(Long idEntrevista);
     Feedback saveFeedback(Feedback feedback);
     void actualizarPuntajeGeneral(Long idEntrevista);
@@ -30,17 +30,16 @@ public interface PostulanteRepository {
     List<Entrevista> findEntrevistasByPostulanteId(Long idPostulante);
     List<Entrevista> findEntrevistasWithFeedbackByPostulanteId(Long idPostulante);
 
-    // Agregar estos métodos
+    // Métodos adicionales
     List<Feedback> findFeedbacksByPostulanteId(Long idPostulante);
     Long saveIdiomaAndGetId(String nombre);
     Long saveHabilidadExperienciaAndGetId(String nombre, Long idExperiencia);
     Long saveExperienciaAndGetId(Long idPostulante, ExperienciaLaboral experiencia);
 
-    // Add these methods to the interface
+    // Métodos para indicadores de entrevistas
     List<TipoEntrevista> findAllTiposEntrevista();
     List<EntrevistaIndicador> findIndicadoresByEntrevistaId(Long id);
     Entrevista saveEntrevistaWithIndicadores(Entrevista entrevista);
     Entrevista updateEntrevista(Long id, EntrevistaUpdateDTO dto);
-
     void updateIndicadoresEntrevista(Long id, List<EntrevistaIndicador> indicadores);
 }
