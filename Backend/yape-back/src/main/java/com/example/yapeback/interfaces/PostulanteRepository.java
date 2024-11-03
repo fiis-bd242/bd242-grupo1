@@ -8,6 +8,7 @@ public interface PostulanteRepository {
     Postulante findById(Long id);
     Postulante save(Postulante postulante);
     void deleteById(Long id);
+    TipoEntrevista findTipoEntrevistaById(Long id);
     List<Idioma> findIdiomasByPostulanteId(Long idPostulante);
     void saveIdioma(Long idPostulante, Idioma idioma);
     void deleteIdiomasByPostulanteId(Long idPostulante);
@@ -34,4 +35,12 @@ public interface PostulanteRepository {
     Long saveIdiomaAndGetId(String nombre);
     Long saveHabilidadExperienciaAndGetId(String nombre, Long idExperiencia);
     Long saveExperienciaAndGetId(Long idPostulante, ExperienciaLaboral experiencia);
+
+    // Add these methods to the interface
+    List<TipoEntrevista> findAllTiposEntrevista();
+    List<EntrevistaIndicador> findIndicadoresByEntrevistaId(Long id);
+    Entrevista saveEntrevistaWithIndicadores(Entrevista entrevista);
+    Entrevista updateEntrevista(Long id, EntrevistaUpdateDTO dto);
+
+    void updateIndicadoresEntrevista(Long id, List<EntrevistaIndicador> indicadores);
 }

@@ -119,12 +119,51 @@ public class VacanteRepositoryImpl implements VacanteRepository {
 
     @Override
     public void deleteById(Long id) {
-        String deleteConvocatoriasSql = "DELETE FROM convocatoria WHERE id_vacante = ?";
-        jdbcTemplate.update(deleteConvocatoriasSql, id);
+        // Delete related records in the habilidad_experiencia table
+        String deleteHabilidadExperienciaSql = "DELETE FROM habilidad_experiencia WHERE id_experiencia IN (SELECT id_experiencia FROM experiencia_laboral WHERE id_postulante IN (SELECT id_postulante FROM postulante WHERE id_vacante = ?))";
+        jdbcTemplate.update(deleteHabilidadExperienciaSql, id);
 
+        // Delete related records in the experiencia_laboral table
+        String deleteExperienciasSql = "DELETE FROM experiencia_laboral WHERE id_postulante IN (SELECT id_postulante FROM postulante WHERE id_vacante = ?)";
+        jdbcTemplate.update(deleteExperienciasSql, id);
+
+        // Delete related records in the educacion table
+        String deleteEducacionesSql = "DELETE FROM educacion WHERE id_postulante IN (SELECT id_postulante FROM postulante WHERE id_vacante = ?)";
+        jdbcTemplate.update(deleteEducacionesSql, id);
+
+        // Delete related records in the idioma_postulante table
+        String deleteIdiomasSql = "DELETE FROM idioma_postulante WHERE id_postulante IN (SELECT id_postulante FROM postulante WHERE id_vacante = ?)";
+        jdbcTemplate.update(deleteIdiomasSql, id);
+
+        // Delete related records in the habilidad_postulante table
+        String deleteHabilidadesSql = "DELETE FROM habilidad_postulante WHERE id_postulante IN (SELECT id_postulante FROM postulante WHERE id_vacante = ?)";
+        jdbcTemplate.update(deleteHabilidadesSql, id);
+
+        // Delete related records in the puntaje_indicador table
+        String deletePuntajeIndicadorSql = "DELETE FROM puntaje_indicador WHERE id_entrevista IN (SELECT id_entrevista FROM entrevista WHERE id_postulante IN (SELECT id_postulante FROM postulante WHERE id_vacante = ?))";
+        jdbcTemplate.update(deletePuntajeIndicadorSql, id);
+
+        // Delete related records in the entrevista table
+        String deleteEntrevistasSql = "DELETE FROM entrevista WHERE id_postulante IN (SELECT id_postulante FROM postulante WHERE id_vacante = ?)";
+        jdbcTemplate.update(deleteEntrevistasSql, id);
+
+        // Delete related records in the oferta_laboral_beneficio table
+        String deleteOfertaLaboralBeneficioSql = "DELETE FROM oferta_laboral_beneficio WHERE id_oferta IN (SELECT id_oferta FROM oferta_laboral WHERE id_postulante IN (SELECT id_postulante FROM postulante WHERE id_vacante = ?))";
+        jdbcTemplate.update(deleteOfertaLaboralBeneficioSql, id);
+
+        // Delete related records in the oferta_laboral table
+        String deleteOfertasSql = "DELETE FROM oferta_laboral WHERE id_postulante IN (SELECT id_postulante FROM postulante WHERE id_vacante = ?)";
+        jdbcTemplate.update(deleteOfertasSql, id);
+
+        // Delete related records in the postulante table
         String deletePostulantesSql = "DELETE FROM postulante WHERE id_vacante = ?";
         jdbcTemplate.update(deletePostulantesSql, id);
 
+        // Delete related records in the convocatoria table
+        String deleteConvocatoriasSql = "DELETE FROM convocatoria WHERE id_vacante = ?";
+        jdbcTemplate.update(deleteConvocatoriasSql, id);
+
+        // Finally, delete the vacante
         String deleteVacanteSql = "DELETE FROM vacante WHERE id_vacante = ?";
         jdbcTemplate.update(deleteVacanteSql, id);
     }
