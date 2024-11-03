@@ -10,19 +10,17 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.time.LocalDate;
 
 @Repository
 public class PostulanteRepositoryImpl implements PostulanteRepository {
 
+    private final JdbcTemplate jdbcTemplate;
+
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    public PostulanteRepositoryImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     @Override
     public List<Postulante> findAll() {
@@ -124,14 +122,11 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
 
     @Override
     public void saveIdioma(Long idPostulante, Idioma idioma) {
-        // Si no existe el idioma, crearlo
         if (idioma.getId_idioma() == null) {
             String sqlIdioma = "INSERT INTO idioma (nombre) VALUES (?) RETURNING id_idioma";
             Long idIdioma = jdbcTemplate.queryForObject(sqlIdioma, Long.class, idioma.getNombre());
             idioma.setId_idioma(idIdioma);
         }
-        
-        // Crear la relación idioma_postulante
         String sql = "INSERT INTO idioma_postulante (id_postulante, id_idioma) VALUES (?, ?)";
         jdbcTemplate.update(sql, idPostulante, idioma.getId_idioma());
     }
@@ -394,7 +389,9 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
 
     @Override
     public List<Observacion> findObservacionesByFeedbackId(Long idFeedback) {
-        String sql = "SELECT * FROM observacion WHERE id_feedback = ?";
+        String sql = "SELECT o.*, co.nombre AS categoria_nombre FROM observacion o " +
+                     "LEFT JOIN Categoria_Observacion co ON o.id_categoria = co.id_categoria " +
+                     "WHERE o.id_feedback = ?";
         return jdbcTemplate.query(sql, new ObservacionRowMapper(), idFeedback);
     }
 
@@ -445,15 +442,17 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
         }
     }
 
-    // src/main/java/com/example/yapeback/interfaces/PostulanteRepositoryImpl.java
     @Override
     public List<Entrevista> findEntrevistasWithFeedbackByPostulanteId(Long idPostulante) {
-        String sql = "SELECT e.*, f.id_feedback, f.fecha AS feedback_fecha, " +
-                "f.descripcion AS feedback_descripcion " +
-                "FROM entrevista e " +
-                "LEFT JOIN feedback f ON e.id_feedback = f.id_feedback " +
-                "WHERE e.id_postulante = ?";
-        return jdbcTemplate.query(sql, new EntrevistaWithFeedbackRowMapper(), idPostulante);
+        String sql = "SELECT e.*, f.fecha AS feedback_fecha, " +
+                     "o.id_observacion, o.id_categoria, o.descripcion, " +
+                     "co.nombre AS categoria_nombre " +
+                     "FROM Entrevista e " +
+                     "JOIN Feedback f ON e.id_feedback = f.id_feedback " +
+                     "LEFT JOIN Observacion o ON f.id_feedback = o.id_feedback " +
+                     "LEFT JOIN categoria_observacion co ON o.id_categoria = co.id_categoria " +
+                     "WHERE e.id_postulante = ?";
+        return jdbcTemplate.query(sql, new Object[]{idPostulante}, new EntrevistaWithFeedbackRowMapper(this));
     }
 
     public void actualizarPuntajesIndicadores(Long idEntrevista, List<EntrevistaIndicador> indicadores) {
@@ -483,7 +482,6 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
         }
     }
 
-    // src/main/java/com/example/yapeback/interfaces/PostulanteRepositoryImpl.java
     @Override
     public void actualizarPuntajeGeneral(Long idEntrevista) {
         String sql = "SELECT SUM(puntaje) FROM puntaje_indicador WHERE id_entrevista = ?";
@@ -494,48 +492,45 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
     }
 
     private static final class EntrevistaWithFeedbackRowMapper implements RowMapper<Entrevista> {
+        private final PostulanteRepositoryImpl repository;
+
+        public EntrevistaWithFeedbackRowMapper(PostulanteRepositoryImpl repository) {
+            this.repository = repository;
+        }
+
         @Override
         public Entrevista mapRow(ResultSet rs, int rowNum) throws SQLException {
-            try {
-                Entrevista entrevista = new Entrevista();
-                entrevista.setId_entrevista(rs.getLong("id_entrevista"));
-                entrevista.setId_postulante(rs.getLong("id_postulante"));
-                entrevista.setId_empleado(rs.getLong("id_empleado"));
-                entrevista.setId_feedback(rs.getLong("id_feedback"));
-                entrevista.setId_tipo_entrevista(rs.getLong("id_tipo_entrevista"));
-                // Convert java.sql.Date to LocalDate
-                java.sql.Date sqlDate = rs.getDate("fecha");
-                if (sqlDate != null) {
-                    entrevista.setFecha(sqlDate.toLocalDate());
-                }
-                entrevista.setEstado(rs.getString("estado"));
-                entrevista.setPuntaje_general(rs.getInt("puntaje_general"));
+            Entrevista entrevista = new Entrevista();
+            entrevista.setId_entrevista(rs.getLong("id_entrevista"));
+            entrevista.setId_postulante(rs.getLong("id_postulante"));
+            entrevista.setId_empleado(rs.getLong("id_empleado"));
+            entrevista.setId_feedback(rs.getLong("id_feedback"));
+            entrevista.setId_tipo_entrevista(rs.getLong("id_tipo_entrevista"));
+            entrevista.setFecha(rs.getDate("fecha").toLocalDate());
+            entrevista.setEstado(rs.getString("estado"));
+            entrevista.setPuntaje_general(rs.getInt("puntaje_general"));
 
-                Feedback feedback = new Feedback();
-                feedback.setId_feedback(rs.getLong("id_feedback"));
-                // Convert fecha for feedback as well
-                java.sql.Date feedbackDate = rs.getDate("fecha");
-                if (feedbackDate != null) {
-                    feedback.setFecha(java.sql.Date.valueOf(feedbackDate.toLocalDate()));
-                }
+            Feedback feedback = new Feedback();
+            feedback.setId_feedback(rs.getLong("id_feedback"));
+            feedback.setFecha(rs.getDate("feedback_fecha").toLocalDate());
 
-                Observacion observacion = new Observacion();
-                observacion.setId_observacion(rs.getLong("id_observacion"));
-                observacion.setId_feedback(rs.getLong("id_feedback"));
-                observacion.setId_categoria(rs.getLong("id_categoria"));
-                observacion.setDescripcion(rs.getString("descripcion"));
-                observacion.setCategoriaNombre(rs.getString("categoria_nombre"));
+            Observacion observacion = new Observacion();
+            observacion.setId_observacion(rs.getLong("id_observacion"));
+            observacion.setId_feedback(rs.getLong("id_feedback"));
+            observacion.setId_categoria(rs.getLong("id_categoria"));
+            observacion.setDescripcion(rs.getString("descripcion"));
+            observacion.setCategoriaNombre(rs.getString("categoria_nombre")); // Asignar el nombre de la categoría
 
-                feedback.setObservaciones(List.of(observacion));
-                entrevista.setFeedback(feedback);
+            feedback.setObservaciones(List.of(observacion));
+            entrevista.setFeedback(feedback);
 
-                return entrevista;
-            } catch (SQLException e) {
-                throw new RuntimeException("Error mapping entrevista row", e);
-            }
+            // Asignar los indicadores
+            List<EntrevistaIndicador> indicadores = repository.findIndicadoresByEntrevistaId(entrevista.getId_entrevista());
+            entrevista.setIndicadores(indicadores);
+
+            return entrevista;
         }
     }
-
     @Override
     public Long saveIdiomaAndGetId(String nombre) {
         String sqlIdioma = "INSERT INTO idioma (nombre) VALUES (?) RETURNING id_idioma";
@@ -662,7 +657,22 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
             observacion.setId_feedback(rs.getLong("id_feedback"));
             observacion.setId_categoria(rs.getLong("id_categoria"));
             observacion.setDescripcion(rs.getString("descripcion"));
+            observacion.setCategoriaNombre(rs.getString("categoria_nombre")); // Asignar el nombre de la categoría
             return observacion;
+        }
+    }
+
+    // Implementación del RowMapper para Feedback que incluye Observaciones
+    private class FeedbackRowMapper implements RowMapper<Feedback> {
+        @Override
+        public Feedback mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Feedback feedback = new Feedback();
+            feedback.setId_feedback(rs.getLong("id_feedback"));
+            LocalDate fecha = rs.getDate("fecha") != null ? rs.getDate("fecha").toLocalDate() : null;
+            feedback.setFecha(fecha);
+            // Mapeo de Observaciones
+            feedback.setObservaciones(findObservacionesByFeedbackId(feedback.getId_feedback()));
+            return feedback;
         }
     }
 }

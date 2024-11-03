@@ -4,14 +4,16 @@ package com.example.yapeback.controller;
 import com.example.yapeback.model.*;
 import com.example.yapeback.service.PostulanteService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 @RestController
-@RequestMapping("/api/postulantes")  // Change the base mapping
+@RequestMapping("/api/postulantes")
 public class PostulanteController {
 
     @Autowired
@@ -29,9 +31,13 @@ public class PostulanteController {
     }
 
     @GetMapping("/{id}/entrevistas/feedback")
-    public ResponseEntity<List<Feedback>> getFeedbacksByPostulanteId(@PathVariable Long id) {
-        List<Feedback> feedbacks = postulanteService.findFeedbacksByPostulanteId(id);
-        return ResponseEntity.ok(feedbacks);
+    public ResponseEntity<List<Entrevista>> getEntrevistasWithFeedbackByPostulanteId(@PathVariable Long id) {
+        List<Entrevista> entrevistas = postulanteService.findEntrevistasWithFeedbackByPostulanteId(id);
+        if (entrevistas != null && !entrevistas.isEmpty()) {
+            return new ResponseEntity<>(entrevistas, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        }
     }
 
     @PostMapping
@@ -69,7 +75,7 @@ public class PostulanteController {
         }
 
         if (postulante.getNombre() != null) existingPostulante.setNombre(postulante.getNombre());
-        if (postulante.getTelefono() != 0) existingPostulante.setTelefono(postulante.getTelefono());
+        if (postulante.getTelefono() != null) existingPostulante.setTelefono(postulante.getTelefono());
         if (postulante.getId_vacante() != null) existingPostulante.setId_vacante(postulante.getId_vacante());
         if (postulante.getCorreo() != null) existingPostulante.setCorreo(postulante.getCorreo());
         if (postulante.getPuntaje_general() != null) existingPostulante.setPuntaje_general(postulante.getPuntaje_general());
@@ -99,16 +105,46 @@ public class PostulanteController {
     }
 
     @GetMapping("/{id}/entrevistas-hechas")
-    public ResponseEntity<List<Entrevista>> getEntrevistasHechasByPostulanteId(@PathVariable Long id) {
-        List<Entrevista> entrevistas = postulanteService.findEntrevistasHechasByPostulanteId(id);
-        return ResponseEntity.ok(entrevistas);
+    public ResponseEntity<?> getEntrevistasHechasByPostulanteId(@PathVariable Long id) {
+        try {
+            List<Entrevista> entrevistas = postulanteService.findEntrevistasHechasByPostulanteId(id);
+            if (entrevistas != null && !entrevistas.isEmpty()) {
+                return new ResponseEntity<>(entrevistas, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(Collections.singletonMap("error", "Error al obtener las entrevistas: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/tipos-entrevista")
+    public ResponseEntity<?> getAllTiposEntrevista() {
+        try {
+            List<TipoEntrevista> tipos = postulanteService.findAllTiposEntrevista();
+            if (tipos != null && !tipos.isEmpty()) {
+                return new ResponseEntity<>(tipos, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500)
+                    .body(Collections.singletonMap("error", "Error al obtener tipos de entrevista: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/{id}/entrevistas")
     public ResponseEntity<?> getEntrevistasByPostulanteId(@PathVariable Long id) {
         try {
             List<Entrevista> entrevistas = postulanteService.findEntrevistasByPostulanteId(id);
-            return ResponseEntity.ok(entrevistas);
+            if (entrevistas != null && !entrevistas.isEmpty()) {
+                return new ResponseEntity<>(entrevistas, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error al obtener entrevistas: " + e.getMessage());

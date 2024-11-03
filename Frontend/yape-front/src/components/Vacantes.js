@@ -92,12 +92,17 @@ const Vacantes = () => {
   });
 
   // Estados para el popup de detalles del postulante
-  const [entrevistas, setEntrevistas] = useState([]); // Initialize as empty array
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [entrevistas, setEntrevistas] = useState([]); // Ensure it's an array
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+
+  // Añadir nuevo estado para el caché
+  const [postulanteCache, setPostulanteCache] = useState({});
+  const [loadingPostulantes, setLoadingPostulantes] = useState(false);
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    const timer = setInterval(() => { 
       setTime(new Date());
     }, 1000);
 
@@ -553,61 +558,83 @@ const Vacantes = () => {
 
   // Función para obtener los postulantes de una vacante
   const fetchPostulantes = async (vacanteId) => {
+    setLoadingPostulantes(true);
     try {
-      // Primero obtener la lista de postulantes de la vacante
+      // Verificar si ya tenemos los postulantes en caché
+      if (postulanteCache[vacanteId]) {
+        setPostulantes(postulanteCache[vacanteId]);
+        setLoadingPostulantes(false);
+        setShowPostulantesModal(true);
+        return;
+      }
+
+      // Obtener lista básica de postulantes
       const response = await fetch(`http://localhost:8080/vacantes/${vacanteId}/postulantes`);
-      if (!response.ok) throw new Error(`Error al obtener los postulantes: ${response.statusText}`);
+      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
       
       const postulantesBasicos = await response.json();
       
-      if (!Array.isArray(postulantesBasicos)) {
-        throw new Error('La respuesta no es un array de postulantes');
-      }
+      // Mostrar inmediatamente la lista básica
+      setPostulantes(postulantesBasicos);
+      setShowPostulantesModal(true);
+      
+      // Cargar detalles en segundo plano
+      loadPostulantesDetails(postulantesBasicos, vacanteId);
+    } catch (error) {
+      console.error('Error al obtener postulantes:', error);
+      alert('Error al cargar los postulantes');
+    } finally {
+      setLoadingPostulantes(false);
+    }
+  };
 
-      // Obtener los detalles completos de cada postulante incluyendo sus entrevistas
+  // Nueva función para cargar detalles en segundo plano
+  const loadPostulantesDetails = async (postulantesBasicos, vacanteId) => {
+    setLoadingDetails(true);
+    try {
       const postulantesDetallados = await Promise.all(
         postulantesBasicos.map(async (postulante) => {
-          const detallesResponse = await fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}`);
-          const entrevistasResponse = await fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}/entrevistas-hechas`);
-          
-          if (!detallesResponse.ok) {
-            console.error(`Error al obtener detalles del postulante ${postulante.id_postulante}`);
-            return postulante;
-          }
+          const [detallesResponse, entrevistasResponse] = await Promise.all([
+            fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}`),
+            fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}/entrevistas-hechas`)
+          ]);
 
           const detalles = await detallesResponse.json();
           const entrevistas = entrevistasResponse.ok ? await entrevistasResponse.json() : [];
-          
+
           return {
             ...detalles,
-            entrevistas: entrevistas
+            entrevistas
           };
         })
       );
 
-      // Verificar si todos los postulantes tienen puntaje_general = 0
-      const todosPuntajeCero = postulantesDetallados.every(p => !p.puntaje_general || p.puntaje_general === 0);
-
-      // Ordenar los postulantes
-      const postulantesOrdenados = postulantesDetallados.sort((a, b) => {
-        // Si todos tienen puntaje 0, ordenar por si tienen entrevistas
-        if (todosPuntajeCero) {
-          const entrevistasA = a.entrevistas?.length || 0;
-          const entrevistasB = b.entrevistas?.length || 0;
-          return entrevistasB - entrevistasA;
-        }
-        // Si no todos tienen puntaje 0, ordenar por puntaje_general
-        const puntajeA = a.puntaje_general || 0;
-        const puntajeB = b.puntaje_general || 0;
-        return puntajeB - puntajeA;
-      });
-
+      // Ordenar postulantes
+      const postulantesOrdenados = ordenarPostulantes(postulantesDetallados);
+      
+      // Actualizar caché y estado
+      setPostulanteCache(prev => ({
+        ...prev,
+        [vacanteId]: postulantesOrdenados
+      }));
       setPostulantes(postulantesOrdenados);
-      setShowPostulantesModal(true);
     } catch (error) {
-      console.error('Error al obtener los postulantes:', error);
-      alert(`Hubo un error al obtener los postulantes: ${error.message}`);
+      console.error('Error al cargar detalles:', error);
+    } finally {
+      setLoadingDetails(false);
     }
+  };
+
+  // Nueva función auxiliar para ordenar postulantes
+  const ordenarPostulantes = (postulantes) => {
+    const todosPuntajeCero = postulantes.every(p => !p.puntaje_general || p.puntaje_general === 0);
+    
+    return postulantes.sort((a, b) => {
+      if (todosPuntajeCero) {
+        return (b.entrevistas?.length || 0) - (a.entrevistas?.length || 0);
+      }
+      return (b.puntaje_general || 0) - (a.puntaje_general || 0);
+    });
   };
 
   // Actualizar el manejador del botón "Postulantes"
@@ -704,24 +731,30 @@ const Vacantes = () => {
     setLoading(true);
     setError(null);
     try {
-      // Primero obtenemos los detalles del postulante
-      const detallesResponse = await fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}`);
-      if (!detallesResponse.ok) throw new Error('Error al obtener los detalles del postulante');
-      
+      const [detallesResponse, entrevistasResponse] = await Promise.all([
+        fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}`),
+        fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}/entrevistas-hechas`)
+      ]);
+
+      if (!detallesResponse.ok) {
+        throw new Error('Error al obtener los detalles del postulante');
+      }
+
       const detallesPostulante = await detallesResponse.json();
       setSelectedPostulante(detallesPostulante);
 
-      // Luego obtenemos las entrevistas
-      const entrevistasResponse = await fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}/entrevistas-hechas`);
-      if (!entrevistasResponse.ok) throw new Error('Error al obtener las entrevistas');
-      
+      if (!entrevistasResponse.ok) {
+        const errorData = await entrevistasResponse.json();
+        throw new Error(errorData.error || 'Error al obtener las entrevistas');
+      }
+
       const entrevistasData = await entrevistasResponse.json();
-      setEntrevistas(entrevistasData || []); // Asegurarse de que siempre sea un array
-      setError(null);
+      setEntrevistas(Array.isArray(entrevistasData) ? entrevistasData : []);
+      
     } catch (error) {
       console.error('Error:', error);
-      setError('Error al obtener los datos del postulante');
-      setEntrevistas([]); // Reset entrevistas en caso de error
+      setError(error.message);
+      setEntrevistas([]);
     } finally {
       setLoading(false);
       setShowPostulanteDetailsModal(true);
@@ -1245,20 +1278,24 @@ const Vacantes = () => {
             <div className="modal" onClick={(e) => e.stopPropagation()}>
               <h2>Postulantes</h2>
               <button onClick={openCreatePostulanteModal}>Crear Postulante</button>
-              <div className="postulantes-list">
-                {(postulantes || []).map(postulante => (
-                  <div key={postulante.id_postulante} className="postulante-item">
-                    <span 
-                      onClick={() => handlePostulanteClick(postulante)}
-                      style={{ cursor: 'pointer', flex: 1 }}
-                    >
-                      {postulante.nombre}
-                    </span>
-                    <button onClick={() => openEditPostulanteModal(postulante)}>Editar</button>
-                    <button onClick={() => handleDeletePostulante(postulante.id_postulante)}>Eliminar</button>
-                  </div>
-                ))}
-              </div>
+              
+              {loadingPostulantes ? (
+                <div className="loading-indicator">Cargando postulantes...</div>
+              ) : (
+                <div className="postulantes-list">
+                  {postulantes.map(postulante => (
+                    <div key={postulante.id_postulante} className="postulante-item">
+                      <span onClick={() => handlePostulanteClick(postulante)} style={{ cursor: 'pointer', flex: 1 }}>
+                        {postulante.nombre}
+                        {loadingDetails && <small className="loading-details"> (Cargando detalles...)</small>}
+                      </span>
+                      <button onClick={() => openEditPostulanteModal(postulante)}>Editar</button>
+                      <button onClick={() => handleDeletePostulante(postulante.id_postulante)}>Eliminar</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="modal-buttons">
                 <button type="button" onClick={() => setShowPostulantesModal(false)}>
                   Volver
@@ -1337,36 +1374,48 @@ const Vacantes = () => {
                 {/* Column 2: Evaluation Section (to be implemented) */}
                 <div className="evaluation-column">
                   <h2>Evaluación</h2>
-                  <p>Puntaje General: {selectedPostulante.puntaje_general}</p>
-                  {/* Add evaluation content here */}
+                  <p>Puntaje General: {selectedPostulante.puntaje_general || 'No disponible'}</p>
+                  
                   <div className="entrevistas-section">
                     <h3>Entrevistas</h3>
                     {loading ? (
-                      <p>Cargando entrevistas...</p>
+                      <div className="loading-spinner">Cargando entrevistas...</div>
                     ) : error ? (
-                      <p className="error-message">{error}</p>
+                      <div className="error-message">
+                        <p>{error}</p>
+                        <button onClick={() => handlePostulanteClick(selectedPostulante)}>
+                          Reintentar
+                        </button>
+                      </div>
                     ) : entrevistas.length > 0 ? (
                       <ul className="entrevistas-list">
                         {entrevistas.map(entrevista => (
                           <li key={entrevista.id_entrevista} className="entrevista-item">
                             <p><strong>Fecha:</strong> {new Date(entrevista.fecha).toLocaleDateString()}</p>
                             <p><strong>Estado:</strong> {entrevista.estado}</p>
-                            {/* Añadir más detalles de la entrevista según necesites */}
+                            <p><strong>Puntaje:</strong> {entrevista.puntaje_general || 'No evaluado'}</p>
                           </li>
                         ))}
                       </ul>
                     ) : (
-                      <p>No hay entrevistas realizadas</p>
+                      <p>No hay entrevistas registradas</p>
                     )}
                     
-                    <button
-                      className="gestionar-entrevistas-button"
-                      onClick={() => navigate(`/gestionar-entrevistas/${selectedPostulante.id_postulante}`)}
-                    >
-                      Gestionar Entrevistas
-                    </button>
+                    {!loading && !error && (
+                      <button
+                        className="gestionar-entrevistas-button"
+                        onClick={() => {
+                          const url = `/gestionar-entrevistas/${selectedPostulante.id_postulante}`;
+                          console.log('Navegando a:', url);
+                          navigate(url);
+                        }}
+                      >
+                        Gestionar Entrevistas
+                      </button>
+                    )}
                   </div>
                 </div>
+                
               </div>
 
               <div className="modal-buttons">

@@ -1,4 +1,3 @@
-// src/main/java/com/example/yapeback/interfaces/EmpleadoRepositoryImpl.java
 package com.example.yapeback.interfaces;
 
 import com.example.yapeback.model.Empleado;
@@ -9,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -24,8 +24,14 @@ public class EmpleadoRepositoryImpl implements EmpleadoRepository {
             empleado.setId_empleado(rs.getLong("id_empleado"));
             empleado.setNombre(rs.getString("nombre"));
             empleado.setApellido(rs.getString("apellido"));
-            empleado.setFecha_nacimiento(rs.getDate("fecha_nacimiento"));
-            empleado.setFecha_ingreso(rs.getDate("fecha_ingreso"));
+            java.sql.Date fechaNacimiento = rs.getDate("fecha_nacimiento");
+            if (fechaNacimiento != null) {
+                empleado.setFecha_nacimiento(fechaNacimiento.toLocalDate());
+            }
+            java.sql.Date fechaIngreso = rs.getDate("fecha_ingreso");
+            if (fechaIngreso != null) {
+                empleado.setFecha_ingreso(fechaIngreso.toLocalDate());
+            }
             empleado.setEstado(rs.getString("estado"));
             empleado.setDocumento_identidad(rs.getString("documento_identidad"));
             empleado.setTelefono(rs.getString("telefono"));
