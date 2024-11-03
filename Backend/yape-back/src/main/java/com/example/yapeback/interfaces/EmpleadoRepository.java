@@ -1,3 +1,4 @@
+// src/main/java/com/example/yapeback/interfaces/EmpleadoRepository.java
 package com.example.yapeback.interfaces;
 
 import com.example.yapeback.model.Empleado;

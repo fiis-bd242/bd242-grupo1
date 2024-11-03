@@ -1,3 +1,4 @@
+// src/main/java/com/example/yapeback/interfaces/EmpleadoRepositoryImpl.java
 package com.example.yapeback.interfaces;
 
 import com.example.yapeback.model.Empleado;
@@ -35,13 +36,13 @@ public class EmpleadoRepositoryImpl implements EmpleadoRepository {
 
     @Override
     public List<Empleado> findAll() {
-        String sql = "SELECT id_empleado, nombre, apellido, fecha_nacimiento, fecha_ingreso, estado, documento_identidad, telefono, id_puesto FROM empleado";
+        String sql = "SELECT * FROM empleado";
         return jdbcTemplate.query(sql, new EmpleadoRowMapper());
     }
 
     @Override
     public Empleado findById(Long id) {
-        String sql = "SELECT id_empleado, nombre, apellido, fecha_nacimiento, fecha_ingreso, estado, documento_identidad, telefono, id_puesto FROM empleado WHERE id_empleado = ?";
+        String sql = "SELECT * FROM empleado WHERE id_empleado = ?";
         return jdbcTemplate.queryForObject(sql, new EmpleadoRowMapper(), id);
     }
 
@@ -50,6 +51,8 @@ public class EmpleadoRepositoryImpl implements EmpleadoRepository {
         if (empleado.getId_empleado() == null) {
             String sql = "INSERT INTO empleado (nombre, apellido, fecha_nacimiento, fecha_ingreso, estado, documento_identidad, telefono, id_puesto) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             jdbcTemplate.update(sql, empleado.getNombre(), empleado.getApellido(), empleado.getFecha_nacimiento(), empleado.getFecha_ingreso(), empleado.getEstado(), empleado.getDocumento_identidad(), empleado.getTelefono(), empleado.getId_puesto());
+            Long newId = jdbcTemplate.queryForObject("SELECT LASTVAL()", Long.class);
+            empleado.setId_empleado(newId);
         } else {
             String sql = "UPDATE empleado SET nombre = ?, apellido = ?, fecha_nacimiento = ?, fecha_ingreso = ?, estado = ?, documento_identidad = ?, telefono = ?, id_puesto = ? WHERE id_empleado = ?";
             jdbcTemplate.update(sql, empleado.getNombre(), empleado.getApellido(), empleado.getFecha_nacimiento(), empleado.getFecha_ingreso(), empleado.getEstado(), empleado.getDocumento_identidad(), empleado.getTelefono(), empleado.getId_puesto(), empleado.getId_empleado());

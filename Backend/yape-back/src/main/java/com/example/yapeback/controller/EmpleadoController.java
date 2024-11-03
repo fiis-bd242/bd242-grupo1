@@ -18,46 +18,66 @@ public class EmpleadoController {
 
     @GetMapping
     public ResponseEntity<List<Empleado>> getAllEmpleados() {
-        List<Empleado> empleados = empleadoService.findAll();
-        return new ResponseEntity<>(empleados, HttpStatus.OK);
+        try {
+            List<Empleado> empleados = empleadoService.findAll();
+            return new ResponseEntity<>(empleados, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Empleado> getEmpleadoById(@PathVariable Long id) {
-        Empleado empleado = empleadoService.findById(id);
-        if (empleado != null) {
-            return new ResponseEntity<>(empleado, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        try {
+            Empleado empleado = empleadoService.findById(id);
+            if (empleado != null) {
+                return new ResponseEntity<>(empleado, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping
     public ResponseEntity<Empleado> createEmpleado(@RequestBody Empleado empleado) {
-        Empleado newEmpleado = empleadoService.save(empleado);
-        return new ResponseEntity<>(newEmpleado, HttpStatus.CREATED);
+        try {
+            Empleado newEmpleado = empleadoService.save(empleado);
+            return new ResponseEntity<>(newEmpleado, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Empleado> updateEmpleado(@PathVariable Long id, @RequestBody Empleado empleado) {
-        Empleado existingEmpleado = empleadoService.findById(id);
-        if (existingEmpleado != null) {
-            empleado.setId_empleado(id);
-            Empleado updatedEmpleado = empleadoService.save(empleado);
-            return new ResponseEntity<>(updatedEmpleado, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        try {
+            Empleado existingEmpleado = empleadoService.findById(id);
+            if (existingEmpleado != null) {
+                empleado.setId_empleado(id);
+                Empleado updatedEmpleado = empleadoService.save(empleado);
+                return new ResponseEntity<>(updatedEmpleado, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEmpleado(@PathVariable Long id) {
-        Empleado existingEmpleado = empleadoService.findById(id);
-        if (existingEmpleado != null) {
-            empleadoService.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        try {
+            Empleado existingEmpleado = empleadoService.findById(id);
+            if (existingEmpleado != null) {
+                empleadoService.deleteById(id);
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

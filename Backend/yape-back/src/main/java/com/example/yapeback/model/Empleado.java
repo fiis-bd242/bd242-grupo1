@@ -1,6 +1,7 @@
+// src/main/java/com/example/yapeback/model/Empleado.java
 package com.example.yapeback.model;
-import lombok.Data;
 
+import lombok.Data;
 import java.sql.Date;
 
 @Data

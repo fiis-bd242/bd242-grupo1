@@ -66,9 +66,6 @@ const Vacantes = () => {
     estado: 'Abierta' // Valor por defecto que coincide con la DB
   });
 
-  // Agregar nuevo estado para almacenar la información de si una vacante se puede eliminar
-  const [deletableVacantes, setDeletableVacantes] = useState({});
-
   // Añadir nuevo estado para almacenar las funciones de los puestos
   const [puestosFunciones, setPuestosFunciones] = useState({});
 
@@ -112,14 +109,6 @@ const Vacantes = () => {
         }
         const data = await response.json();
         setVacantes(data);
-
-        // Verificar cada vacante directamente con la información que ya tenemos
-        const deletableStatus = {};
-        data.forEach(vacante => {
-          deletableStatus[vacante.id_vacante] = checkDeletableVacante(vacante);
-        });
-        console.log('Deletable status:', deletableStatus); // Para debugging
-        setDeletableVacantes(deletableStatus);
       } catch (error) {
         console.error('Error fetching vacantes:', error);
       }
@@ -541,12 +530,6 @@ const Vacantes = () => {
     }
   };
 
-  // Agregar función para verificar si una vacante se puede eliminar
-  const checkDeletableVacante = (vacante) => {
-    // Una vacante es eliminable solo si no tiene postulantes ni convocatorias
-    return vacante.postulantes.length === 0 && vacante.convocatorias.length === 0;
-  };
-
   // Añadir función para obtener las funciones de un puesto
   const fetchPuestoFunciones = async (id_puesto) => {
     try {
@@ -581,21 +564,39 @@ const Vacantes = () => {
         throw new Error('La respuesta no es un array de postulantes');
       }
 
-      // Obtener los detalles completos de cada postulante
+      // Obtener los detalles completos de cada postulante incluyendo sus entrevistas
       const postulantesDetallados = await Promise.all(
         postulantesBasicos.map(async (postulante) => {
           const detallesResponse = await fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}`);
+          const entrevistasResponse = await fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}/entrevistas-hechas`);
+          
           if (!detallesResponse.ok) {
             console.error(`Error al obtener detalles del postulante ${postulante.id_postulante}`);
             return postulante;
           }
-          return await detallesResponse.json();
+
+          const detalles = await detallesResponse.json();
+          const entrevistas = entrevistasResponse.ok ? await entrevistasResponse.json() : [];
+          
+          return {
+            ...detalles,
+            entrevistas: entrevistas
+          };
         })
       );
 
-      // Ordenar los postulantes por puntaje general de forma descendente
+      // Verificar si todos los postulantes tienen puntaje_general = 0
+      const todosPuntajeCero = postulantesDetallados.every(p => !p.puntaje_general || p.puntaje_general === 0);
+
+      // Ordenar los postulantes
       const postulantesOrdenados = postulantesDetallados.sort((a, b) => {
-        // Si no existe puntaje_general, asignar 0
+        // Si todos tienen puntaje 0, ordenar por si tienen entrevistas
+        if (todosPuntajeCero) {
+          const entrevistasA = a.entrevistas?.length || 0;
+          const entrevistasB = b.entrevistas?.length || 0;
+          return entrevistasB - entrevistasA;
+        }
+        // Si no todos tienen puntaje 0, ordenar por puntaje_general
         const puntajeA = a.puntaje_general || 0;
         const puntajeB = b.puntaje_general || 0;
         return puntajeB - puntajeA;
@@ -957,15 +958,13 @@ const Vacantes = () => {
                       <p>Cantidad de vacantes: {vacante.cantidad}</p>
                       <p>Estado: {vacante.estado}</p>
                     </div>
-                    {deletableVacantes[vacante.id_vacante] && (
-                      <button 
-                        className="delete-button"
-                        onClick={(e) => handleDelete(e, vacante.id_vacante)}
-                        title="Esta vacante se puede eliminar porque no tiene postulantes ni convocatorias"
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
-                    )}
+                    <button 
+                      className="delete-button"
+                      onClick={(e) => handleDelete(e, vacante.id_vacante)}
+                      title="Eliminar vacante"
+                    >
+                      <i className="fas fa-trash"></i>
+                    </button>
                   </div>
                 ))}
               {groupedPuestos[id_puesto].length > 1 && (
