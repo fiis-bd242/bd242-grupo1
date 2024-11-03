@@ -37,3 +37,7 @@
   - [7.1. Creación de Tablas](./7/7.1/7.1.md)
   - [7.2. Poblamiento Inicial de Datos](./7/7.2/7.2.md)
   - [7.3. Carga Masiva de Datos](./7/7.3/7.3.md)
+- [8. Preparación para Implementación](./8/8.md)
+  - [8.1. Sentencias SQL por módulo / prototipo](./8/8.1/8.1.md)
+  - [8.2. Alcance del Piloto (Funcionalidad primaria por módulo)](./8/8.2/8.2.md)
+  - [8.3. Stack Tecnológico Elegido](./8/8.3/8.3.md)
