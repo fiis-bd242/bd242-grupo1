@@ -30,21 +30,11 @@ public class PostulanteController {
         return ResponseEntity.ok(postulante);
     }
 
-    @GetMapping("/{id}/entrevistas/feedback")
-    public ResponseEntity<List<Entrevista>> getEntrevistasWithFeedbackByPostulanteId(@PathVariable Long id) {
-        List<Entrevista> entrevistas = postulanteService.findEntrevistasWithFeedbackByPostulanteId(id);
-        if (entrevistas != null && !entrevistas.isEmpty()) {
-            return new ResponseEntity<>(entrevistas, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
-        }
-    }
-
     @PostMapping
     public ResponseEntity<Postulante> createPostulante(@RequestBody Postulante postulante) {
         try {
-            if (postulante.getPuntaje_general() == null) {
-                postulante.setPuntaje_general(0);
+            if (postulante.getPuntaje() == null) {
+                postulante.setPuntaje(0);
             }
             if (postulante.getIdiomas() == null) {
                 postulante.setIdiomas(new ArrayList<>());
@@ -78,7 +68,7 @@ public class PostulanteController {
         if (postulante.getTelefono() != null) existingPostulante.setTelefono(postulante.getTelefono());
         if (postulante.getId_vacante() != null) existingPostulante.setId_vacante(postulante.getId_vacante());
         if (postulante.getCorreo() != null) existingPostulante.setCorreo(postulante.getCorreo());
-        if (postulante.getPuntaje_general() != null) existingPostulante.setPuntaje_general(postulante.getPuntaje_general());
+        if (postulante.getPuntaje() != null) existingPostulante.setPuntaje(postulante.getPuntaje());
 
         if (postulante.getIdiomas() != null) {
             postulanteService.deleteIdiomasByPostulanteId(id);
@@ -102,38 +92,6 @@ public class PostulanteController {
 
         Postulante updatedPostulante = postulanteService.save(existingPostulante);
         return ResponseEntity.ok(updatedPostulante);
-    }
-
-    @GetMapping("/{id}/entrevistas-hechas")
-    public ResponseEntity<?> getEntrevistasHechasByPostulanteId(@PathVariable Long id) {
-        try {
-            List<Entrevista> entrevistas = postulanteService.findEntrevistasHechasByPostulanteId(id);
-            if (entrevistas != null && !entrevistas.isEmpty()) {
-                return new ResponseEntity<>(entrevistas, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500)
-                    .body(Collections.singletonMap("error", "Error al obtener las entrevistas: " + e.getMessage()));
-        }
-    }
-
-    @GetMapping("/tipos-entrevista")
-    public ResponseEntity<?> getAllTiposEntrevista() {
-        try {
-            List<TipoEntrevista> tipos = postulanteService.findAllTiposEntrevista();
-            if (tipos != null && !tipos.isEmpty()) {
-                return new ResponseEntity<>(tipos, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500)
-                    .body(Collections.singletonMap("error", "Error al obtener tipos de entrevista: " + e.getMessage()));
-        }
     }
 
     @GetMapping("/{id}/entrevistas")

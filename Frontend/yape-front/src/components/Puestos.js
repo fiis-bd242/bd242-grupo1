@@ -180,7 +180,7 @@ const Puestos = () => {
     setModalData({ ...modalData, funciones });
   };
 
-  // Modificar handleSubmit para mantener la navegación actual
+  // Modificar handleSubmit para manejar tanto creación como actualización de puestos
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -194,18 +194,37 @@ const Puestos = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/puestos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nombre: modalData.nombre,
-          paga: parseFloat(modalData.paga),
-          id_departamento: selectedDepartment.id_departamento,
-          funciones: modalData.funciones
-        }),
-      });
+      let response;
+      const puestoData = {
+        nombre: modalData.nombre,
+        paga: parseFloat(modalData.paga),
+        id_departamento: selectedDepartment.id_departamento,
+        funciones: modalData.funciones,
+      };
+
+      if (modalData.id_puesto) {
+        // Actualizar puesto existente
+        response = await fetch(`http://localhost:8080/puestos/${modalData.id_puesto}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(puestoData),
+        });
+      } else {
+        // Crear nuevo puesto
+        response = await fetch('http://localhost:8080/puestos', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(puestoData),
+        });
+      }
+
+      if (!response.ok) {
+        throw new Error(`Error HTTP! status: ${response.status}`);
+      }
 
       await response.json();
       
@@ -242,10 +261,10 @@ const Puestos = () => {
         setCurrentDepartments(currentDepts);
       }
 
-      alert('Puesto creado exitosamente');
+      alert(modalData.id_puesto ? 'Puesto actualizado exitosamente' : 'Puesto creado exitosamente');
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al crear el puesto');
+      alert(modalData.id_puesto ? 'Error al actualizar el puesto' : 'Error al crear el puesto');
     }
   };
 

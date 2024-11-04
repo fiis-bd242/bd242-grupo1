@@ -1,0 +1,179 @@
+.gestionar-entrevistas-container {
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+.entrevista-form, .observacion-form {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.entrevista-form h3, .observacion-form h3 {
+  margin-top: 0;
+}
+
+.entrevista-form label, .observacion-form label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.entrevista-form input, .entrevista-form select,
+.observacion-form textarea, .observacion-form select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  box-sizing: border-box;
+}
+
+.entrevistas-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.entrevistas-table th, .entrevistas-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.entrevistas-table th {
+  background-color: #f2f2f2;
+}
+
+.entrevistas-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.observaciones-section {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.observaciones-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.observacion-item {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.observacion-item.Regular {
+  border-left: 4px solid #28a745;
+}
+
+.observacion-item.Importante {
+  border-left: 4px solid #ffc107;
+}
+
+.observacion-item.Crítica {
+  border-left: 4px solid #dc3545;
+}
+
+button {
+  padding: 8px 12px;
+  margin-right: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+button[type="submit"] {
+  background-color: #007bff;
+  color: white;
+}
+
+button[type="button"] {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Alinear elementos dentro de la columna derecha a la derecha */
+.right-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Alinea los elementos al final (derecha) */
+    /* ...existing styles... */
+}
+
+/* Estilo para el botón "Gestionar Entrevistas" */
+.manage-entrevistas-button {
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    align-self: flex-end; /* Asegura que el botón se alinee a la derecha */
+    margin-top: 20px; /* Espacio superior */
+    width: 100%; /* Ancho completo */
+    max-width: 300px; /* Ajustar según necesidad */
+    display: block;
+}
+
+.manage-entrevistas-button:hover {
+    background-color: #005a9e;
+}
+
+/* Add styles for modal buttons */
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  margin-left: 10px;
+}
+
+/* Increase the size of the modal */
+.modal {
+  max-width: 800px; /* Increase the max-width */
+  width: 90%; /* Adjust the width as needed */
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1000;
+}
+
+/* ...existing styles... */
+
+.crear-observacion-button {
+    background-color: #28a745; /* Verde */
+    color: white;
+}
+
+.crear-observacion-button:hover {
+    background-color: #218838;
+}
+
+/* Asegúrate de aplicar la clase al botón en GestionarEntrevistas.js si lo deseas */
+
+/* Estilos para el spinner de carga */
+.spinner {
+  border: 8px solid #f3f3f3; /* Color de fondo del spinner */
+  border-top: 8px solid #007bff; /* Color de la parte superior */
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto; /* Centrar el spinner */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

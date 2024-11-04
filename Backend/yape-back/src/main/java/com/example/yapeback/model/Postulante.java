@@ -1,6 +1,8 @@
 package com.example.yapeback.model;
 
 import lombok.Data;
+
+import java.math.BigInteger;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -8,10 +10,10 @@ import java.util.ArrayList;
 public class Postulante {
     private Long id_postulante;
     private String nombre;
-    private Integer telefono;
+    private BigInteger telefono;
     private String correo;
     private Long id_vacante;
-    private Integer puntaje_general;
+    private Integer puntaje;
     private List<Idioma> idiomas = new ArrayList<>();
     private List<Educacion> educaciones = new ArrayList<>();
     private List<Habilidad> habilidades = new ArrayList<>();
