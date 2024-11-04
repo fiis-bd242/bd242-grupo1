@@ -5,6 +5,7 @@ import com.example.yapeback.model.Observacion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,9 +24,9 @@ public class ObservacionService {
             Observacion existingObservacion = existingObservacionOpt.get();
             existingObservacion.setNombre(observacion.getNombre());
             existingObservacion.setDescripcion(observacion.getDescripcion());
+            existingObservacion.setId_entrevista(observacion.getId_entrevista());
             return observacionRepository.save(existingObservacion);
         } else {
-            // Handle the case where the Observacion is not found
             return null; // or throw an appropriate exception
         }
     }
@@ -37,5 +38,9 @@ public class ObservacionService {
 
     public void deleteById(Long id) {
         observacionRepository.deleteById(id);
+    }
+
+    public List<Observacion> findByEntrevistaId(Long idEntrevista) {
+        return observacionRepository.findByEntrevistaId(idEntrevista);
     }
 }

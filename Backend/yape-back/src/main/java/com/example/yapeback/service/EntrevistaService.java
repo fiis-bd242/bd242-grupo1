@@ -1,13 +1,13 @@
 package com.example.yapeback.service;
 
 import com.example.yapeback.interfaces.EntrevistaRepository;
-import com.example.yapeback.interfaces.FeedbackRepository;
 import com.example.yapeback.interfaces.ObservacionRepository;
 import com.example.yapeback.model.Entrevista;
-import com.example.yapeback.model.Feedback;
+import com.example.yapeback.model.Observacion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -15,9 +15,6 @@ public class EntrevistaService {
 
     @Autowired
     private EntrevistaRepository entrevistaRepository;
-
-    @Autowired
-    private FeedbackRepository feedbackRepository;
 
     @Autowired
     private ObservacionRepository observacionRepository;
@@ -49,18 +46,15 @@ public class EntrevistaService {
     }
 
     public void deleteById(Long id) {
-        // Find the feedback associated with the interview
-        Optional<Feedback> feedbackOpt = feedbackRepository.findByEntrevistaId(id);
-        if (feedbackOpt.isPresent()) {
-            Feedback feedback = feedbackOpt.get();
-            // Delete all observations associated with the feedback
-            observacionRepository.findByFeedbackId(feedback.getId_feedback()).forEach(observacion -> {
-                observacionRepository.deleteById(observacion.getId_observacion());
-            });
-            // Delete the feedback
-            feedbackRepository.deleteById(feedback.getId_feedback());
-        }
+        // Delete all observations associated with the interview
+        observacionRepository.findByEntrevistaId(id).forEach(observacion -> {
+            observacionRepository.deleteById(observacion.getId_observacion());
+        });
         // Delete the interview
         entrevistaRepository.deleteById(id);
+    }
+
+    public List<Observacion> findObservacionesByEntrevistaId(Long idEntrevista) {
+        return observacionRepository.findByEntrevistaId(idEntrevista);
     }
 }

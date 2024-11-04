@@ -17,14 +17,14 @@ public class ObservacionRepository {
     private JdbcTemplate jdbcTemplate;
 
     public Observacion save(Observacion observacion) {
-        String sql = "INSERT INTO observacion (id_feedback, nombre, descripcion) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, observacion.getId_feedback(), observacion.getNombre(), observacion.getDescripcion());
+        String sql = "INSERT INTO observacion (id_entrevista, nombre, descripcion) VALUES (?, ?, ?)";
+        jdbcTemplate.update(sql, observacion.getId_entrevista(), observacion.getNombre(), observacion.getDescripcion());
         return observacion;
     }
 
     public Observacion update(Observacion observacion) {
-        String sql = "UPDATE observacion SET id_feedback = ?, nombre = ?, descripcion = ? WHERE id_observacion = ?";
-        jdbcTemplate.update(sql, observacion.getId_feedback(), observacion.getNombre(), observacion.getDescripcion(), observacion.getId_observacion());
+        String sql = "UPDATE observacion SET id_entrevista = ?, nombre = ?, descripcion = ? WHERE id_observacion = ?";
+        jdbcTemplate.update(sql, observacion.getId_entrevista(), observacion.getNombre(), observacion.getDescripcion(), observacion.getId_observacion());
         return observacion;
     }
 
@@ -43,8 +43,8 @@ public class ObservacionRepository {
         jdbcTemplate.update(sql, id);
     }
 
-    public List<Observacion> findByFeedbackId(Long idFeedback) {
-        String sql = "SELECT * FROM observacion WHERE id_feedback = ?";
-        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Observacion.class), idFeedback);
+    public List<Observacion> findByEntrevistaId(Long idEntrevista) {
+        String sql = "SELECT * FROM observacion WHERE id_entrevista = ?";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Observacion.class), idEntrevista);
     }
 }

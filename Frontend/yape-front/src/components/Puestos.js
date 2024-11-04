@@ -48,7 +48,7 @@ const DepartamentoNode = ({ departamento, baseLevel, onDepartmentClick, onAddPue
                   onEditPuesto(puesto, departamento.id_departamento);
                 }}
               >
-                ✏️
+                Edit
               </button>
             </div>
           ))
@@ -95,7 +95,18 @@ const Puestos = () => {
       }
       const data = await response.json();
       console.log('Datos recibidos de la API (organigrama):', data);
-      setCurrentDepartments(data.subDepartamentos || []);
+      
+      // Sort 'puestos' within each department
+      const sortPuestos = (departments) => {
+        return departments.map(dept => ({
+          ...dept,
+          puestos: dept.puestos.sort((a, b) => a.id_puesto - b.id_puesto),
+          subDepartamentos: dept.subDepartamentos ? sortPuestos(dept.subDepartamentos) : [],
+        }));
+      };
+      
+      const sortedDepartments = sortPuestos(data.subDepartamentos || []);
+      setCurrentDepartments(sortedDepartments);
       setBaseLevel(2); // Reset al nivel base cuando se obtiene el organigrama inicial
       setHistory([]); // Limpiar el historial
     } catch (error) {
@@ -243,14 +254,25 @@ const Puestos = () => {
       const organigramaResponse = await fetch('http://localhost:8080/departamentos/1/organigrama');
       const updatedData = await organigramaResponse.json();
 
+      // Sort 'puestos' within each department
+      const sortPuestos = (departments) => {
+        return departments.map(dept => ({
+          ...dept,
+          puestos: dept.puestos.sort((a, b) => a.id_puesto - b.id_puesto),
+          subDepartamentos: dept.subDepartamentos ? sortPuestos(dept.subDepartamentos) : [],
+        }));
+      };
+
+      const sortedDepartments = sortPuestos(updatedData.subDepartamentos || []);
+
       // Si estamos en la vista principal
       if (history.length === 0) {
-        setCurrentDepartments(updatedData.subDepartamentos || []);
+        setCurrentDepartments(sortedDepartments);
       } 
       // Si estamos en un subdepartamento
       else {
         // Reconstruir la ruta de navegación
-        let currentDepts = updatedData.subDepartamentos;
+        let currentDepts = sortedDepartments;
         for (let i = 0; i < history.length; i++) {
           const historicDept = history[i].departments[0];
           const nextDept = currentDepts.find(d => d.id_departamento === historicDept.id_departamento);
