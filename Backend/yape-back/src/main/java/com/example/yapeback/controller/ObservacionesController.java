@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/observaciones")
 public class ObservacionesController {
@@ -36,5 +38,11 @@ public class ObservacionesController {
     public ResponseEntity<Void> deleteObservacion(@PathVariable Long id) {
         observacionService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/entrevista/{idEntrevista}")
+    public ResponseEntity<List<Observacion>> getObservacionesByEntrevistaId(@PathVariable Long idEntrevista) {
+        List<Observacion> observaciones = observacionService.findByEntrevistaId(idEntrevista);
+        return ResponseEntity.ok(observaciones);
     }
 }

@@ -38,23 +38,23 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
     public Postulante save(Postulante postulante) {
         if (postulante.getId_postulante() == null) {
             String sql = "INSERT INTO postulante (nombre, telefono, id_vacante, correo, puntaje) VALUES (?, ?, ?, ?, ?)";
-            jdbcTemplate.update(sql, 
-                postulante.getNombre(), 
-                postulante.getTelefono(), 
-                postulante.getId_vacante(), 
-                postulante.getCorreo(), 
-                postulante.getPuntaje());
+            jdbcTemplate.update(sql,
+                    postulante.getNombre(),
+                    postulante.getTelefono(),
+                    postulante.getId_vacante(),
+                    postulante.getCorreo(),
+                    postulante.getPuntaje());
             Long newId = jdbcTemplate.queryForObject("SELECT LASTVAL()", Long.class);
             postulante.setId_postulante(newId);
         } else {
             String sql = "UPDATE postulante SET nombre = ?, telefono = ?, id_vacante = ?, correo = ?, puntaje = ? WHERE id_postulante = ?";
-            jdbcTemplate.update(sql, 
-                postulante.getNombre(), 
-                postulante.getTelefono(), 
-                postulante.getId_vacante(), 
-                postulante.getCorreo(), 
-                postulante.getPuntaje(), 
-                postulante.getId_postulante());
+            jdbcTemplate.update(sql,
+                    postulante.getNombre(),
+                    postulante.getTelefono(),
+                    postulante.getId_vacante(),
+                    postulante.getCorreo(),
+                    postulante.getPuntaje(),
+                    postulante.getId_postulante());
         }
         return postulante;
     }
@@ -94,7 +94,7 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
             // 7. Finalmente eliminar el postulante
             String sql = "DELETE FROM postulante WHERE id_postulante = ?";
             jdbcTemplate.update(sql, id);
-            
+
         } catch (Exception e) {
             throw new RuntimeException("Error al eliminar el postulante y sus relaciones: " + e.getMessage(), e);
         }
@@ -159,10 +159,10 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
     @Override
     public void saveExperiencia(Long idPostulante, ExperienciaLaboral experiencia) {
         String sql = "INSERT INTO experiencia_laboral (id_postulante, empresa, puesto, fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?, ?) RETURNING id_experiencia";
-        Long idExperiencia = jdbcTemplate.queryForObject(sql, Long.class, 
-            idPostulante, experiencia.getEmpresa(), experiencia.getPuesto(), 
-            experiencia.getFecha_inicio(), experiencia.getFecha_fin());
-        
+        Long idExperiencia = jdbcTemplate.queryForObject(sql, Long.class,
+                idPostulante, experiencia.getEmpresa(), experiencia.getPuesto(),
+                experiencia.getFecha_inicio(), experiencia.getFecha_fin());
+
         // Guardar las habilidades de la experiencia
         if (experiencia.getHabilidades() != null) {
             for (HabilidadExperiencia habilidad : experiencia.getHabilidades()) {
@@ -177,13 +177,13 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
         // Primero obtener todas las experiencias del postulante
         String selectSql = "SELECT id_experiencia FROM experiencia_laboral WHERE id_postulante = ?";
         List<Long> experienciaIds = jdbcTemplate.queryForList(selectSql, Long.class, idPostulante);
-        
+
         // Eliminar las habilidades asociadas a cada experiencia
         String deleteHabilidadesSql = "DELETE FROM habilidad_experiencia WHERE id_experiencia = ?";
         for (Long expId : experienciaIds) {
             jdbcTemplate.update(deleteHabilidadesSql, expId);
         }
-        
+
         // Finalmente eliminar las experiencias
         String deleteExperienciasSql = "DELETE FROM experiencia_laboral WHERE id_postulante = ?";
         jdbcTemplate.update(deleteExperienciasSql, idPostulante);
@@ -369,9 +369,9 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
     @Override
     public Long saveExperienciaAndGetId(Long idPostulante, ExperienciaLaboral experiencia) {
         String sql = "INSERT INTO experiencia_laboral (id_postulante, empresa, puesto, fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?, ?) RETURNING id_experiencia";
-        return jdbcTemplate.queryForObject(sql, Long.class, 
-            idPostulante, experiencia.getEmpresa(), experiencia.getPuesto(), 
-            experiencia.getFecha_inicio(), experiencia.getFecha_fin());
+        return jdbcTemplate.queryForObject(sql, Long.class,
+                idPostulante, experiencia.getEmpresa(), experiencia.getPuesto(),
+                experiencia.getFecha_inicio(), experiencia.getFecha_fin());
     }
 
     @Override
@@ -400,29 +400,16 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
         public Observacion mapRow(ResultSet rs, int rowNum) throws SQLException {
             Observacion observacion = new Observacion();
             observacion.setId_observacion(rs.getLong("id_observacion"));
-            observacion.setId_feedback(rs.getLong("id_feedback"));
+            observacion.setId_entrevista(rs.getLong("id_entrevista"));
             observacion.setNombre(rs.getString("id_nombre"));
             observacion.setDescripcion(rs.getString("descripcion"));// Asignar el nombre de la categoría
             return observacion;
         }
     }
 
-    public List<Observacion> findObservacionesByFeedbackId(Long idFeedback) {
-        String sql = "SELECT * FROM observacion WHERE id_feedback = ?";
-        return jdbcTemplate.query(sql, new ObservacionRowMapper(), idFeedback);
+    public List<Observacion> findObservacionesByEntrevistaId(Long idEntrevista) {
+        String sql = "SELECT * FROM observacion WHERE id_entrevista = ?";
+        return jdbcTemplate.query(sql, new ObservacionRowMapper(), idEntrevista);
     }
 
-    // Implementación del RowMapper para Feedback que incluye Observaciones
-    private class FeedbackRowMapper implements RowMapper<Feedback> {
-        @Override
-        public Feedback mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Feedback feedback = new Feedback();
-            feedback.setId_feedback(rs.getLong("id_feedback"));
-            LocalDate fecha = rs.getDate("fecha") != null ? rs.getDate("fecha").toLocalDate() : null;
-            feedback.setFecha(fecha);
-            // Mapeo de Observaciones
-            feedback.setObservaciones(findObservacionesByFeedbackId(feedback.getId_feedback()));
-            return feedback;
-        }
-    }
 }

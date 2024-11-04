@@ -163,11 +163,11 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
     }
     const payload = {
       ...createObservationFormData,
-      id_feedback: selectedEntrevista.id_entrevista
+      id_entrevista: selectedEntrevista.id_entrevista // Changed from id_feedback
     };
   
     try {
-      const response = await fetch('http://localhost:8080/api/observaciones', {
+      const response = await fetch('http://localhost:8080/api/observaciones', { // Updated endpoint
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -190,7 +190,7 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
       
       // Limpiar el formulario
       setCreateObservationFormData({
-        id_feedback: '',
+        id_entrevista: '', // Updated field
         nombre: '',
         descripcion: ''
       });
@@ -212,11 +212,11 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
     }
     const payload = {
       ...editObservationFormData,
-      id_observacion: selectedObservation.id_observacion // Add id_observacion to payload
+      id_entrevista: selectedObservation.id_entrevista // Changed from id_feedback
     };
   
     try {
-      const response = await fetch(`http://localhost:8080/api/observaciones/${selectedObservation.id_observacion}`, {
+      const response = await fetch(`http://localhost:8080/api/observaciones/${selectedObservation.id_observacion}`, { // Updated endpoint
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -237,7 +237,7 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
       );
   
       // Update cache
-      const entrevistaId = selectedObservation.id_feedback;
+      const entrevistaId = selectedObservation.id_entrevista;
       observationsCache.current[entrevistaId] = updatedObservations;
       
       // Update state
@@ -268,7 +268,7 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
   
     setLoadingObservations(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/entrevistas/${id_entrevista}/observaciones`);
+      const response = await fetch(`http://localhost:8080/api/observaciones/entrevista/${id_entrevista}`); // Updated endpoint
       
       // Initialize empty array for observations
       let observationsData = [];
@@ -326,7 +326,7 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
     if (!confirmDelete) return;
   
     try {
-      const response = await fetch(`http://localhost:8080/api/observaciones/${observationId}`, {
+      const response = await fetch(`http://localhost:8080/api/observaciones/${observationId}`, { // Updated endpoint
         method: 'DELETE',
       });
   
