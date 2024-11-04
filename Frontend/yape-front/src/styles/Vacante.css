@@ -1056,3 +1056,80 @@
   margin: 5px 0;
   border-radius: 4px;
 }
+
+/* Styles for Interview Details */
+.entrevista-details {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+}
+
+.info-section {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.info-section h3 {
+    color: #333;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+}
+
+.indicadores-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.indicador-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.observaciones-list {
+    margin-top: 15px;
+}
+
+.observacion-item {
+    background: white;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.observacion-item small {
+    color: #666;
+    display: block;
+    margin-top: 5px;
+}
+
+/* Modal large variant */
+.modal-large {
+    width: 90%;
+    max-width: 1000px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Types of observations */
+.observacion-item.Regular {
+    border-left: 4px solid #28a745;
+}
+
+.observacion-item.Importante {
+    border-left: 4px solid #ffc107;
+}
+
+.observacion-item.Crítica {
+    border-left: 4px solid #dc3545;
+}

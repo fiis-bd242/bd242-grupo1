@@ -8,5 +8,5 @@ public class Observacion {
     private Long id_feedback;
     private Long id_categoria;
     private String descripcion;
-    private String categoriaNombre; // Añadir este campo
+    private String categoriaNombre; // Add this field
 }

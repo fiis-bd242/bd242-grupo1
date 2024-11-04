@@ -5,8 +5,17 @@ public class EntrevistaIndicador {
     private String nombre;
     private Integer puntaje;
 
-    // Getters y Setters
+    // No-argument constructor
+    public EntrevistaIndicador() {
+    }
 
+    // Constructor that accepts Long and int
+    public EntrevistaIndicador(Long id_indicador, int puntaje) {
+        this.id_indicador = id_indicador;
+        this.puntaje = puntaje;
+    }
+
+    // Getters and Setters
     public Long getId_indicador() {
         return id_indicador;
     }

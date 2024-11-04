@@ -22,13 +22,23 @@ const GestionarEntrevistas = () => {
     });
     const [showIndicadoresModal, setShowIndicadoresModal] = useState(false);
     const [currentIndicadores, setCurrentIndicadores] = useState([]);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [selectedEntrevista, setSelectedEntrevista] = useState(null);
+    const [showObservacionModal, setShowObservacionModal] = useState(false);
+    const [observacionForm, setObservacionForm] = useState({
+        contenido: '',
+        tipo: 'Regular' // or other default value
+    });
+    const [entrevistaCompleta, setEntrevistaCompleta] = useState(null);
 
     const fetchEntrevistas = useCallback(async () => {
         try {
-            const response = await fetch(`http://localhost:8080/api/postulantes/${id}/entrevistas`);
+            const response = await fetch(`http://localhost:8080/api/entrevistas`);
             if (!response.ok) throw new Error('Error al obtener entrevistas');
             const data = await response.json();
-            setEntrevistas(data);
+            // Filter interviews for current postulant
+            const filteredData = data.filter(entrevista => entrevista.id_postulante === parseInt(id));
+            setEntrevistas(filteredData);
         } catch (error) {
             console.error('Error:', error);
             setError('Error al obtener las entrevistas');
@@ -137,7 +147,7 @@ const GestionarEntrevistas = () => {
 
     const handleUpdateIndicadores = async (entrevistaId) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/entrevistas/${entrevistaId}/indicadores`, {
+            const response = await fetch(`http://localhost:8080/api/entrevistas/${entrevistaId}/puntajes`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -145,13 +155,18 @@ const GestionarEntrevistas = () => {
                 body: JSON.stringify(currentIndicadores),
             });
 
-            if (!response.ok) throw new Error('Error al actualizar indicadores');
+            if (!response.ok) throw new Error('Error al actualizar puntajes');
             
             await fetchEntrevistas();
             setShowIndicadoresModal(false);
+            
+            // Refresh interview details if details modal is open
+            if (showDetailsModal) {
+                await fetchEntrevistaCompleta(entrevistaId);
+            }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error al actualizar indicadores');
+            alert('Error al actualizar los puntajes');
         }
     };
 
@@ -185,6 +200,45 @@ const GestionarEntrevistas = () => {
             id_empleado: '',
             id_tipo_entrevista: ''
         });
+    };
+
+    const fetchEntrevistaCompleta = async (id_entrevista) => {
+        try {
+            setLoading(true);
+            const response = await fetch(`http://localhost:8080/api/entrevistas/${id_entrevista}/completa`);
+            if (!response.ok) throw new Error('Error al obtener detalles de la entrevista');
+            const data = await response.json();
+            setEntrevistaCompleta(data);
+            setShowDetailsModal(true);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al cargar los detalles de la entrevista');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleObservacionSubmit = async (e, id_entrevista) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(`http://localhost:8080/api/entrevistas/${id_entrevista}/observaciones`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(observacionForm),
+            });
+
+            if (!response.ok) throw new Error('Error al agregar observación');
+            
+            // Refresh interview details
+            await fetchEntrevistaCompleta(id_entrevista);
+            setShowObservacionModal(false);
+            setObservacionForm({ contenido: '', tipo: 'Regular' });
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al agregar la observación');
+        }
     };
 
     if (loading) return <div className="main-content">Cargando...</div>;
@@ -228,6 +282,9 @@ const GestionarEntrevistas = () => {
                                             {empleados.find(e => e.id_empleado === entrevista.id_empleado)?.nombre || 'N/A'}
                                         </td>
                                         <td>
+                                            <button onClick={() => fetchEntrevistaCompleta(entrevista.id_entrevista)} className="manage-button">
+                                                Ver Detalles
+                                            </button>
                                             <button onClick={() => openEditModal(entrevista)} className="manage-button">
                                                 Editar
                                             </button>
@@ -349,6 +406,97 @@ const GestionarEntrevistas = () => {
                                 <div className="modal-buttons">
                                     <button type="submit">Guardar</button>
                                     <button type="button" onClick={() => setShowIndicadoresModal(false)}>
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {showDetailsModal && entrevistaCompleta && (
+                    <div className="modal-overlay">
+                        <div className="modal modal-large">
+                            <h2>Detalles de la Entrevista</h2>
+                            <div className="entrevista-details">
+                                <div className="info-section">
+                                    <h3>Información General</h3>
+                                    <p><strong>Fecha:</strong> {new Date(entrevistaCompleta.fecha).toLocaleDateString()}</p>
+                                    <p><strong>Estado:</strong> {entrevistaCompleta.estado}</p>
+                                    <p><strong>Tipo:</strong> {entrevistaCompleta.tipo_entrevista?.nombre}</p>
+                                    <p><strong>Entrevistador:</strong> {`${entrevistaCompleta.empleado?.nombre} ${entrevistaCompleta.empleado?.apellido}`}</p>
+                                </div>
+
+                                <div className="info-section">
+                                    <h3>Indicadores</h3>
+                                    <button onClick={() => setShowIndicadoresModal(true)}>
+                                        Editar Puntajes
+                                    </button>
+                                    <div className="indicadores-list">
+                                        {entrevistaCompleta.indicadores?.map(indicador => (
+                                            <div key={indicador.id_indicador} className="indicador-item">
+                                                <span>{indicador.nombre}</span>
+                                                <span>{indicador.puntaje}/20</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="info-section">
+                                    <h3>Observaciones</h3>
+                                    <button onClick={() => setShowObservacionModal(true)}>
+                                        Agregar Observación
+                                    </button>
+                                    <div className="observaciones-list">
+                                        {entrevistaCompleta.observaciones?.map(obs => (
+                                            <div key={obs.id_observacion} className="observacion-item">
+                                                <p><strong>{obs.tipo}:</strong> {obs.contenido}</p>
+                                                <small>{new Date(obs.fecha).toLocaleString()}</small>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="modal-buttons">
+                                <button type="button" onClick={() => setShowDetailsModal(false)}>
+                                    Cerrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {showObservacionModal && selectedEntrevista && (
+                    <div className="modal-overlay">
+                        <div className="modal">
+                            <h2>Agregar Observación</h2>
+                            <form onSubmit={(e) => handleObservacionSubmit(e, selectedEntrevista.id_entrevista)}>
+                                <label>
+                                    Tipo:
+                                    <select
+                                        value={observacionForm.tipo}
+                                        onChange={(e) => setObservacionForm({...observacionForm, tipo: e.target.value})}
+                                        required
+                                    >
+                                        <option value="Regular">Regular</option>
+                                        <option value="Importante">Importante</option>
+                                        <option value="Crítica">Crítica</option>
+                                    </select>
+                                </label>
+
+                                <label>
+                                    Contenido:
+                                    <textarea
+                                        value={observacionForm.contenido}
+                                        onChange={(e) => setObservacionForm({...observacionForm, contenido: e.target.value})}
+                                        required
+                                    />
+                                </label>
+
+                                <div className="modal-buttons">
+                                    <button type="submit">Guardar</button>
+                                    <button type="button" onClick={() => setShowObservacionModal(false)}>
                                         Cancelar
                                     </button>
                                 </div>
