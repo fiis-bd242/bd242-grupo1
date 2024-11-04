@@ -252,6 +252,7 @@
     z-index: 1000;
     width: 80%;
     max-width: 800px;
+    padding-bottom: 20px; /* Añadir espacio inferior */
 }
 
 .vacante-popup h2 {
@@ -1083,6 +1084,7 @@
     background: #f8f9fa;
     padding: 15px;
     border-radius: 8px;
+    margin-bottom: 20px; /* Espacio inferior entre secciones */
 }
 
 .info-section h3 {
@@ -1187,3 +1189,112 @@
 }
 
 /* ...rest of existing styles... */
+
+/* Estilo para el puntaje */
+.puntaje {
+    font-size: 28px; /* Aumenta el tamaño de la fuente */
+    color: #ff5722; /* Color vibrante para resaltar */
+    font-weight: bold; /* Negrita para mayor prominencia */
+    background-color: #fff3e0; /* Fondo suave para destacar */
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: inline-block;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Opcional: Ajustes específicos para entrevistas */
+.entrevistas-section {
+    /* Asegura que la tabla no esté demasiado junta al puntaje */
+    margin-top: 10px;
+}
+
+/* Estilos para el contenedor de detalles con dos columnas */
+.postulante-details-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dos columnas iguales */
+    gap: 20px;
+    margin-top: 20px;
+    position: relative;
+}
+
+/* Estilos para la columna izquierda */
+.left-column {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.left-column .info-section {
+    margin-bottom: 20px;
+}
+
+.left-column .info-section h3 {
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.left-column .info-section ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.left-column .info-section ul li {
+    margin-bottom: 5px;
+    line-height: 1.4;
+}
+
+/* Estilos para la columna derecha */
+.right-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Alinea los elementos al final (derecha) */
+    /* ...existing styles... */
+}
+
+.right-column .manage-entrevistas-button {
+    width: 100%;
+    max-width: 300px; /* Ajustar según necesidad */
+}
+
+/* Espaciado entre secciones en la columna derecha */
+.right-column .info-section {
+    margin-bottom: 20px;
+}
+
+/* ...existing styles... */
+
+.evaluation-section {
+    /* ...existing styles... */
+}
+
+.entrevistas-list {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+.entrevista-item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.manage-entrevistas-button {
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px; /* Espacio superior para separar del contenido anterior */
+    width: 100%; /* Asegura que el botón ocupe el ancho completo */
+    max-width: 300px; /* Ajustar según necesidad */
+    display: block;
+    align-self: flex-end; /* Asegura que el botón se alinee a la derecha */
+}
+
+.manage-entrevistas-button:hover {
+    background-color: #005a9e;
+}

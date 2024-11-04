@@ -15,6 +15,7 @@ function App() {
         <Route path="/menu/puestos" element={<Puestos />} />
         <Route path="/menu/vacantes" element={<Vacantes />} />
         <Route path="/gestionar-entrevistas/:id" element={<GestionarEntrevistas />} />
+        <Route path="/gestionar-entrevistas" element={<GestionarEntrevistas />} />
       </Routes>
     </div>
   );

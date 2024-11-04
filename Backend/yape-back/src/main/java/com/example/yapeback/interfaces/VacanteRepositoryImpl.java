@@ -67,7 +67,7 @@ public class VacanteRepositoryImpl implements VacanteRepository {
             Postulante postulante = new Postulante();
             postulante.setId_postulante(rs.getLong("id_postulante"));
             postulante.setNombre(rs.getString("nombre"));
-            postulante.setTelefono(rs.getInt("telefono"));
+            postulante.setTelefono(rs.getBigDecimal("telefono").toBigInteger());
             postulante.setId_vacante(rs.getLong("id_vacante"));
             postulante.setCorreo(rs.getString("correo"));
             return postulante;
