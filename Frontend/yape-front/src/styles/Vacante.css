@@ -21,7 +21,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    padding: 0;
+    width: 100%;
 }
 
 /* Estilo para la lista de vacantes con scroll */
@@ -56,7 +58,13 @@
 /* Asegúrate de que el contenido principal no esté detrás de la barra lateral */
 .main-content {
     margin-left: 256px; /* Asegura que el contenido no se superponga con la barra lateral */
-    padding: 20px;
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: calc(100vh - 40px); /* Altura total menos el padding */
 }
 
 /* Estilo para los botones de filtro */
@@ -83,14 +91,15 @@
 /* Estilo para el botón de crear vacante */
 .create-button {
     text-align: right;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    text-align: left;
 }
 
 .create-button button {
     background-color: #28a745;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 24px;
     cursor: pointer;
     border-radius: 5px; /* Bordes redondeados */
     transition: background-color 0.3s; /* Transición para efecto hover */
@@ -404,6 +413,9 @@
 .secondary-button {
   background-color: #6c757d !important;
   color: white !important;
+  margin-left: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
 }
 
 .secondary-button:hover {
@@ -949,6 +961,8 @@
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-top: 20px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .secondary-button {
@@ -1133,3 +1147,43 @@
 .observacion-item.Crítica {
     border-left: 4px solid #dc3545;
 }
+
+/* Actualizar los estilos para GestionarEntrevistas */
+.layout-container {
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+/* ...existing styles... */
+
+/* Estilos específicos para GestionarEntrevistas */
+.gestionar-entrevistas-container {
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+.gestionar-entrevistas-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 30px;
+    min-height: calc(100vh - 40px);
+}
+
+/* Revertir el estilo general de .main-content */
+.main-content {
+    margin-left: 256px; /* Volver al margen original para la sidebar */
+    padding: 20px;
+}
+
+/* Ajustar el estilo cuando .main-content está dentro de .gestionar-entrevistas-container */
+.gestionar-entrevistas-container .main-content {
+    margin-left: 0; /* Eliminar el margen para la página de gestionar entrevistas */
+    padding: 0;
+}
+
+/* ...rest of existing styles... */

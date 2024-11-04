@@ -1,6 +1,7 @@
 package com.example.yapeback.interfaces;
 
 import com.example.yapeback.model.Observacion;
+import com.example.yapeback.model.TipoEntrevistaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -58,6 +59,8 @@ public class ObservacionRepositoryImpl implements ObservacionRepository {
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, idCategoria);
         return count != null && count > 0;
     }
+
+
 
 
 }

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 @Service
 public class EntrevistaService {
-
     private final EntrevistaRepository entrevistaRepository;
     private final TipoEntrevistaRepository tipoEntrevistaRepository;
     private final FeedbackRepository feedbackRepository;
@@ -23,8 +22,8 @@ public class EntrevistaService {
                              TipoEntrevistaRepository tipoEntrevistaRepository,
                              FeedbackRepository feedbackRepository,
                              PuntajeIndicadorRepository puntajeIndicadorRepository,
-                             ObservacionRepository observacionRepository
-                             , IndicadorRepository indicadorRepository) {
+                             ObservacionRepository observacionRepository,
+                             IndicadorRepository indicadorRepository) {
         this.entrevistaRepository = entrevistaRepository;
         this.tipoEntrevistaRepository = tipoEntrevistaRepository;
         this.feedbackRepository = feedbackRepository;
