@@ -1,252 +1,262 @@
-import React, { useState, useEffect, useCallback } from 'react'; // Add useCallback
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/Vacante.css';
 
 const GestionarEntrevistas = () => {
-    const { id } = useParams();
+    const { id } = useParams(); // id del postulante
     const navigate = useNavigate();
     const [entrevistas, setEntrevistas] = useState([]);
-    const [tiposEntrevista, setTiposEntrevista] = useState([]);
-    const [empleados, setEmpleados] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const [currentEntrevista, setCurrentEntrevista] = useState(null);
-    const [formData, setFormData] = useState({
-        estado: 'Pendiente',
-        fecha: '',
-        id_postulante: id,
-        id_empleado: '',
-        id_tipo_entrevista: ''
-    });
-    const [showIndicadoresModal, setShowIndicadoresModal] = useState(false);
-    const [currentIndicadores, setCurrentIndicadores] = useState([]);
+    
+    // Modal states
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [showScoresModal, setShowScoresModal] = useState(false);
+    const [showObservationModal, setShowObservationModal] = useState(false);
+
+    // Data states
     const [selectedEntrevista, setSelectedEntrevista] = useState(null);
-    const [showObservacionModal, setShowObservacionModal] = useState(false);
+    const [entrevistaCompleta, setEntrevistaCompleta] = useState(null);
+    
+    // Nuevo estado para empleados y tipos de entrevista
+    const [empleados, setEmpleados] = useState([]);
+    const [tiposEntrevista, setTiposEntrevista] = useState([]);
+    
+    const [formData, setFormData] = useState({
+        fecha: '',
+        estado: 'Pendiente',
+        id_empleado: '',
+        id_tipo_entrevista: '',
+        id_postulante: parseInt(id) // Asegurar que se incluya el id del postulante
+    });
     const [observacionForm, setObservacionForm] = useState({
         contenido: '',
-        tipo: 'Regular' // or other default value
+        tipo: 'Regular'
     });
-    const [entrevistaCompleta, setEntrevistaCompleta] = useState(null);
+    const [scores, setScores] = useState([]);
 
-    const fetchEntrevistas = useCallback(async () => {
+    // Fetch all interviews
+    const fetchEntrevistas = useCallback(async () => { // Envolver con useCallback
         try {
-            const response = await fetch(`http://localhost:8080/api/entrevistas`);
+            console.log('Fetching entrevistas...');
+            const response = await fetch(`http://localhost:8080/api/postulantes/${id}/entrevistas`);
             if (!response.ok) throw new Error('Error al obtener entrevistas');
             const data = await response.json();
-            // Filter interviews for current postulant
-            const filteredData = data.filter(entrevista => entrevista.id_postulante === parseInt(id));
-            setEntrevistas(filteredData);
-        } catch (error) {
-            console.error('Error:', error);
-            setError('Error al obtener las entrevistas');
+            console.log('Entrevistas obtenidas:', data);
+            setEntrevistas(data);
+            setError(null);
+        } catch (err) {
+            setError('Error al cargar las entrevistas');
+            console.error(err);
+        } finally {
+            setLoading(false);
         }
-    }, [id]); // Add id as dependency
+    }, [id]); // Añadir dependencias
+
+    // Función para obtener empleados
+    const fetchEmpleados = useCallback(async () => { // Envolver con useCallback
+        try {
+            console.log('Fetching empleados...');
+            // Actualiza la URL según el endpoint proporcionado
+            const response = await fetch('http://localhost:8080/empleados');
+            if (!response.ok) throw new Error('Error al obtener empleados');
+            const data = await response.json();
+            console.log('Empleados obtenidos:', data);
+            setEmpleados(data);
+        } catch (err) {
+            setError('Error al cargar los empleados');
+            console.error(err);
+        }
+    }, []); // Sin dependencias adicionales
+
+    // Función para obtener tipos de entrevista
+    const fetchTiposEntrevista = useCallback(async () => { // Envolver con useCallback
+        try {
+            console.log('Fetching tipos de entrevista...');
+            // Actualiza la URL al nuevo endpoint proporcionado
+            const response = await fetch('http://localhost:8080/api/tipos-entrevista/id-nombres');
+            if (!response.ok) throw new Error('Error al obtener tipos de entrevista');
+            const data = await response.json();
+            console.log('Tipos de entrevista obtenidos:', data); // Verificar estructura de datos
+
+            // Verificar si los datos están dentro de una propiedad específica
+            // Por ejemplo, si la respuesta es { tipos: [...] }, ajusta a data.tipos
+            const tipos = Array.isArray(data) ? data : data.tipos || [];
+            console.log('Tipos de entrevista procesados:', tipos);
+
+            setTiposEntrevista(data);
+
+        } catch (err) {
+            setError('Error al cargar los tipos de entrevista');
+            console.error(err);
+        }
+    }, []); // Sin dependencias adicionales
+
+    // Fetch complete interview details
+    const fetchEntrevistaCompleta = useCallback(async (id_entrevista) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/entrevistas/${id_entrevista}/completa`);
+            if (!response.ok) throw new Error('Error al obtener detalles');
+            const data = await response.json();
+            setEntrevistaCompleta(data);
+            setShowDetailsModal(true);
+            setError(null);
+        } catch (err) {
+            setError('Error al cargar los detalles');
+            console.error(err);
+        }
+    }, []);
+
+    // Fetch all data with useCallback
+    const fetchAllData = useCallback(async () => {
+        await Promise.all([fetchEntrevistas(), fetchEmpleados(), fetchTiposEntrevista()]);
+        setLoading(false);
+    }, [fetchEntrevistas, fetchEmpleados, fetchTiposEntrevista]); // Añadir dependencias
 
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                // Fetch entrevistas
-                console.log('Fetching entrevistas for postulante:', id);
-                const entrevistasRes = await fetch(`http://localhost:8080/api/postulantes/${id}/entrevistas`);
-                if (!entrevistasRes.ok) {
-                    const errorText = await entrevistasRes.text();
-                    throw new Error(`Error al obtener entrevistas: ${errorText}`);
-                }
-                const entrevistasData = await entrevistasRes.json();
-                console.log('Entrevistas recibidas:', entrevistasData);
-                setEntrevistas(entrevistasData);
+        fetchAllData();
+    }, [fetchAllData]); // Incluir fetchAllData en las dependencias
 
-                // Fetch tipos de entrevista
-                const tiposRes = await fetch('http://localhost:8080/api/tipos-entrevista');
-                if (!tiposRes.ok) throw new Error('Error al obtener tipos de entrevista');
-                const tiposData = await tiposRes.json();
-                console.log('Tipos de entrevista recibidos:', tiposData);
-                setTiposEntrevista(tiposData);
-
-                // Fetch empleados
-                const empleadosRes = await fetch('http://localhost:8080/api/empleados/all');
-                if (!empleadosRes.ok) throw new Error('Error al obtener empleados');
-                const empleadosData = await empleadosRes.json();
-                console.log('Empleados recibidos:', empleadosData);
-                setEmpleados(empleadosData);
-
-                setError(null);
-            } catch (err) {
-                console.error('Error detallado:', err);
-                setError(`Error al cargar los datos: ${err.message}`);
-                setEntrevistas([]);
-                setTiposEntrevista([]);
-                setEmpleados([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [id]); // Solo depende de id, no de fetchEntrevistas
-
-    const handleCreateOrEdit = async (e) => {
+    // Create new interview
+    const handleCreate = async (e) => {
         e.preventDefault();
         try {
-            const url = isEditing 
-                ? `http://localhost:8080/api/entrevistas/${currentEntrevista.id_entrevista}`
-                : 'http://localhost:8080/api/entrevistas';
-            
-            const response = await fetch(url, {
-                method: isEditing ? 'PUT' : 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
+            const nuevaEntrevista = {
+                fecha: formData.fecha,
+                estado: formData.estado,
+                idEmpleado: formData.id_empleado ? parseInt(formData.id_empleado) : null,
+                idTipoEntrevista: formData.id_tipo_entrevista ? parseInt(formData.id_tipo_entrevista) : null,
+                idPostulante: parseInt(id) || null
+            };
+
+            console.log('Datos a enviar:', JSON.stringify(nuevaEntrevista, null, 2)); // Mostrar datos enviados
+
+            // Validar que los campos requeridos no estén vacíos ni sean nulos
+            if (
+                !nuevaEntrevista.fecha ||
+                !nuevaEntrevista.idEmpleado ||
+                !nuevaEntrevista.idTipoEntrevista ||
+                !nuevaEntrevista.idPostulante
+            ) {
+                setError('Por favor, completa todos los campos requeridos.');
+                return;
+            }
+
+            const response = await fetch('http://localhost:8080/api/entrevistas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(nuevaEntrevista)
             });
 
             if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`Error del servidor: ${errorData}`);
+                let errorMessage = 'Error al crear entrevista';
+                const contentType = response.headers.get('Content-Type');
+                if (contentType && contentType.includes('application/json')) {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
-            
+
+            // Si la respuesta tiene contenido JSON, puedes procesarlo aquí si es necesario
+            // const result = await response.json();
+            // console.log('Entrevista creada exitosamente:', result);
+
             await fetchEntrevistas();
-            setShowModal(false);
-            resetForm();
-        } catch (error) {
-            console.error('Error detallado:', error);
-            alert(`Error al guardar la entrevista: ${error.message}`);
+            setShowCreateModal(false);
+            setFormData({ 
+                fecha: '', 
+                estado: 'Pendiente',
+                id_empleado: '',
+                id_tipo_entrevista: '',
+                id_postulante: parseInt(id)
+            });
+        } catch (err) {
+            setError(`Error al crear la entrevista: ${err.message}`); // Mostrar mensaje de error detallado
+            console.error(err);
         }
     };
 
+    // Update interview
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(`http://localhost:8080/api/entrevistas/${selectedEntrevista.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            
+            if (!response.ok) throw new Error('Error al actualizar');
+            await fetchEntrevistas();
+            setShowEditModal(false);
+        } catch (err) {
+            setError('Error al actualizar la entrevista');
+            console.error(err);
+        }
+    };
+
+    // Update scores
+    const handleUpdateScores = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(`http://localhost:8080/api/entrevistas/${selectedEntrevista.id}/puntajes`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(scores)
+            });
+            
+            if (!response.ok) throw new Error('Error al actualizar puntajes');
+            await fetchEntrevistas();
+            setShowScoresModal(false);
+        } catch (err) {
+            setError('Error al actualizar los puntajes');
+            console.error(err);
+        }
+    };
+
+    // Add observation
+    const handleAddObservation = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(`http://localhost:8080/api/entrevistas/${selectedEntrevista.id}/observaciones`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(observacionForm)
+            });
+            
+            if (!response.ok) throw new Error('Error al agregar observación');
+            await fetchEntrevistaCompleta(selectedEntrevista.id);
+            setShowObservationModal(false);
+            setObservacionForm({ contenido: '', tipo: 'Regular' });
+        } catch (err) {
+            setError('Error al agregar la observación');
+            console.error(err);
+        }
+    };
+
+    // Delete interview
     const handleDelete = async (id_entrevista) => {
-        if (!window.confirm('¿Está seguro que desea eliminar esta entrevista?')) return;
+        if (!window.confirm('¿Está seguro de eliminar esta entrevista?')) return;
         
         try {
             const response = await fetch(`http://localhost:8080/api/entrevistas/${id_entrevista}`, {
                 method: 'DELETE'
             });
-            if (!response.ok) throw new Error('Error al eliminar la entrevista');
+            
+            if (!response.ok) throw new Error('Error al eliminar');
             await fetchEntrevistas();
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error al eliminar la entrevista');
+        } catch (err) {
+            setError('Error al eliminar la entrevista');
+            console.error(err);
         }
     };
-
-    const fetchIndicadores = async (entrevistaId) => {
-        try {
-            const response = await fetch(`http://localhost:8080/api/entrevistas/${entrevistaId}/indicadores`);
-            if (!response.ok) throw new Error('Error al obtener indicadores');
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error:', error);
-            return [];
-        }
-    };
-
-    const handleUpdateIndicadores = async (entrevistaId) => {
-        try {
-            const response = await fetch(`http://localhost:8080/api/entrevistas/${entrevistaId}/puntajes`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(currentIndicadores),
-            });
-
-            if (!response.ok) throw new Error('Error al actualizar puntajes');
-            
-            await fetchEntrevistas();
-            setShowIndicadoresModal(false);
-            
-            // Refresh interview details if details modal is open
-            if (showDetailsModal) {
-                await fetchEntrevistaCompleta(entrevistaId);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error al actualizar los puntajes');
-        }
-    };
-
-    const openEditModal = async (entrevista) => {
-        setIsEditing(true);
-        setCurrentEntrevista(entrevista);
-        const indicadoresData = await fetchIndicadores(entrevista.id_entrevista);
-        setCurrentIndicadores(indicadoresData);
-        setFormData({
-            estado: entrevista.estado,
-            fecha: entrevista.fecha.split('T')[0],
-            id_postulante: id,
-            id_empleado: entrevista.id_empleado,
-            id_tipo_entrevista: entrevista.id_tipo_entrevista
-        });
-        setShowModal(true);
-    };
-
-    const openCreateModal = () => {
-        setIsEditing(false);
-        setCurrentEntrevista(null);
-        resetForm();
-        setShowModal(true);
-    };
-
-    const resetForm = () => {
-        setFormData({
-            estado: 'Pendiente',
-            fecha: '',
-            id_postulante: id,
-            id_empleado: '',
-            id_tipo_entrevista: ''
-        });
-    };
-
-    const fetchEntrevistaCompleta = async (id_entrevista) => {
-        try {
-            setLoading(true);
-            const response = await fetch(`http://localhost:8080/api/entrevistas/${id_entrevista}/completa`);
-            if (!response.ok) throw new Error('Error al obtener detalles de la entrevista');
-            const data = await response.json();
-            setEntrevistaCompleta(data);
-            setShowDetailsModal(true);
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error al cargar los detalles de la entrevista');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleObservacionSubmit = async (e, id_entrevista) => {
-        e.preventDefault();
-        try {
-            const response = await fetch(`http://localhost:8080/api/entrevistas/${id_entrevista}/observaciones`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(observacionForm),
-            });
-
-            if (!response.ok) throw new Error('Error al agregar observación');
-            
-            // Refresh interview details
-            await fetchEntrevistaCompleta(id_entrevista);
-            setShowObservacionModal(false);
-            setObservacionForm({ contenido: '', tipo: 'Regular' });
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error al agregar la observación');
-        }
-    };
-
-    if (loading) return <div className="main-content">Cargando...</div>;
-    if (error) return <div className="main-content">Error: {error}</div>;
 
     return (
-        <div className="layout-container">
-            <div className="main-content">
+        <div className="gestionar-entrevistas-container">
+            <div className="gestionar-entrevistas-content">
                 <header className="header">
                     <h1 className="page-title">Gestionar Entrevistas</h1>
                     <button onClick={() => navigate(-1)} className="secondary-button">
@@ -255,18 +265,24 @@ const GestionarEntrevistas = () => {
                 </header>
 
                 <div className="content-section">
-                    <button onClick={openCreateModal} className="create-button">
+                    <button onClick={() => setShowCreateModal(true)} className="create-button">
                         Nueva Entrevista
                     </button>
 
-                    {entrevistas.length > 0 ? (
+                    {loading ? (
+                        <div className="loading-indicator">Cargando entrevistas...</div>
+                    ) : error ? (
+                        <div className="error-message">
+                            {error}
+                            <button onClick={fetchEntrevistas}>Reintentar</button>
+                        </div>
+                    ) : entrevistas.length > 0 ? (
                         <table className="vacante-table">
                             <thead>
                                 <tr>
                                     <th>Fecha</th>
                                     <th>Estado</th>
                                     <th>Tipo</th>
-                                    <th>Empleado</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -275,20 +291,35 @@ const GestionarEntrevistas = () => {
                                     <tr key={entrevista.id_entrevista}>
                                         <td>{new Date(entrevista.fecha).toLocaleDateString()}</td>
                                         <td>{entrevista.estado}</td>
+                                        <td>{entrevista.tipo_entrevista?.nombre}</td>
                                         <td>
-                                            {tiposEntrevista.find(t => t.id_tipo_entrevista === entrevista.id_tipo_entrevista)?.nombre || 'N/A'}
-                                        </td>
-                                        <td>
-                                            {empleados.find(e => e.id_empleado === entrevista.id_empleado)?.nombre || 'N/A'}
-                                        </td>
-                                        <td>
-                                            <button onClick={() => fetchEntrevistaCompleta(entrevista.id_entrevista)} className="manage-button">
+                                            <button 
+                                                onClick={() => fetchEntrevistaCompleta(entrevista.id_entrevista)}
+                                                className="manage-button"
+                                            >
                                                 Ver Detalles
                                             </button>
-                                            <button onClick={() => openEditModal(entrevista)} className="manage-button">
+                                            <button 
+                                                onClick={() => {
+                                                    setSelectedEntrevista(entrevista);
+                                                    setShowEditModal(true);
+                                                    // Prellenar formData con los datos de la entrevista seleccionada
+                                                    setFormData({
+                                                        fecha: entrevista.fecha,
+                                                        estado: entrevista.estado,
+                                                        id_empleado: entrevista.id_empleado,
+                                                        id_tipo_entrevista: entrevista.id_tipo_entrevista,
+                                                        id_postulante: entrevista.id_postulante
+                                                    });
+                                                }}
+                                                className="manage-button"
+                                            >
                                                 Editar
                                             </button>
-                                            <button onClick={() => handleDelete(entrevista.id_entrevista)} className="delete-button">
+                                            <button 
+                                                onClick={() => handleDelete(entrevista.id_entrevista)}
+                                                className="delete-button"
+                                            >
                                                 Eliminar
                                             </button>
                                         </td>
@@ -301,11 +332,12 @@ const GestionarEntrevistas = () => {
                     )}
                 </div>
 
-                {showModal && (
+                {/* Modal para crear/editar entrevista */}
+                {(showCreateModal || showEditModal) && (
                     <div className="modal-overlay">
                         <div className="modal">
-                            <h2>{isEditing ? 'Editar' : 'Nueva'} Entrevista</h2>
-                            <form onSubmit={handleCreateOrEdit}>
+                            <h2>{showEditModal ? 'Editar' : 'Nueva'} Entrevista</h2>
+                            <form onSubmit={showEditModal ? handleUpdate : handleCreate}>
                                 <label>
                                     Fecha:
                                     <input
@@ -324,24 +356,8 @@ const GestionarEntrevistas = () => {
                                         required
                                     >
                                         <option value="Pendiente">Pendiente</option>
-                                        <option value="Hecha">Hecha</option>
-                                        <option value="Rechazada">Rechazada</option>
-                                    </select>
-                                </label>
-
-                                <label>
-                                    Tipo de Entrevista:
-                                    <select
-                                        value={formData.id_tipo_entrevista}
-                                        onChange={(e) => setFormData({...formData, id_tipo_entrevista: e.target.value})}
-                                        required
-                                    >
-                                        <option value="">Seleccione un tipo</option>
-                                        {tiposEntrevista.map(tipo => (
-                                            <option key={tipo.id_tipo_entrevista} value={tipo.id_tipo_entrevista}>
-                                                {tipo.nombre}
-                                            </option>
-                                        ))}
+                                        <option value="Realizada">Realizada</option>
+                                        <option value="Cancelada">Cancelada</option>
                                     </select>
                                 </label>
 
@@ -349,23 +365,53 @@ const GestionarEntrevistas = () => {
                                     Empleado:
                                     <select
                                         value={formData.id_empleado}
-                                        onChange={(e) => setFormData({...formData, id_empleado: e.target.value})}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            id_empleado: e.target.value ? parseInt(e.target.value) : null
+                                        })}
                                         required
                                     >
-                                        <option value="">Seleccione un empleado</option>
+                                        <option value="">Selecciona un empleado</option>
                                         {empleados.map(empleado => (
                                             <option key={empleado.id_empleado} value={empleado.id_empleado}>
-                                                {`${empleado.nombre} ${empleado.apellido}`}
+                                                {empleado.nombre} {empleado.apellido}
                                             </option>
                                         ))}
                                     </select>
                                 </label>
 
+                                <label>
+                                    Tipo de Entrevista:
+                                    <select
+                                        value={formData.id_tipo_entrevista}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            id_tipo_entrevista: e.target.value ? parseInt(e.target.value) : null
+                                        })}
+                                        required
+                                    >
+                                        <option value="">Selecciona un tipo</option>
+                                        {tiposEntrevista.map((tipo) => (
+                                            <option key={tipo.id} value={tipo.id}>
+                                                {tipo.nombre}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+
+                                {/* Agregar más campos según sea necesario */}
+
                                 <div className="modal-buttons">
                                     <button type="submit">
-                                        {isEditing ? 'Guardar' : 'Crear'}
+                                        {showEditModal ? 'Guardar' : 'Crear'}
                                     </button>
-                                    <button type="button" onClick={() => setShowModal(false)}>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => {
+                                            setShowCreateModal(false);
+                                            setShowEditModal(false);
+                                        }}
+                                    >
                                         Cancelar
                                     </button>
                                 </div>
@@ -374,46 +420,7 @@ const GestionarEntrevistas = () => {
                     </div>
                 )}
 
-                {showIndicadoresModal && currentIndicadores.length > 0 && (
-                    <div className="modal-overlay">
-                        <div className="modal">
-                            <h2>Editar Indicadores</h2>
-                            <form onSubmit={(e) => {
-                                e.preventDefault();
-                                handleUpdateIndicadores(currentEntrevista.id_entrevista);
-                            }}>
-                                {currentIndicadores.map((indicador, index) => (
-                                    <div key={indicador.id_indicador} className="indicador-item">
-                                        <label>
-                                            {indicador.nombre}:
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                max="20"
-                                                value={indicador.puntaje}
-                                                onChange={(e) => {
-                                                    const newIndicadores = [...currentIndicadores];
-                                                    newIndicadores[index] = {
-                                                        ...indicador,
-                                                        puntaje: parseInt(e.target.value)
-                                                    };
-                                                    setCurrentIndicadores(newIndicadores);
-                                                }}
-                                            />
-                                        </label>
-                                    </div>
-                                ))}
-                                <div className="modal-buttons">
-                                    <button type="submit">Guardar</button>
-                                    <button type="button" onClick={() => setShowIndicadoresModal(false)}>
-                                        Cancelar
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                )}
-
+                {/* Modal de detalles */}
                 {showDetailsModal && entrevistaCompleta && (
                     <div className="modal-overlay">
                         <div className="modal modal-large">
@@ -424,37 +431,35 @@ const GestionarEntrevistas = () => {
                                     <p><strong>Fecha:</strong> {new Date(entrevistaCompleta.fecha).toLocaleDateString()}</p>
                                     <p><strong>Estado:</strong> {entrevistaCompleta.estado}</p>
                                     <p><strong>Tipo:</strong> {entrevistaCompleta.tipo_entrevista?.nombre}</p>
-                                    <p><strong>Entrevistador:</strong> {`${entrevistaCompleta.empleado?.nombre} ${entrevistaCompleta.empleado?.apellido}`}</p>
                                 </div>
 
                                 <div className="info-section">
                                     <h3>Indicadores</h3>
-                                    <button onClick={() => setShowIndicadoresModal(true)}>
+                                    <button onClick={() => {
+                                        setScores(entrevistaCompleta.indicadores || []);
+                                        setShowScoresModal(true);
+                                    }}>
                                         Editar Puntajes
                                     </button>
-                                    <div className="indicadores-list">
-                                        {entrevistaCompleta.indicadores?.map(indicador => (
-                                            <div key={indicador.id_indicador} className="indicador-item">
-                                                <span>{indicador.nombre}</span>
-                                                <span>{indicador.puntaje}/20</span>
-                                            </div>
-                                        ))}
-                                    </div>
+                                    {entrevistaCompleta.indicadores?.map(indicador => (
+                                        <div key={indicador.id_indicador} className="indicador-item">
+                                            <span>{indicador.nombre}</span>
+                                            <span>{indicador.puntaje}/20</span>
+                                        </div>
+                                    ))}
                                 </div>
 
                                 <div className="info-section">
                                     <h3>Observaciones</h3>
-                                    <button onClick={() => setShowObservacionModal(true)}>
+                                    <button onClick={() => setShowObservationModal(true)}>
                                         Agregar Observación
                                     </button>
-                                    <div className="observaciones-list">
-                                        {entrevistaCompleta.observaciones?.map(obs => (
-                                            <div key={obs.id_observacion} className="observacion-item">
-                                                <p><strong>{obs.tipo}:</strong> {obs.contenido}</p>
-                                                <small>{new Date(obs.fecha).toLocaleString()}</small>
-                                            </div>
-                                        ))}
-                                    </div>
+                                    {entrevistaCompleta.observaciones?.map(obs => (
+                                        <div key={obs.id_observacion} className={`observacion-item ${obs.tipo}`}>
+                                            <p><strong>{obs.tipo}:</strong> {obs.contenido}</p>
+                                            <small>{new Date(obs.fecha).toLocaleString()}</small>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
@@ -467,16 +472,49 @@ const GestionarEntrevistas = () => {
                     </div>
                 )}
 
-                {showObservacionModal && selectedEntrevista && (
+                {/* Modal para actualizar puntajes */}
+                {showScoresModal && (
+                    <div className="modal-overlay">
+                        <div className="modal">
+                            <h2>Editar Puntajes</h2>
+                            <form onSubmit={handleUpdateScores}>
+                                {scores.map((score, index) => (
+                                    <div key={score.id_indicador} className="indicador-item">
+                                        <span>{score.nombre}</span>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="20"
+                                            value={score.puntaje}
+                                            onChange={(e) => {
+                                                const newScores = [...scores];
+                                                newScores[index].puntaje = parseInt(e.target.value) || 0;
+                                                setScores(newScores);
+                                            }}
+                                            required
+                                        />
+                                    </div>
+                                ))}
+                                <div className="modal-buttons">
+                                    <button type="submit">Guardar</button>
+                                    <button type="button" onClick={() => setShowScoresModal(false)}>Cancelar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* Modal para agregar observación */}
+                {showObservationModal && (
                     <div className="modal-overlay">
                         <div className="modal">
                             <h2>Agregar Observación</h2>
-                            <form onSubmit={(e) => handleObservacionSubmit(e, selectedEntrevista.id_entrevista)}>
+                            <form onSubmit={handleAddObservation}>
                                 <label>
                                     Tipo:
                                     <select
                                         value={observacionForm.tipo}
-                                        onChange={(e) => setObservacionForm({...observacionForm, tipo: e.target.value})}
+                                        onChange={(e) => setObservacionForm({ ...observacionForm, tipo: e.target.value })}
                                         required
                                     >
                                         <option value="Regular">Regular</option>
@@ -484,26 +522,24 @@ const GestionarEntrevistas = () => {
                                         <option value="Crítica">Crítica</option>
                                     </select>
                                 </label>
-
                                 <label>
                                     Contenido:
                                     <textarea
                                         value={observacionForm.contenido}
-                                        onChange={(e) => setObservacionForm({...observacionForm, contenido: e.target.value})}
+                                        onChange={(e) => setObservacionForm({ ...observacionForm, contenido: e.target.value })}
                                         required
                                     />
                                 </label>
-
                                 <div className="modal-buttons">
-                                    <button type="submit">Guardar</button>
-                                    <button type="button" onClick={() => setShowObservacionModal(false)}>
-                                        Cancelar
-                                    </button>
+                                    <button type="submit">Agregar</button>
+                                    <button type="button" onClick={() => setShowObservationModal(false)}>Cancelar</button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 )}
+
+                {/* Modales adicionales según sea necesario */}
             </div>
         </div>
     );
