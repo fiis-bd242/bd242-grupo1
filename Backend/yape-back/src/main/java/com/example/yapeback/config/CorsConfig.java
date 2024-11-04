@@ -13,13 +13,10 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        
-        // Allow specific origins instead of "*"
-        config.addAllowedOriginPattern("*");
+        config.setAllowCredentials(true);
+        config.addAllowedOriginPattern("http://localhost:3000"); // Replace with your allowed origins
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
-        config.setAllowCredentials(true);
-        
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
