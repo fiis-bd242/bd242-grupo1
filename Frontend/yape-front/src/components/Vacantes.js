@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/MenuPrincipal.css';
 import '../styles/Vacante.css'; // Asegúrate de que el nombre del archivo CSS sea consistente
 import GestionarEntrevistas from './GestionarEntrevistas'; // Import the component
+import axios from 'axios';
 
 const Vacantes = () => {
   const navigate = useNavigate();
@@ -102,6 +103,9 @@ const Vacantes = () => {
   const [entrevistas, setEntrevistas] = useState([]);
   const [showEntrevistasModal, setShowEntrevistasModal] = useState(false);
   const [entrevistasDetails, setEntrevistasDetails] = useState([]);
+
+  // Estado para almacenar la oferta laboral
+  const [ofertaLaboral, setOfertaLaboral] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => { 
@@ -847,6 +851,34 @@ const Vacantes = () => {
     return endDate > today;
   };
 
+  // Función para obtener la oferta laboral del postulante
+  const fetchOfertaLaboral = async (postulanteId) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/postulantes/${postulanteId}`);
+      setOfertaLaboral(response.data.ofertaLaboral);
+    } catch (error) {
+      console.error('Error fetching oferta laboral:', error);
+    }
+  };
+
+  // Llamar a fetchOfertaLaboral cuando se selecciona un postulante
+  useEffect(() => {
+    if (selectedPostulante) {
+      fetchOfertaLaboral(selectedPostulante.id_postulante);
+    }
+  }, [selectedPostulante]);
+
+  // Helper function to check if postulante only has basic info
+  const hasOnlyBasicInfo = (postulante) => {
+    return (
+      !postulante.idiomas?.length &&
+      !postulante.educaciones?.length &&
+      !postulante.habilidades?.length &&
+      !postulante.experienciasLaborales?.length &&
+      !postulante.ofertaLaboral
+    );
+  };
+
   return (
     <div className="layout-container">
       {/* Sidebar */}
@@ -1320,7 +1352,9 @@ const Vacantes = () => {
                         {loadingDetails && <small className="loading-details"> (Cargando detalles...)</small>}
                       </span>
                       <button onClick={() => openEditPostulanteModal(postulante)}>Editar</button>
-                      <button onClick={() => handleDeletePostulante(postulante.id_postulante)}>Eliminar</button>
+                      {hasOnlyBasicInfo(postulante) && (
+                        <button onClick={() => handleDeletePostulante(postulante.id_postulante)}>Eliminar</button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1421,6 +1455,39 @@ const Vacantes = () => {
                         Gestionar Entrevistas
                     </button>
                   )}
+                  {/* Agregar espacio adicional */}
+                  <div style={{ marginTop: '20px' }}></div>
+                  {/* Nueva sección de contratación */}
+                  {/* Sección de contratación siempre visible */}
+                  <section>
+                    <h2>Contratación</h2>
+                    <p><strong>Fecha de Oferta:</strong> {ofertaLaboral ? ofertaLaboral.fecha_oferta : 'No asignada'}</p>
+                    <p><strong>Fecha de Inicio Propuesta:</strong> {ofertaLaboral ? ofertaLaboral.fecha_inicio_propuesta : 'No asignada'}</p>
+                    <p>
+                      <strong>Documento Legal Sin Firma:</strong> {
+                        ofertaLaboral && ofertaLaboral.link_documento_legal_sin_firma ? 
+                          <a href={ofertaLaboral.link_documento_legal_sin_firma}>Ver Documento</a> : 
+                          'No disponible'
+                      }
+                    </p>
+                    <p>
+                      <strong>Documento Legal Con Firma:</strong> {
+                        ofertaLaboral && ofertaLaboral.link_documento_legal_con_firma ? 
+                          <a href={ofertaLaboral.link_documento_legal_con_firma}>Ver Documento</a> : 
+                          'No disponible'
+                      }
+                    </p>
+                    <h3>Beneficios</h3>
+                    {ofertaLaboral && ofertaLaboral.beneficios && ofertaLaboral.beneficios.length > 0 ? (
+                      <ul>
+                        {ofertaLaboral.beneficios.map(beneficio => (
+                          <li key={beneficio.id_beneficio}>{beneficio.descripcion}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>No hay beneficios asignados</p>
+                    )}
+                  </section>
                 </div>
               </div>
             </div>
