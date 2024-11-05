@@ -1362,4 +1362,49 @@
   background-color: #ffe6e6;
 }
 
+/* Estilos para la sección de feedback */
+.feedback-section {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.feedback-greeting {
+  font-size: 1.1em;
+  color: #2c5282;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #e6fffa;
+  border-radius: 4px;
+}
+
+.feedback-observations {
+  padding: 15px;
+  background-color: white;
+  border-radius: 4px;
+}
+
+.feedback-observations h3 {
+  color: #2d3748;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #4299e1;
+  padding-bottom: 5px;
+}
+
+.feedback-observations ol {
+  padding-left: 20px;
+}
+
+.feedback-observations li {
+  margin-bottom: 10px;
+  line-height: 1.6;
+  color: #4a5568;
+}
+
+.feedback-observations li:last-child {
+  margin-bottom: 0;
+}
+
 /* ...existing CSS... */

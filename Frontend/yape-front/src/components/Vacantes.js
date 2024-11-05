@@ -135,6 +135,9 @@ const Vacantes = () => {
     { id_beneficio: 10, descripcion: "Comedor subsidiado" }
   ]);
 
+  // Añadir este nuevo estado después de los otros estados
+  const [observacionesPostulante, setObservacionesPostulante] = useState([]);
+
   useEffect(() => {
     const timer = setInterval(() => { 
       setTime(new Date());
@@ -816,38 +819,57 @@ const Vacantes = () => {
 
   // También actualizar cuando se selecciona un postulante para ver detalles
   const handlePostulanteClick = async (postulante) => {
-    setSelectedPostulante(postulante); // Use setSelectedPostulante here
-
-    // Fetch entrevistas
+    setSelectedPostulante(postulante);
+    
     try {
-      const response = await fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}/entrevistas`);
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+      // 1. Obtener todas las entrevistas del postulante
+      const entrevistasResponse = await fetch(`http://localhost:8080/api/postulantes/${postulante.id_postulante}/entrevistas`);
+      if (!entrevistasResponse.ok) {
+        throw new Error(`Error: ${entrevistasResponse.statusText}`);
       }
-      const data = await response.json();
-      setEntrevistas(data);
-
+      const entrevistasData = await entrevistasResponse.json();
+      setEntrevistas(entrevistasData);
+  
+      // 2. Obtener las observaciones para cada entrevista
+      const allObservaciones = [];
+      for (const entrevista of entrevistasData) {
+        const observacionesResponse = await fetch(`http://localhost:8080/api/observaciones/entrevista/${entrevista.id_entrevista}`);
+        if (observacionesResponse.ok) {
+          const observacionesData = await observacionesResponse.json();
+          // Solo agregamos las descripciones de las observaciones
+          allObservaciones.push(...observacionesData.map(obs => ({
+            descripcion: obs.descripcion,
+            tipoEntrevista: entrevista.tipo_entrevista, // Opcional: agregar el tipo de entrevista
+            fecha: entrevista.fecha // Opcional: agregar la fecha de la entrevista
+          })));
+        }
+      }
+  
+      // 3. Actualizar el estado con todas las observaciones
+      setObservacionesPostulante(allObservaciones);
+  
       // Calculate average score and update postulante data
-      const totalPuntaje = data.reduce((sum, entrevista) => sum + entrevista.puntaje_general, 0);
-      const averagePuntaje = data.length > 0 ? totalPuntaje / data.length : 0;
+      const totalPuntaje = entrevistasData.reduce((sum, entrevista) => sum + (entrevista.puntaje_general || 0), 0);
+      const averagePuntaje = entrevistasData.length > 0 ? totalPuntaje / entrevistasData.length : 0;
       
       setSelectedPostulante({
         ...postulante,
         puntaje: averagePuntaje
       });
-
+  
     } catch (error) {
-      console.error("Error fetching entrevistas:", error);
+      console.error("Error fetching entrevistas and observaciones:", error);
     }
-
+  
     setShowPostulanteDetailsModal(true);
-  };
+  }; // Add missing semicolon here
 
   const fetchEntrevistasDetails = async (postulanteId) => {
     try {
-      console.log(`Fetching entrevistas details for postulanteId: ${postulanteId}`);
       const response = await fetch(`http://localhost:8080/api/postulantes/${postulanteId}/entrevistas`);
-      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
       const data = await response.json();
       console.log('Fetched entrevistas details:', data);
       setEntrevistasDetails(data);
@@ -1637,6 +1659,28 @@ const Vacantes = () => {
                   )}
                   {/* Agregar espacio adicional */}
                   <div style={{ marginTop: '20px' }}></div>
+                  {/* Nueva sección de Feedback */}
+                  <section className="feedback-section">
+                    <h2>Feedback</h2>
+                    <div className="feedback-content">
+                      <p className="feedback-greeting">
+                        Hola, <strong>{selectedPostulante.nombre}</strong>. 
+                        Este es el feedback de todo tu proceso de postulación. Esperamos te sea útil.
+                      </p>
+                      <div className="feedback-observations">
+                        <h3>Lista de observaciones:</h3>
+                        {observacionesPostulante.length > 0 ? (
+                          <ol>
+                            {observacionesPostulante.map((observacion, index) => (
+                              <li key={index}>{observacion.descripcion}</li>
+                            ))}
+                          </ol>
+                        ) : (
+                          <p>No hay observaciones registradas.</p>
+                        )}
+                      </div>
+                    </div>
+                  </section>
                   {/* Nueva sección de contratación */}
                   {/* Sección de contratación siempre visible */}
                   <section>
