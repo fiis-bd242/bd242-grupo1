@@ -231,10 +231,14 @@ CREATE TABLE Audiencia (
 
 CREATE TABLE Prototipo (
 	cod_prototipo SERIAL NOT NULL,
+	nombre_prot VARCHAR(255) not null,
+	Descripcion Varchar(255) not null,
 	Prop_presupuesto NUMERIC NOT NULL,
+	Fecha_creacion timestamp not null,
+	Fecha_estado timestamp,
 	Prop_audiencia varchar (255) not null,
 	ID_empleado INTEGER NOT NULL,
-	cod_est_prot INTEGER NOT NULL,
+	cod_est_prot INTEGER,
 	PRIMARY KEY (cod_prototipo),
 	FOREIGN KEY (ID_empleado) REFERENCES Empleado(ID_empleado),
 	FOREIGN KEY (cod_est_prot) REFERENCES Estado_prototipo(cod_est_prot),
@@ -251,9 +255,13 @@ CREATE TABLE Canal (
 create table prototipoxcanal (
 	cod_prototipo INTEGER not null,
 	cod_canal INTEGER not null,
+	impresiones numeric default null,
+    clics numeric default null,
+    conversiones numeric default null, 
 	FOREIGN KEY (cod_prototipo) REFERENCES Prototipo(cod_prototipo),
 	FOREIGN KEY (cod_canal) REFERENCES Canal(cod_canal)
 ); 
+
 CREATE TABLE Objetivos (
     Id_objetivo SERIAL PRIMARY KEY,
     Descripcion VARCHAR (255),
@@ -269,21 +277,23 @@ CREATE TABLE Tipo_recurso (
 
 
 CREATE TABLE Recursos (
-    id_recurso SERIAL PRIMARY KEY,
-    cod_prototipo INTEGER NOT NULL,
-    nombre_recurso VARCHAR(255) NOT NULL,
-    url_recurso VARCHAR(255) not null,
-    id_tipo_recurso INTEGER not null,
+    id_recurso_prot SERIAL PRIMARY KEY,
+    nombre_recurso VARCHAR(255) default null,
+    url_recurso VARCHAR(255) default null,
+    id_tipo_recurso INTEGER default null,
+    cod_prototipo INTEGER not null,
     FOREIGN KEY (id_tipo_recurso) REFERENCES Tipo_recurso(id_tipo_recurso),
     FOREIGN KEY (cod_prototipo) REFERENCES Prototipo(cod_prototipo)
 );
 
 CREATE TABLE Campana_Publicitaria (
 	cod_campana SERIAL NOT NULL,
-    Resultado TEXT NOT NULL,
+    Resultado TEXT,
    	Presupuesto NUMERIC NOT NULL,
 	Nombre_campana VARCHAR(255) NOT NULL,
 	Audiencia Varchar(50) NOT NULL,
+	fecha_publicacion timestamp,
+	fecha_finalizacion timestamp,
 	cod_promocion INTEGER NOT NULL,
 	cod_prototipo INTEGER NOT NULL,
 	PRIMARY KEY (cod_campana),
@@ -291,30 +301,20 @@ CREATE TABLE Campana_Publicitaria (
 	FOREIGN KEY (cod_prototipo) REFERENCES Prototipo(cod_prototipo)
 );
 
-CREATE TABLE Desempeno_Canal (
-    id_desempeno SERIAL PRIMARY KEY,
-    cod_campana INTEGER NOT NULL,
-    cod_canal INTEGER NOT NULL,
-    impresiones NUMERIC,
-    clics NUMERIC,
-    conversiones NUMERIC, 
-    FOREIGN KEY (cod_campana) REFERENCES Campana_Publicitaria(cod_campana),
-    FOREIGN KEY (cod_canal) REFERENCES Canal(cod_canal)
-);
 
 CREATE TABLE Pre_test (
-	id_pretest SERIAL NOT NULL,
+	id_pretest SERIAL NOT null ,
 	AudienciaA varchar(255) NOT NULL,
-	AudienciaB varchar(255) NOT NULL,
-	Fecha_inicio timestamp NOT NULL,
-	Fecha_fin timestamp not null,
-	Resultado varchar (255) NOT NULL,
-	Comentarios TEXT NOT NULL,
+	AudienciaB varchar(255),
+	Fecha_inicio timestamp not null,
+	Fecha_fin timestamp,
+	Resultado varchar (255),
 	cod_prototipo INTEGER NOT NULL,
 	id_empleado Integer not null,
 	PRIMARY KEY (id_pretest),
 	FOREIGN KEY (cod_prototipo) REFERENCES Prototipo(cod_prototipo),
 	foreign key (AudienciaB)references audiencia(id_audiencia),
+	foreign key (Resultado) references audiencia(id_audiencia),
 	foreign key (id_empleado) references Empleado(id_empleado)
 	
 );
