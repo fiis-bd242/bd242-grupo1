@@ -164,11 +164,11 @@ VALUES
     ('Pendiente');
 
 -- Tabla Promocion (adaptada)
-INSERT INTO Promocion (fecha_inicio, fecha_fin, dscto, precio final, estado_promo, dscrip_promo, ID_empleado)
+INSERT INTO Promocion (fecha_inicio, fecha_fin, dscto, precio final, estado_promo, dscrip_promo, vigencia, ID_empleado)
 VALUES
-    ('2024-10-01', '2024-10-15', 15.00, 40.50, TRUE, 'Promoción de inicio de temporada', 5),
-    ('2024-11-01', '2024-11-30', 20.00, 29.90, TRUE, 'Promoción de Black Friday', 6),
-    ('2024-12-01', '2024-12-25', 25.00, 15.40, FALSE, 'Promoción de Navidad', 7);
+    ('2024-10-01', '2024-10-15', 15.00, 40.50, TRUE, 'Promoción de inicio de temporada', 30, 5),
+    ('2024-11-01', '2024-11-30', 20.00, 29.90, TRUE, 'Promoción de Black Friday',7, 6),
+    ('2024-12-01', '2024-12-25', 25.00, 15.40, FALSE, 'Promoción de Navidad',15, 7);
 
 INSERT INTO Audiencia (id_audiencia, Edad_rango, Genero, Ubicacion)
 VALUES
