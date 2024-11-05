@@ -1005,6 +1005,60 @@ const Vacantes = () => {
     }
   };
 
+  const handleContratar = async (postulante) => {
+    if (window.confirm('¿Está seguro que desea contratar a este postulante?')) {
+      try {
+        // Fetch the vacancy
+        const vacanteResponse = await fetch(`http://localhost:8080/vacantes/${postulante.id_vacante}`);
+        if (!vacanteResponse.ok) throw new Error('Error fetching vacante');
+        const vacante = await vacanteResponse.json();
+    
+        // Update the vacancy quantity and status if necessary
+        const updatedVacante = { 
+          ...vacante, 
+          cantidad: vacante.cantidad - 1,
+          estado: vacante.cantidad - 1 === 0 ? 'Cerrada' : vacante.estado
+        };
+        await fetch(`http://localhost:8080/vacantes/${vacante.id_vacante}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedVacante),
+        });
+    
+        // Create the new employee
+        const newEmployee = {
+          nombre: postulante.nombre,
+          apellido: postulante.apellido,
+          fecha_nacimiento: '2000-01-01',
+          fecha_ingreso: new Date().toISOString().split('T')[0],
+          estado: 'Activo',
+          documento_identidad: '9999',
+          telefono: postulante.telefono,
+          id_puesto: vacante.id_puesto,
+        };
+        await fetch('http://localhost:8080/empleados', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newEmployee),
+        });
+    
+        // Hide the hired applicant
+        setPostulantes((prevPostulantes) =>
+          prevPostulantes.filter((p) => p.id_postulante !== postulante.id_postulante)
+        );
+    
+        alert('Postulante contratado exitosamente');
+        setShowPostulanteDetailsModal(false); // Close the modal
+
+        // Reload the page to see the updated vacancy status
+        window.location.reload();
+      } catch (error) {
+        console.error('Error al contratar postulante:', error);
+        alert('Error al contratar el postulante');
+      }
+    }
+  };
+
   return (
     <div className="layout-container">
       {/* Sidebar */}
@@ -1615,7 +1669,7 @@ const Vacantes = () => {
                     )}
                     <div className="contratacion-buttons">
                       <button onClick={() => handleEditOferta(selectedPostulante)}>Editar</button>
-                      <button>Contratar</button>
+                      <button onClick={() => handleContratar(selectedPostulante)}>Contratar</button>
                     </div>
                   </section>
                 </div>
