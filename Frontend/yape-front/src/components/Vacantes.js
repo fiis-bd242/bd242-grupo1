@@ -107,6 +107,34 @@ const Vacantes = () => {
   // Estado para almacenar la oferta laboral
   const [ofertaLaboral, setOfertaLaboral] = useState(null);
 
+  // Añadir estos nuevos estados después de los estados existentes
+  const [showEditOfertaModal, setShowEditOfertaModal] = useState(false);
+  const [editOfertaData, setEditOfertaData] = useState({
+    id_oferta: '',
+    fecha_oferta: '',
+    fecha_inicio_propuesta: '',
+    link_documento_legal_sin_firma: '',
+    link_documento_legal_con_firma: '',
+    id_postulante: '',
+    id_vacante: '',
+    estado: 'Pendiente', // Add the estado field with default value
+    beneficios: []
+  });
+
+  // Añadir este estado después de los otros estados
+  const [beneficiosDisponibles] = useState([
+    { id_beneficio: 1, descripcion: "Seguro de salud" },
+    { id_beneficio: 2, descripcion: "Bono de desempeño" },
+    { id_beneficio: 3, descripcion: "Vacaciones pagadas" },
+    { id_beneficio: 4, descripcion: "Plan de pensiones" },
+    { id_beneficio: 5, descripcion: "Capacitación y desarrollo" },
+    { id_beneficio: 6, descripcion: "Horario flexible" },
+    { id_beneficio: 7, descripcion: "Trabajo remoto" },
+    { id_beneficio: 8, descripcion: "Descuentos en productos" },
+    { id_beneficio: 9, descripcion: "Gimnasio en la empresa" },
+    { id_beneficio: 10, descripcion: "Comedor subsidiado" }
+  ]);
+
   useEffect(() => {
     const timer = setInterval(() => { 
       setTime(new Date());
@@ -668,6 +696,7 @@ const Vacantes = () => {
   const handleCreatePostulante = async (e) => {
     e.preventDefault();
     try {
+      // Create postulante
       const response = await fetch(`http://localhost:8080/api/postulantes`, {
         method: 'POST',
         headers: {
@@ -675,16 +704,19 @@ const Vacantes = () => {
         },
         body: JSON.stringify(formData),
       });
+      
       if (response.ok) {
         const postulante = await response.json();
-        // Create an interview for the new postulante
+        
+        // Create interview
         const interviewData = {
           estado: 'Pendiente',
           fecha: new Date().toISOString().split('T')[0],
           id_postulante: postulante.id_postulante,
-          id_empleado: employee.id_empleado, // Assuming employee is the interviewer
-          id_tipo_entrevista: 1, // Assuming a default interview type
+          id_empleado: employee.id_empleado,
+          id_tipo_entrevista: 1,
         };
+        
         await fetch(`http://localhost:8080/api/entrevistas`, {
           method: 'POST',
           headers: {
@@ -692,11 +724,31 @@ const Vacantes = () => {
           },
           body: JSON.stringify(interviewData),
         });
-        alert('Postulante y entrevista creados exitosamente');
+
+        // Create oferta laboral
+        const ofertaData = {
+          fecha_oferta: "",
+          fecha_inicio_propuesta: "",
+          link_documento_legal_sin_firma: "",
+          link_documento_legal_con_firma: "",
+          id_postulante: postulante.id_postulante,
+          id_vacante: selectedVacante.id_vacante,
+          beneficios: []
+        };
+
+        await fetch(`http://localhost:8080/api/ofertas-laborales`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(ofertaData),
+        });
+
+        alert('Postulante, entrevista y oferta laboral creados exitosamente');
         closeCreatePostulanteModal();
       }
     } catch (error) {
-      console.error('Error al crear postulante:', error);
+      console.error('Error:', error);
       alert('Error al crear el postulante');
     }
   };
@@ -728,13 +780,29 @@ const Vacantes = () => {
   const handleDeletePostulante = async (postulanteId) => {
     if (window.confirm('¿Está seguro que desea eliminar este postulante?')) {
       try {
-        const response = await fetch(`http://localhost:8080/api/postulantes/${postulanteId}`, { // Actualizado
+        // Primero obtenemos la oferta laboral del postulante
+        const response = await fetch(`http://localhost:8080/api/postulantes/${postulanteId}`);
+        const postulante = await response.json();
+        
+        // Si el postulante tiene una oferta laboral, la eliminamos primero
+        if (postulante.ofertaLaboral) {
+          await fetch(`http://localhost:8080/api/ofertas-laborales/${postulante.ofertaLaboral.id_oferta}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+        }
+  
+        // Después eliminamos el postulante
+        const deleteResponse = await fetch(`http://localhost:8080/api/postulantes/${postulanteId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
           },
         });
-        if (response.ok) {
+  
+        if (deleteResponse.ok) {
           alert('Postulante eliminado exitosamente');
           // Actualizar la lista de postulantes
           fetchPostulantes(selectedVacante.id_vacante);
@@ -877,6 +945,64 @@ const Vacantes = () => {
       !postulante.experienciasLaborales?.length &&
       !postulante.ofertaLaboral
     );
+  };
+
+  // Añadir estas nuevas funciones antes del return
+  const handleEditOferta = (postulante) => {
+    const currentOferta = ofertaLaboral || {};
+    setEditOfertaData({
+      id_oferta: currentOferta.id_oferta || '',
+      fecha_oferta: currentOferta.fecha_oferta || '',
+      fecha_inicio_propuesta: currentOferta.fecha_inicio_propuesta || '',
+      link_documento_legal_sin_firma: currentOferta.link_documento_legal_sin_firma || '',
+      link_documento_legal_con_firma: currentOferta.link_documento_legal_con_firma || '',
+      id_postulante: postulante.id_postulante,
+      id_vacante: selectedVacante.id_vacante,
+      estado: currentOferta.estado || 'Pendiente',
+      beneficios: currentOferta.beneficios || []
+    });
+    setShowEditOfertaModal(true);
+  };
+
+  const handleEditOfertaSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const payload = {
+        fecha_oferta: editOfertaData.fecha_oferta,
+        fecha_inicio_propuesta: editOfertaData.fecha_inicio_propuesta,
+        link_documento_legal_sin_firma: editOfertaData.link_documento_legal_sin_firma,
+        link_documento_legal_con_firma: editOfertaData.link_documento_legal_con_firma,
+        id_postulante: editOfertaData.id_postulante,
+        id_vacante: editOfertaData.id_vacante,
+        estado: editOfertaData.estado,
+        beneficios: editOfertaData.beneficios.map(beneficio => ({
+          id_beneficio: beneficio.id_beneficio,
+          descripcion: beneficio.descripcion
+        }))
+      };
+
+      console.log('Sending payload:', payload); // For debugging
+
+      const response = await axios.put(
+        `http://localhost:8080/api/ofertas-laborales/${editOfertaData.id_oferta}`, 
+        payload
+      );
+      
+      if (response.status === 200) {
+        setOfertaLaboral(response.data);
+        setShowEditOfertaModal(false);
+        alert('Oferta laboral actualizada exitosamente.');
+        
+        // Refresh the postulante data to show updated oferta
+        if (selectedPostulante) {
+          await fetchOfertaLaboral(selectedPostulante.id_postulante);
+        }
+      }
+    } catch (error) {
+      console.error('Error al actualizar la oferta laboral:', error.response?.data || error.message);
+      alert('Ocurrió un error al actualizar la oferta laboral.');
+    }
   };
 
   return (
@@ -1487,6 +1613,10 @@ const Vacantes = () => {
                     ) : (
                       <p>No hay beneficios asignados</p>
                     )}
+                    <div className="contratacion-buttons">
+                      <button onClick={() => handleEditOferta(selectedPostulante)}>Editar</button>
+                      <button>Contratar</button>
+                    </div>
                   </section>
                 </div>
               </div>
@@ -1966,6 +2096,120 @@ const Vacantes = () => {
             empleadoId={employee.id_empleado} // Assuming employee is the interviewer
             fetchEntrevistasDetails={fetchEntrevistasDetails} // Pass the function
           />
+        )}
+
+        {/* Añadir el modal de edición de oferta laboral antes del último </main> */}
+        {showEditOfertaModal && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2>Editar Oferta Laboral</h2>
+              <form onSubmit={handleEditOfertaSubmit}>
+                <label>
+                  Fecha de Oferta:
+                  <input
+                    type="date"
+                    value={editOfertaData.fecha_oferta}
+                    onChange={(e) => setEditOfertaData({
+                      ...editOfertaData,
+                      fecha_oferta: e.target.value
+                    })}
+                  />
+                </label>
+                <label>
+                  Fecha de Inicio Propuesta:
+                  <input
+                    type="date"
+                    value={editOfertaData.fecha_inicio_propuesta}
+                    onChange={(e) => setEditOfertaData({
+                      ...editOfertaData,
+                      fecha_inicio_propuesta: e.target.value
+                    })}
+                  />
+                </label>
+                <label>
+                  Link Documento Legal Sin Firma:
+                  <input
+                    type="text"
+                    value={editOfertaData.link_documento_legal_sin_firma}
+                    onChange={(e) => setEditOfertaData({
+                      ...editOfertaData,
+                      link_documento_legal_sin_firma: e.target.value
+                    })}
+                  />
+                </label>
+                <label>
+                  Link Documento Legal Con Firma:
+                  <input
+                    type="text"
+                    value={editOfertaData.link_documento_legal_con_firma}
+                    onChange={(e) => setEditOfertaData({
+                      ...editOfertaData,
+                      link_documento_legal_con_firma: e.target.value
+                    })}
+                  />
+                </label>
+                
+                <h3>Beneficios</h3>
+                <div className="beneficios-selector">
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      const beneficioSeleccionado = beneficiosDisponibles.find(
+                        b => b.id_beneficio === parseInt(e.target.value)
+                      );
+                      if (beneficioSeleccionado && !editOfertaData.beneficios.some(
+                        b => b.id_beneficio === beneficioSeleccionado.id_beneficio
+                      )) {
+                        setEditOfertaData({
+                          ...editOfertaData,
+                          beneficios: [...editOfertaData.beneficios, beneficioSeleccionado]
+                        });
+                      }
+                    }}
+                  >
+                    <option value="">Seleccionar beneficio</option>
+                    {beneficiosDisponibles.map(beneficio => (
+                      <option 
+                        key={beneficio.id_beneficio} 
+                        value={beneficio.id_beneficio}
+                        disabled={editOfertaData.beneficios.some(
+                          b => b.id_beneficio === beneficio.id_beneficio
+                        )}
+                      >
+                        {beneficio.descripcion}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="beneficios-list">
+                  {editOfertaData.beneficios.map((beneficio, index) => (
+                    <div key={beneficio.id_beneficio} className="beneficio-item">
+                      <span>{beneficio.descripcion}</span>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setEditOfertaData({
+                            ...editOfertaData,
+                            beneficios: editOfertaData.beneficios.filter((_, i) => i !== index)
+                          });
+                        }}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="modal-buttons">
+                  <button type="submit">Guardar</button>
+                  <button type="button" onClick={() => setShowEditOfertaModal(false)}>
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         )}
       </main>    
     </div>  

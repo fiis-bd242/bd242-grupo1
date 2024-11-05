@@ -1,4 +1,3 @@
-// src/main/java/com/example/yapeback/interfaces/OfertaLaboralRepository.java
 package com.example.yapeback.interfaces;
 
 import com.example.yapeback.model.OfertaLaboral;
@@ -9,4 +8,5 @@ public interface OfertaLaboralRepository {
     OfertaLaboral findById(Long id);
     OfertaLaboral save(OfertaLaboral ofertaLaboral);
     void deleteById(Long id);
+    void updateBeneficios(OfertaLaboral ofertaLaboral);
 }

@@ -51,4 +51,9 @@ public class BeneficioController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/mis-beneficios")
+    public List<Beneficio> getAllMyBeneficios() {
+        return beneficioService.findAll();
+    }
 }
