@@ -18,4 +18,6 @@ public interface VacanteRepository {
     List<Postulante> findPostulantesByVacanteId(Long idVacante);
     Convocatoria findConvocatoriaById(Long id);
     List<Convocatoria> findAllConvocatorias(); // Add this method
+    void deleteOfertaLaboralByPostulanteId(Long idPostulante);
+    void deleteOfertaLaboralByVacanteId(Long idVacante);
 }

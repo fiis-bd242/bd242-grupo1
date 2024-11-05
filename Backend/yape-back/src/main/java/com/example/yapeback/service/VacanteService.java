@@ -16,6 +16,9 @@ public class VacanteService {
     private final VacanteRepository vacanteRepository;
 
     @Autowired
+    private PostulanteService postulanteService; // Add this field
+
+    @Autowired
     public VacanteService(VacanteRepository vacanteRepository) {
         this.vacanteRepository = vacanteRepository;
     }
@@ -33,6 +36,31 @@ public class VacanteService {
     }
 
     public void deleteById(Long id) {
+        // 1. Get all postulantes for this vacante
+        List<Postulante> postulantes = vacanteRepository.findPostulantesByVacanteId(id);
+        
+        // 2. Delete all convocatorias
+        List<Convocatoria> convocatorias = vacanteRepository.findAllConvocatorias();
+        for (Convocatoria convocatoria : convocatorias) {
+            if (convocatoria.getId_vacante().equals(id)) {
+                vacanteRepository.deleteConvocatoriaById(convocatoria.getId_convocatoria());
+            }
+        }
+
+        // 3. Delete all ofertas_laborales for each postulante
+        for (Postulante postulante : postulantes) {
+            vacanteRepository.deleteOfertaLaboralByPostulanteId(postulante.getId_postulante());
+        }
+        
+        // 4. Delete all postulantes using the existing endpoint service
+        for (Postulante postulante : postulantes) {
+            postulanteService.deleteById(postulante.getId_postulante());
+        }
+        
+        // 5. Delete all oferta_laboral records associated with the vacante
+        vacanteRepository.deleteOfertaLaboralByVacanteId(id);
+        
+        // 6. Finally delete the vacante itself
         vacanteRepository.deleteById(id);
     }
 
@@ -51,7 +79,6 @@ public class VacanteService {
     public Convocatoria saveConvocatoria(Convocatoria convocatoria) {
         return vacanteRepository.saveConvocatoria(convocatoria);
     }
-
 
     public Convocatoria findConvocatoriaById(Long id) {
         return vacanteRepository.findConvocatoriaById(id);
