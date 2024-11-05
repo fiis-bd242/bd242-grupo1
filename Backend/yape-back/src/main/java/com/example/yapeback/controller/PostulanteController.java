@@ -11,10 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/postulantes")
 public class PostulanteController {
+
+    private static final Logger logger = LoggerFactory.getLogger(PostulanteController.class);
 
     @Autowired
     private PostulanteService postulanteService;
@@ -111,11 +115,18 @@ public class PostulanteController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePostulante(@PathVariable Long id) {
-        Postulante existingPostulante = postulanteService.findById(id);
-        if (existingPostulante == null) {
-            return ResponseEntity.notFound().build();
+        try {
+            Postulante existingPostulante = postulanteService.findById(id);
+            if (existingPostulante == null) {
+                logger.warn("Postulante with id {} not found for deletion", id);
+                return ResponseEntity.notFound().build();
+            }
+            postulanteService.deleteById(id);
+            logger.info("Postulante with id {} deleted successfully", id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            logger.error("Error deleting postulante with id {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        postulanteService.deleteById(id);
-        return ResponseEntity.ok().build();
     }
 }

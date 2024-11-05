@@ -6,6 +6,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,6 +16,8 @@ import java.time.LocalDate;
 
 @Repository
 public class PostulanteRepositoryImpl implements PostulanteRepository {
+
+    private static final Logger logger = LoggerFactory.getLogger(PostulanteRepositoryImpl.class);
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -59,43 +63,59 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
         return postulante;
     }
 
+    // src/main/java/com/example/yapeback/interfaces/PostulanteRepositoryImpl.java
     @Override
     public void deleteById(Long id) {
         try {
-            // 1. Eliminar las entrevistas relacionadas
+            // 1. Eliminar observaciones relacionadas con las entrevistas del postulante
             List<Entrevista> entrevistas = findEntrevistasByPostulanteId(id);
             for (Entrevista entrevista : entrevistas) {
-                String sqlDelete = "DELETE FROM entrevista WHERE id_entrevista = ?";
-                jdbcTemplate.update(sqlDelete, entrevista.getId_entrevista());
+                String sqlDeleteObservaciones = "DELETE FROM observacion WHERE id_entrevista = ?";
+                jdbcTemplate.update(sqlDeleteObservaciones, entrevista.getId_entrevista());
             }
 
-            // 2. Eliminar idiomas relacionados
-            deleteIdiomasByPostulanteId(id);
+            // 2. Eliminar entrevistas del postulante
+            String sqlDeleteEntrevistas = "DELETE FROM entrevista WHERE id_postulante = ?";
+            jdbcTemplate.update(sqlDeleteEntrevistas, id);
 
-            // 3. Eliminar educaciones
-            deleteEducacionesByPostulanteId(id);
-
-            // 4. Eliminar habilidades
-            deleteHabilidadesByPostulanteId(id);
-
-            // 5. Eliminar experiencias laborales y sus habilidades
-            deleteExperienciasByPostulanteId(id);
-
-            // 6. Eliminar oferta laboral y sus beneficios
+            // 3. Eliminar beneficios de ofertas laborales del postulante
             OfertaLaboral ofertaLaboral = findOfertaLaboralByPostulanteId(id);
             if (ofertaLaboral != null) {
-                String deleteBeneficiosSQL = "DELETE FROM oferta_laboral_beneficio WHERE id_oferta = ?";
-                jdbcTemplate.update(deleteBeneficiosSQL, ofertaLaboral.getId_oferta());
+                String sqlDeleteBeneficios = "DELETE FROM oferta_laboral_beneficio WHERE id_oferta = ?";
+                jdbcTemplate.update(sqlDeleteBeneficios, ofertaLaboral.getId_oferta());
 
-                String deleteOfertaSQL = "DELETE FROM oferta_laboral WHERE id_postulante = ?";
-                jdbcTemplate.update(deleteOfertaSQL, id);
+                // 4. Eliminar ofertas laborales del postulante
+                String sqlDeleteOfertas = "DELETE FROM oferta_laboral WHERE id_postulante = ?";
+                jdbcTemplate.update(sqlDeleteOfertas, id);
             }
 
-            // 7. Finalmente eliminar el postulante
-            String sql = "DELETE FROM postulante WHERE id_postulante = ?";
-            jdbcTemplate.update(sql, id);
+            // 5. Eliminar habilidades del postulante
+            String sqlDeleteHabilidades = "DELETE FROM habilidad_postulante WHERE id_postulante = ?";
+            jdbcTemplate.update(sqlDeleteHabilidades, id);
 
+            // 6. Eliminar idiomas del postulante
+            String sqlDeleteIdiomas = "DELETE FROM idioma_postulante WHERE id_postulante = ?";
+            jdbcTemplate.update(sqlDeleteIdiomas, id);
+
+            // 7. Eliminar habilidades de experiencias laborales del postulante
+            String sqlDeleteHabilidadesExperiencia = "DELETE FROM habilidad_experiencia WHERE id_experiencia IN (SELECT id_experiencia FROM experiencia_laboral WHERE id_postulante = ?)";
+            jdbcTemplate.update(sqlDeleteHabilidadesExperiencia, id);
+
+            // 8. Eliminar experiencias laborales del postulante
+            String sqlDeleteExperiencias = "DELETE FROM experiencia_laboral WHERE id_postulante = ?";
+            jdbcTemplate.update(sqlDeleteExperiencias, id);
+
+            // 9. Eliminar registros de educación del postulante
+            String sqlDeleteEducaciones = "DELETE FROM educacion WHERE id_postulante = ?";
+            jdbcTemplate.update(sqlDeleteEducaciones, id);
+
+            // 10. Finalmente eliminar el postulante
+            String sqlDeletePostulante = "DELETE FROM postulante WHERE id_postulante = ?";
+            jdbcTemplate.update(sqlDeletePostulante, id);
+
+            logger.info("Successfully deleted postulante with id {}", id);
         } catch (Exception e) {
+            logger.error("Error deleting postulante with id {}: {}", id, e.getMessage(), e);
             throw new RuntimeException("Error al eliminar el postulante y sus relaciones: " + e.getMessage(), e);
         }
     }
@@ -401,7 +421,7 @@ public class PostulanteRepositoryImpl implements PostulanteRepository {
             Observacion observacion = new Observacion();
             observacion.setId_observacion(rs.getLong("id_observacion"));
             observacion.setId_entrevista(rs.getLong("id_entrevista"));
-            observacion.setNombre(rs.getString("id_nombre"));
+            observacion.setNombre(rs.getString("nombre")); // Fixed field name
             observacion.setDescripcion(rs.getString("descripcion"));// Asignar el nombre de la categoría
             return observacion;
         }
