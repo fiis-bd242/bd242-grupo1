@@ -1,4 +1,3 @@
-```sql
 CREATE TYPE estado_enum AS ENUM ('Pendiente', 'Resuelto', 'No Resuelto','En Progreso', 'Reabierto');
 CREATE TYPE aprobacion_enum AS ENUM ('aprobado', 'rechazado');
 CREATE TYPE estado_conv_enum AS ENUM ('abierta', 'cerrada');
@@ -31,26 +30,6 @@ CREATE TABLE seller (
                         PRIMARY KEY (cod_seller)
 );
 
--- Crear la tabla Categoria_Observacion
-CREATE TABLE Categoria_Observacion (
-                                       id_categoria SERIAL PRIMARY KEY,
-                                       nombre VARCHAR(50) NOT null
-);
-
-CREATE TABLE Feedback (
-                          id_feedback SERIAL NOT NULL,
-                          fecha DATE NOT NULL,
-                          PRIMARY KEY (id_feedback)
-);
-
--- Crear la tabla Observacion
-CREATE TABLE Observacion (
-                             id_observacion SERIAL PRIMARY KEY,
-                             id_feedback INT REFERENCES Feedback(id_feedback),
-                             id_categoria INT REFERENCES Categoria_Observacion(id_categoria),
-                             descripcion TEXT NOT NULL
-);
-
 CREATE TABLE Estado_prototipo (
 
                                   cod_est_prot serial not null,
@@ -80,48 +59,6 @@ CREATE TABLE productoxseller (
                                  PRIMARY KEY (cod_productoxseller),
                                  FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto),
                                  FOREIGN KEY (cod_seller) REFERENCES Seller(cod_seller)
-);
-
-CREATE TABLE Departamento (
-                              id_departamento SERIAL NOT NULL,
-                              descripcion VARCHAR(100) NOT NULL,
-                              id_departamento_padre INTEGER,
-                              PRIMARY KEY (id_departamento),
-                              FOREIGN KEY (id_departamento_padre) REFERENCES Departamento(id_departamento)
-);
-
-CREATE TABLE Funcion (
-                         id_funcion SERIAL PRIMARY KEY,
-                         nombre VARCHAR(50) NOT NULL,
-                         descripcion VARCHAR(250) NOT NULL
-);
-
-CREATE TABLE Puesto (
-                        id_puesto SERIAL PRIMARY KEY,
-                        nombre VARCHAR(50) NOT NULL,
-                        paga FLOAT NOT NULL,
-                        id_departamento INTEGER NOT NULL,
-                        FOREIGN KEY (id_departamento) REFERENCES Departamento(id_departamento)
-);
-
-CREATE TABLE Puesto_Funcion (
-                                id_puesto INT REFERENCES Puesto(id_puesto),
-                                id_funcion INT REFERENCES Funcion(id_funcion),
-                                PRIMARY KEY (id_puesto, id_funcion)
-);
-
-CREATE TABLE Empleado (
-                          ID_empleado SERIAL NOT NULL,
-                          Nombre VARCHAR(50) NOT NULL,
-                          Apellido VARCHAR(50) NOT NULL,
-                          fecha_nacimiento DATE NOT NULL,
-                          fecha_ingreso DATE NOT NULL,
-                          Estado VARCHAR(50) NOT NULL,
-                          Documento_identidad VARCHAR(50) NOT NULL,
-                          Telefono VARCHAR(20) NOT NULL,
-                          id_puesto INTEGER NOT NULL,
-                          PRIMARY KEY (ID_empleado),
-                          FOREIGN KEY (id_puesto) REFERENCES Puesto(id_puesto)
 );
 
 CREATE TABLE Ticket_general (
@@ -380,153 +317,6 @@ CREATE TABLE Pre_test (
 	foreign key (AudienciaB)references audiencia(id_audiencia),
 	foreign key (id_empleado) references Empleado(id_empleado)
 	
-);
-
-CREATE TABLE Vacante (
-                         id_vacante SERIAL NOT NULL,
-                         estado VARCHAR(50) CHECK (estado IN ('Abierta', 'Cerrada', 'Vencida')) NOT NULL,
-                         fecha_fin DATE NOT NULL,
-                         fecha_inicio DATE NOT NULL,
-                         comentario VARCHAR(100) NOT NULL,
-                         id_puesto INTEGER NOT NULL,
-                         cantidad INTEGER NOT NULL,
-                         PRIMARY KEY (id_vacante),
-                         FOREIGN KEY (id_puesto) REFERENCES Puesto(id_puesto)
-);
-
-
-CREATE TABLE Convocatoria (
-                              id_convocatoria SERIAL PRIMARY KEY,
-                              id_vacante INT NOT NULL,
-                              medio_publicacion VARCHAR(25) NOT NULL,
-                              fecha_inicio DATE NOT NULL,
-                              fecha_fin DATE NOT NULL,
-                              estado VARCHAR(50) CHECK (estado IN ('Abierta', 'Cerrada', 'En proceso')),
-                              FOREIGN KEY (id_vacante) REFERENCES Vacante(id_vacante)
-);
-
-CREATE TABLE Postulante (
-                            id_postulante SERIAL NOT NULL,
-                            nombre VARCHAR(255) NOT NULL,
-                            telefono INTEGER NOT NULL,
-                            correo VARCHAR(255) NOT NULL,
-                            id_vacante INTEGER NOT NULL,
-                            puntaje_general INTEGER NOT NULL,
-                            PRIMARY KEY (id_postulante),
-                            FOREIGN KEY (id_vacante) REFERENCES Vacante(id_vacante)
-);
-
-CREATE TABLE Educacion (
-                           id_educacion SERIAL PRIMARY KEY,
-                           id_postulante INT REFERENCES Postulante(id_postulante),
-                           institucion VARCHAR(100),
-                           titulo VARCHAR(100),
-                           fecha_inicio DATE,
-                           fecha_fin DATE,
-                           en_curso BOOLEAN
-);
-
-CREATE TABLE Experiencia_Laboral (
-                                     id_experiencia SERIAL PRIMARY KEY,
-                                     id_postulante INT REFERENCES Postulante(id_postulante),
-                                     empresa VARCHAR(100),
-                                     puesto VARCHAR(100),
-                                     fecha_inicio DATE,
-                                     fecha_fin DATE
-);
-
-CREATE TABLE Habilidad_Experiencia (
-                                       id_habilidad_experiencia SERIAL PRIMARY KEY,
-                                        nombre VARCHAR(50),
-                                       id_experiencia INT REFERENCES Experiencia_Laboral(id_experiencia),
-                                       nivel VARCHAR(20) CHECK (nivel IN ('Básico', 'Intermedio', 'Avanzado')) -- por ejemplo: 'Básico', 'Intermedio', 'Avanzado'
-);
-
-CREATE TABLE Idioma (
-                        id_idioma SERIAL PRIMARY KEY,
-                        nombre VARCHAR(50) NOT NULL
-);
--- Tabla Idioma_Postulante
-CREATE TABLE Idioma_Postulante (
-                                   id_postulante INT REFERENCES Postulante(id_postulante),
-                                   id_idioma INT REFERENCES Idioma(id_idioma),
-                                   nivel VARCHAR(20) CHECK (nivel IN ('Básico', 'Intermedio', 'Avanzado')), -- por ejemplo: 'Básico', 'Intermedio', 'Avanzado'
-                                   PRIMARY KEY (id_postulante, id_idioma)
-);
-
--- Tabla Habilidad_Postulante
-CREATE TABLE Habilidad_Postulante (
-                                      id_habilidad_postulante SERIAL PRIMARY KEY,
-                                      id_postulante INT REFERENCES Postulante(id_postulante),
-                                      nombre VARCHAR(50),
-                                      nivel VARCHAR(20) check ( nivel in ('Básico', 'Intermedio', 'Avanzado') )
-);
-
--- Crear la tabla Beneficio
-CREATE TABLE Beneficio (
-                           id_beneficio SERIAL PRIMARY KEY,
-                           descripcion TEXT NOT NULL
-);
-
-CREATE TABLE Oferta_Laboral (
-                                id_oferta SERIAL PRIMARY KEY,
-                                id_postulante INT REFERENCES Postulante(id_postulante),
-                                id_vacante INT REFERENCES Vacante(id_vacante),
-                                fecha_oferta DATE,
-                                fecha_inicio_propuesta DATE,
-                                link_documento_legal_sin_firma TEXT,
-                                link_documento_legal_con_firma TEXT,
-                                estado VARCHAR(20) CHECK (estado IN ('Pendiente', 'Aceptada', 'Rechazada'))
-);
-
--- Crear la tabla intermedia Oferta_Laboral_Beneficio
-CREATE TABLE Oferta_Laboral_Beneficio (
-                                          id_oferta INT REFERENCES Oferta_Laboral(id_oferta),
-                                          id_beneficio INT REFERENCES Beneficio(id_beneficio),
-                                          PRIMARY KEY (id_oferta, id_beneficio)
-);
-
-
-CREATE TABLE Tipo_entrevista (
-                                 id_tipo_entrevista SERIAL PRIMARY KEY,
-                                 nombre VARCHAR(50) NOT NULL
-);
-
-CREATE TABLE Entrevista (
-                            id_entrevista SERIAL NOT NULL,
-                            estado VARCHAR(50) NOT NULL CHECK (estado IN ('Pendiente', 'Aceptada', 'Rechazada')),
-                            fecha DATE NOT NULL,
-                            puntaje_general INTEGER NOT NULL,
-                            id_postulante INTEGER NOT NULL,
-                            ID_empleado INTEGER NOT NULL,
-                            id_feedback INTEGER NOT NULL,
-                            id_tipo_entrevista INTEGER NOT NULL,
-                            PRIMARY KEY (id_entrevista),
-                            FOREIGN KEY (id_tipo_entrevista) REFERENCES Tipo_entrevista(id_tipo_entrevista),
-                            FOREIGN KEY (id_postulante) REFERENCES Postulante(id_postulante),
-                            FOREIGN KEY (ID_empleado) REFERENCES Empleado(ID_empleado),
-                            FOREIGN KEY (id_feedback) REFERENCES Feedback(id_feedback)
-);
-
-
-
--- Crear la tabla Indicador
-CREATE TABLE Indicador (
-                           id_indicador SERIAL PRIMARY KEY,
-                           nombre VARCHAR(50) NOT NULL
-);
-
-CREATE TABLE Tipo_entrevista_Indicador (
-                                           id_tipo_entrevista INT REFERENCES Tipo_entrevista(id_tipo_entrevista),
-                                           id_indicador INT REFERENCES Indicador (id_indicador),
-                                           PRIMARY KEY (id_tipo_entrevista, id_indicador)
-);
-
-CREATE TABLE Puntaje_Indicador (
-                                   id_entrevista INT REFERENCES Entrevista(id_entrevista),
-                                   id_indicador INT REFERENCES Indicador (id_indicador),
-                                   puntaje INT NOT NULL,
-                                   PRIMARY KEY (id_entrevista, id_indicador)
 );
 
 CREATE TABLE Estado_ticket_asig (
@@ -857,4 +647,165 @@ CREATE TABLE Permiso (
     ID_empleado INT REFERENCES Empleado(ID_empleado),
     ID_tipo_permiso INT REFERENCES Tipo_permiso(ID_tipo_permiso)
 );
-```
+
+CREATE TABLE Departamento (
+                              id_departamento SERIAL NOT NULL,
+                              descripcion VARCHAR(100) NOT NULL,
+                              id_departamento_padre INTEGER,
+                              PRIMARY KEY (id_departamento),
+                              FOREIGN KEY (id_departamento_padre) REFERENCES Departamento(id_departamento)
+);
+
+CREATE TABLE Funcion (
+                         id_funcion SERIAL PRIMARY KEY,
+                         nombre VARCHAR(50) NOT NULL,
+                         descripcion VARCHAR(250) NOT NULL
+);
+
+CREATE TABLE Puesto (
+                        id_puesto SERIAL PRIMARY KEY,
+                        nombre VARCHAR(50) NOT NULL,
+                        paga FLOAT NOT NULL,
+                        id_departamento INTEGER NOT NULL,
+                        FOREIGN KEY (id_departamento) REFERENCES Departamento(id_departamento)
+);
+
+CREATE TABLE Puesto_Funcion (
+                                id_puesto INT REFERENCES Puesto(id_puesto),
+                                id_funcion INT REFERENCES Funcion(id_funcion),
+                                PRIMARY KEY (id_puesto, id_funcion)
+);
+
+CREATE TABLE Empleado (
+                          ID_empleado SERIAL NOT NULL,
+                          Nombre VARCHAR(50) NOT NULL,
+                          Apellido VARCHAR(50) NOT NULL,
+                          fecha_nacimiento DATE NOT NULL,
+                          fecha_ingreso DATE NOT NULL,
+                          Estado VARCHAR(50) NOT NULL,
+                          Documento_identidad VARCHAR(50) NOT NULL,
+                          Telefono VARCHAR(20) NOT NULL,
+                          id_puesto INTEGER NOT NULL,
+                          PRIMARY KEY (ID_empleado),
+                          FOREIGN KEY (id_puesto) REFERENCES Puesto(id_puesto)
+);
+
+CREATE TABLE Vacante (
+                         id_vacante SERIAL NOT NULL,
+                         estado VARCHAR(50) CHECK (estado IN ('Abierta', 'Cerrada', 'Vencida')) NOT NULL,
+                         fecha_fin DATE NOT NULL,
+                         fecha_inicio DATE NOT NULL,
+                         comentario VARCHAR(100) NOT NULL,
+                         id_puesto INTEGER NOT NULL,
+                         cantidad INTEGER NOT NULL,
+                         PRIMARY KEY (id_vacante),
+                         FOREIGN KEY (id_puesto) REFERENCES Puesto(id_puesto)
+);
+
+CREATE TABLE Convocatoria (
+                              id_convocatoria SERIAL PRIMARY KEY,
+                              id_vacante INT NOT NULL,
+                              medio_publicacion VARCHAR(25) NOT NULL,
+                              fecha_inicio DATE NOT NULL,
+                              fecha_fin DATE NOT NULL,
+                              estado VARCHAR(50) CHECK (estado IN ('Abierta', 'Cerrada', 'En proceso')),
+                              FOREIGN KEY (id_vacante) REFERENCES Vacante(id_vacante)
+);
+
+CREATE TABLE Postulante (
+                            id_postulante SERIAL NOT NULL,
+                            nombre VARCHAR(255) NOT NULL,
+                            telefono BIGINT NOT NULL,
+                            correo VARCHAR(255) NOT NULL,
+                            id_vacante INTEGER NOT NULL,
+                            puntaje INTEGER NOT NULL,
+                            PRIMARY KEY (id_postulante),
+                            FOREIGN KEY (id_vacante) REFERENCES Vacante(id_vacante)
+);
+
+CREATE TABLE Educacion (
+                           id_educacion SERIAL PRIMARY KEY,
+                           id_postulante INT REFERENCES Postulante(id_postulante),
+                           institucion VARCHAR(100),
+                           titulo VARCHAR(100),
+                           fecha_inicio DATE,
+                           fecha_fin DATE,
+                           en_curso BOOLEAN
+);
+
+CREATE TABLE Experiencia_Laboral (
+                                     id_experiencia SERIAL PRIMARY KEY,
+                                     id_postulante INT REFERENCES Postulante(id_postulante),
+                                     empresa VARCHAR(100),
+                                     puesto VARCHAR(100),
+                                     fecha_inicio DATE,
+                                     fecha_fin DATE
+);
+
+CREATE TABLE Habilidad_Experiencia (
+                                       id_habilidad_experiencia SERIAL PRIMARY KEY,
+                                       nombre VARCHAR(50),
+                                       id_experiencia INT REFERENCES Experiencia_Laboral(id_experiencia),
+                                       nivel VARCHAR(20) CHECK (nivel IN ('Básico', 'Intermedio', 'Avanzado'))
+);
+
+CREATE TABLE Idioma (
+                        id_idioma SERIAL PRIMARY KEY,
+                        nombre VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Idioma_Postulante (
+                                   id_postulante INT REFERENCES Postulante(id_postulante),
+                                   id_idioma INT REFERENCES Idioma(id_idioma),
+                                   nivel VARCHAR(20) CHECK (nivel IN ('Básico', 'Intermedio', 'Avanzado')),
+                                   PRIMARY KEY (id_postulante, id_idioma)
+);
+
+CREATE TABLE Habilidad_Postulante (
+                                      id_habilidad_postulante SERIAL PRIMARY KEY,
+                                      id_postulante INT REFERENCES Postulante(id_postulante),
+                                      nombre VARCHAR(50),
+                                      nivel VARCHAR(20) CHECK (nivel IN ('Básico', 'Intermedio', 'Avanzado'))
+);
+
+CREATE TABLE Beneficio (
+                           id_beneficio SERIAL PRIMARY KEY,
+                           descripcion TEXT NOT NULL
+);
+
+CREATE TABLE Oferta_Laboral (
+                                id_oferta SERIAL PRIMARY KEY,
+                                id_postulante INT REFERENCES Postulante(id_postulante),
+                                id_vacante INT REFERENCES Vacante(id_vacante),
+                                fecha_oferta DATE,
+                                fecha_inicio_propuesta DATE,
+                                link_documento_legal_sin_firma TEXT,
+                                link_documento_legal_con_firma TEXT,
+                                estado VARCHAR(20) CHECK (estado IN ('Pendiente', 'Aceptada', 'Rechazada'))
+);
+
+CREATE TABLE Oferta_Laboral_Beneficio (
+                                          id_oferta INT REFERENCES Oferta_Laboral(id_oferta),
+                                          id_beneficio INT REFERENCES Beneficio(id_beneficio),
+                                          PRIMARY KEY (id_oferta, id_beneficio)
+);
+
+CREATE TABLE Entrevista (
+                            id_entrevista SERIAL NOT NULL,
+                            estado VARCHAR(50) NOT NULL CHECK (estado IN ('Pendiente', 'Hecha', 'Rechazada')),
+                            fecha DATE NOT NULL,
+                            puntaje_general INTEGER NOT NULL,
+                            id_postulante INTEGER NOT NULL,
+                            ID_empleado INTEGER NOT NULL,
+                            tipo_entrevista VARCHAR(50) NOT NULL,
+                            PRIMARY KEY (id_entrevista),
+                            FOREIGN KEY (id_postulante) REFERENCES Postulante(id_postulante),
+                            FOREIGN KEY (ID_empleado) REFERENCES Empleado(ID_empleado)
+);
+
+CREATE TABLE Observacion (
+                             id_observacion SERIAL PRIMARY KEY,
+                             id_entrevista INT REFERENCES Entrevista(id_entrevista),
+                             nombre VARCHAR(50) NOT NULL,
+                             descripcion TEXT NOT NULL
+);
