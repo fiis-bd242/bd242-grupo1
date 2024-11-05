@@ -460,11 +460,11 @@ const Vacantes = () => {
         });
 
         if (response.ok) {
-          // Actualizar la lista de vacantes
-          const vacantesResponse = await fetch('http://localhost:8080/vacantes');
-          const updatedVacantes = await vacantesResponse.json();
-          setVacantes(updatedVacantes);
+          // Actualizar la lista de vacantes eliminando la vacante eliminada
+          setVacantes(prevVacantes => prevVacantes.filter(vacante => vacante.id_vacante !== vacanteId));
           alert('Vacante eliminada exitosamente');
+        } else {
+          alert('Error al eliminar la vacante');
         }
       } catch (error) {
         console.error('Error:', error);
@@ -598,26 +598,28 @@ const Vacantes = () => {
   const fetchPostulantes = async (vacanteId) => {
     setLoadingPostulantes(true);
     try {
-      // Verificar si ya tenemos los postulantes en caché
-      if (postulanteCache[vacanteId]) {
-        setPostulantes(postulanteCache[vacanteId]);
-        setLoadingPostulantes(false);
-        setShowPostulantesModal(true);
-        return;
-      }
-
-      // Obtener lista básica de postulantes
+      // Get basic list of postulantes
       const response = await fetch(`http://localhost:8080/vacantes/${vacanteId}/postulantes`);
       if (!response.ok) throw new Error(`Error: ${response.statusText}`);
       
       const postulantesBasicos = await response.json();
       
-      // Mostrar inmediatamente la lista básica
-      setPostulantes(postulantesBasicos);
+      // Show basic list immediately
+      const basicPostulantes = postulantesBasicos.map(p => ({
+        ...p,
+        idiomas: [],
+        educaciones: [],
+        habilidades: [],
+        experienciasLaborales: []
+      }));
+      
+      setPostulantes(basicPostulantes);
       setShowPostulantesModal(true);
       
-      // Cargar detalles en segundo plano
-      loadPostulantesDetails(postulantesBasicos, vacanteId);
+      // Load details in background if cache doesn't exist
+      if (!postulanteCache[vacanteId]) {
+        loadPostulantesDetails(postulantesBasicos, vacanteId);
+      }
     } catch (error) {
       console.error('Error al obtener postulantes:', error);
       alert('Error al cargar los postulantes');
@@ -699,13 +701,19 @@ const Vacantes = () => {
   const handleCreatePostulante = async (e) => {
     e.preventDefault();
     try {
+      // Include id_vacante in the form data
+      const newPostulanteData = {
+        ...formData,
+        id_vacante: selectedVacante.id_vacante
+      };
+
       // Create postulante
       const response = await fetch(`http://localhost:8080/api/postulantes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(newPostulanteData),
       });
       
       if (response.ok) {
@@ -957,17 +965,6 @@ const Vacantes = () => {
       fetchOfertaLaboral(selectedPostulante.id_postulante);
     }
   }, [selectedPostulante]);
-
-  // Helper function to check if postulante only has basic info
-  const hasOnlyBasicInfo = (postulante) => {
-    return (
-      !postulante.idiomas?.length &&
-      !postulante.educaciones?.length &&
-      !postulante.habilidades?.length &&
-      !postulante.experienciasLaborales?.length &&
-      !postulante.ofertaLaboral
-    );
-  };
 
   // Añadir estas nuevas funciones antes del return
   const handleEditOferta = (postulante) => {
@@ -1554,9 +1551,7 @@ const Vacantes = () => {
                         {loadingDetails && <small className="loading-details"> (Cargando detalles...)</small>}
                       </span>
                       <button onClick={() => openEditPostulanteModal(postulante)}>Editar</button>
-                      {hasOnlyBasicInfo(postulante) && (
-                        <button onClick={() => handleDeletePostulante(postulante.id_postulante)}>Eliminar</button>
-                      )}
+                      <button onClick={() => handleDeletePostulante(postulante.id_postulante)}>Eliminar</button>
                     </div>
                   ))}
                 </div>
