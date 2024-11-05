@@ -1,7 +1,7 @@
-// src/main/java/com/example/yapeback/controller/OfertaLaboralController.java
 package com.example.yapeback.controller;
 
 import com.example.yapeback.model.OfertaLaboral;
+import com.example.yapeback.model.Beneficio;
 import com.example.yapeback.service.OfertaLaboralService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -47,8 +47,26 @@ public class OfertaLaboralController {
     public ResponseEntity<Void> deleteOfertaLaboral(@PathVariable Long id) {
         if (ofertaLaboralService.findById(id).isPresent()) {
             ofertaLaboralService.deleteById(id);
-            return ResponseEntity.noContent().<Void>build();
+            return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.notFound().<Void>build();
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/{id}/beneficios")
+    public ResponseEntity<OfertaLaboral> assignBeneficios(@PathVariable Long id, @RequestBody List<Beneficio> beneficios) {
+        OfertaLaboral updatedOferta = ofertaLaboralService.assignBeneficios(id, beneficios);
+        if (updatedOferta != null) {
+            return ResponseEntity.ok(updatedOferta);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{id}/beneficios")
+    public ResponseEntity<OfertaLaboral> updateBeneficios(@PathVariable Long id, @RequestBody List<Beneficio> beneficios) {
+        OfertaLaboral updatedOferta = ofertaLaboralService.updateBeneficios(id, beneficios);
+        if (updatedOferta != null) {
+            return ResponseEntity.ok(updatedOferta);
+        }
+        return ResponseEntity.notFound().build();
     }
 }

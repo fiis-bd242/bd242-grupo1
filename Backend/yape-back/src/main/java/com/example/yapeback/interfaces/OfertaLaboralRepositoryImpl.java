@@ -1,7 +1,7 @@
-// src/main/java/com/example/yapeback/interfaces/OfertaLaboralRepositoryImpl.java
 package com.example.yapeback.interfaces;
 
 import com.example.yapeback.model.OfertaLaboral;
+import com.example.yapeback.model.Beneficio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -47,6 +47,16 @@ public class OfertaLaboralRepositoryImpl implements OfertaLaboralRepository {
     public void deleteById(Long id) {
         String sql = "DELETE FROM oferta_laboral WHERE id_oferta = ?";
         jdbcTemplate.update(sql, id);
+    }
+
+    public void updateBeneficios(OfertaLaboral ofertaLaboral) {
+        String deleteSql = "DELETE FROM Oferta_Laboral_Beneficio WHERE id_oferta = ?";
+        jdbcTemplate.update(deleteSql, ofertaLaboral.getId_oferta());
+
+        String insertSql = "INSERT INTO Oferta_Laboral_Beneficio (id_oferta, id_beneficio) VALUES (?, ?)";
+        for (Beneficio beneficio : ofertaLaboral.getBeneficios()) {
+            jdbcTemplate.update(insertSql, ofertaLaboral.getId_oferta(), beneficio.getId_beneficio());
+        }
     }
 
     private static class OfertaLaboralRowMapper implements RowMapper<OfertaLaboral> {
