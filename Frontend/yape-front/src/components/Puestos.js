@@ -82,9 +82,10 @@ const Puestos = () => {
     id_departamento: null, 
     funciones: [{ nombre: '', descripcion: '' }] 
   });
-  const [isDeleting, setIsDeleting] = useState(false);
   const [employee, setEmployee] = useState({ nombre: '', apellido: '' });
   const [baseLevel, setBaseLevel] = useState(2); // Nivel base inicial
+  const [empleados, setEmpleados] = useState([]);
+  const [vacantes, setVacantes] = useState([]);
 
   // Función para obtener el organigrama de departamentos
   const fetchOrganigrama = async () => {
@@ -138,6 +139,18 @@ const Puestos = () => {
     fetchOrganigrama();
     fetchEmployee();
 
+    // Fetch empleados data
+    fetch('http://localhost:8080/empleados')
+      .then(response => response.json())
+      .then(data => setEmpleados(data))
+      .catch(error => console.error('Error fetching empleados:', error));
+
+    // Fetch vacantes data
+    fetch('http://localhost:8080/vacantes')
+      .then(response => response.json())
+      .then(data => setVacantes(data))
+      .catch(error => console.error('Error fetching vacantes:', error));
+
     return () => {
       clearInterval(timer);
     };
@@ -151,7 +164,6 @@ const Puestos = () => {
       id_departamento, 
       funciones: [{ nombre: '', descripcion: '' }] 
     });
-    setIsDeleting(false);
     setModalOpen(true);
   };
 
@@ -163,7 +175,6 @@ const Puestos = () => {
       id_departamento, 
       funciones: puesto.funciones || [{ nombre: '', descripcion: '' }] 
     });
-    setIsDeleting(true);
     setModalOpen(true);
   };
 
@@ -248,7 +259,6 @@ const Puestos = () => {
         funciones: [{ nombre: '', descripcion: '' }]
       });
       setModalOpen(false);
-      setIsDeleting(false);
 
       // Obtener el organigrama actualizado
       const organigramaResponse = await fetch('http://localhost:8080/departamentos/1/organigrama');
@@ -314,7 +324,6 @@ const Puestos = () => {
         funciones: [{ nombre: '', descripcion: '' }]
       });
       setModalOpen(false);
-      setIsDeleting(false);
 
       // Actualizar la lista de departamentos y puestos
       fetchOrganigrama();
@@ -354,6 +363,13 @@ const Puestos = () => {
   const handleLogout = () => {
     // Implementar lógica de logout, por ejemplo, limpiar tokens y redirigir
     navigate('/');
+  };
+
+  // Function to check if a puesto can be deleted
+  const canDeletePuesto = (id_puesto) => {
+    const hasEmpleados = empleados.some(emp => emp.id_puesto === id_puesto);
+    const hasVacantes = vacantes.some(vac => vac.id_puesto === id_puesto);
+    return !hasEmpleados && !hasVacantes;
   };
 
   return (
@@ -518,7 +534,7 @@ const Puestos = () => {
               </div>
               
               <div className="modal-buttons">
-                {isDeleting && (
+                {modalData.id_puesto && canDeletePuesto(modalData.id_puesto) && (
                   <button type="button" className="delete-button" onClick={handleDeletePuesto}>
                     Eliminar Puesto
                   </button>
