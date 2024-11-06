@@ -1,3 +1,4 @@
+```sql
 CREATE TYPE estado_enum AS ENUM ('Pendiente', 'Resuelto', 'No Resuelto','En Progreso', 'Reabierto');
 CREATE TYPE aprobacion_enum AS ENUM ('aprobado', 'rechazado');
 CREATE TYPE estado_conv_enum AS ENUM ('abierta', 'cerrada');
@@ -222,12 +223,11 @@ CREATE TABLE promocionxproducto (
 
 
 CREATE TABLE Audiencia (
-    id_audiencia VARCHAR (255) PRIMARY KEY,
-    Edad_rango int4range,  -- Utilizamos un rango de enteros
-    Genero VARCHAR(2),
-    Ubicacion VARCHAR(255)
+	id_audiencia varchar (20) primary key, 
+    Edad_rango varchar (20) NOT NULL,
+    Genero VARCHAR(2) NOT NULL,
+    Ubicacion VARCHAR(50) NOT NULL
 );
-
 
 CREATE TABLE Prototipo (
 	cod_prototipo SERIAL NOT NULL,
@@ -316,7 +316,6 @@ CREATE TABLE Pre_test (
 	foreign key (AudienciaB)references audiencia(id_audiencia),
 	foreign key (Resultado) references audiencia(id_audiencia),
 	foreign key (id_empleado) references Empleado(id_empleado)
-	
 );
 
 CREATE TABLE Estado_ticket_asig (
@@ -809,3 +808,4 @@ CREATE TABLE Observacion (
                              nombre VARCHAR(50) NOT NULL,
                              descripcion TEXT NOT NULL
 );
+```sql
