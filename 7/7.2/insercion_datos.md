@@ -182,13 +182,12 @@ VALUES
 ('3145MT', '[31,45]', 'M', 'Trujillo');
 
 -- Prototipos
-ALTER SEQUENCE prototipo_cod_prototipo_seq RESTART WITH 1;
-INSERT INTO Prototipo (Prop_presupuesto, Prop_audiencia, ID_empleado, cod_est_prot)
+INSERT INTO Prototipo (nombre_prot,Descripcion,Prop_presupuesto,fecha_creacion,fecha_estado, Prop_audiencia, ID_empleado, cod_est_prot)
 VALUES
-(5000.00, '1830ML', 5, 1),
-(3000.00, '3145MFA', 6, 2),
-(4000.00, '4660MC', 7, 3),
-(6000.00, '1830FT', 8, 1);
+('Prototipo 1','A',5000.00,'2024-02-14 09:23:45','2024-03-15 10:00:00','1830ML', 5, 1),
+('Prototipo 2','B',3000.00,'2024-07-22 14:10:30','2024-09-23 16:30:45','3145MFA', 6, 2),
+('Prototipo 3','C',4000.00,'2024-10-05 18:55:15','2024-11-06 20:05:00','4660MC', 7, 3),
+('Prototipo 4','D',6000.00,'2024-08-29 06:45:00','2024-09-30 08:15:30','1830FT', 8, 1);
 
 -- Canales
 ALTER SEQUENCE canal_cod_canal_seq RESTART WITH 1;
@@ -201,18 +200,19 @@ VALUES
 ('Publicidad Digital', 'Anuncios en plataformas de internet');
 
 -- Relación Prototipo-Canal (prototipoxcanal)
-INSERT INTO prototipoxcanal (cod_prototipo, cod_canal)
+INSERT INTO prototipoxcanal (cod_prototipo, cod_canal, impresiones, clics, conversiones)
 VALUES
-(1, 1),  -- Prototipo 1 usa Redes Sociales
-(1, 5),  -- Prototipo 1 también usa Publicidad Digital
-(2, 2),  -- Prototipo 2 usa Televisión
-(3, 3),  -- Prototipo 3 usa Radio
-(3, 4),  -- Prototipo 3 también usa Medios Impresos
-(4, 5);  -- Prototipo 4 usa Publicidad Digital
+(1, 1, 10000, 1500, 300),  -- Prototipo 1 usa Redes Sociales
+(1, 5, 12000, 1800, 350),  -- Prototipo 1 también usa Publicidad Digital
+(2, 2, null, null,null),  -- Prototipo 2 usa Televisión
+(3, 3, null, null, null),  -- Prototipo 3 usa Radio
+(3, 4, null, null,null),  -- Prototipo 3 también usa Medios Impresos
+(4, 5, 14000, 2100, 450);  -- Prototipo 4 usa Publicidad Digital
+
 
 
 -- Objetivos
-ALTER SEQUENCE Objetivos_id_objetivo_seq RESTART WITH 1;
+
 INSERT INTO Objetivos (Descripcion, cod_prototipo)
 VALUES
 ('Incrementar las ventas mensuales en un 10%', 1),
@@ -225,35 +225,46 @@ VALUES
 ('Generar más referencias de clientes actuales', 4);
 
 -- Campaña Publicitaria
-ALTER SEQUENCE Campana_publicitaria_cod_campana_seq RESTART WITH 1;
-INSERT INTO Campana_Publicitaria (Resultado, Presupuesto, Nombre_campana, Audiencia, cod_promocion, cod_prototipo)
-VALUES
-('Incremento de ventas en un 15%', 5000.00, 'Campaña de Verano', '1830ML', 1, 1),
-('Mayor visibilidad de marca', 3000.00, 'Campaña de Invierno', '3145MFA', 2, 2),
-('Posicionamiento exitoso', 4000.00, 'Campaña de Primavera', '4660MC', 3, 3),
-('Fidelización alcanzada', 6000.00, 'Campaña de Otoño', '1830FT', 3, 4);
 
-
--- Desempeño del Canal
-ALTER SEQUENCE Desempeno_Canal_id_desempeno_seq RESTART WITH 1;
-INSERT INTO Desempeno_Canal (cod_campana, cod_canal, impresiones, clics, conversiones)
+INSERT INTO Campana_Publicitaria (Resultado, Presupuesto, Nombre_campana, Audiencia,fecha_publicacion,fecha_finalizacion,cod_promocion, cod_prototipo)
 VALUES
-(1, 1, 10000, 1500, 300),  -- Campaña 1 con canal Redes Sociales
-(1, 5, 12000, 1800, 350),  -- Campaña 1 con canal Publicidad Digital
-(2, 2, 15000, 2000, 400),  -- Campaña 2 con canal Televisión
-(3, 3, 8000, 1200, 250),   -- Campaña 3 con canal Radio
-(3, 4, 5000, 800, 150),     -- Campaña 3 con canal Medios Impresos
-(4, 1, 11000, 1600, 320),  -- Campaña 4 con canal Redes Sociales
-(4, 5, 14000, 2100, 450);   -- Campaña 4 con canal Publicidad Digital
+('Incremento de ventas en un 15%', 5000.00, 'Campaña de Verano', '1830ML','2024-06-01 10:00:00','2024-07-01 18:00:00', 1, 1),
+('Fidelización alcanzada', 6000.00, 'Campaña de Otoño', '1830FT','2024-12-01 09:00:00','2025-01-05 23:59:59', 3, 4);
 
 -- Pre-test
-ALTER SEQUENCE Pre_test_id_pretest_seq RESTART WITH 1;
-INSERT INTO Pre_test (AudienciaA, AudienciaB, Fecha_inicio, Fecha_fin, Resultado, Comentarios, cod_prototipo, id_empleado)
+
+INSERT INTO Pre_test (AudienciaA, AudienciaB, Fecha_inicio, Fecha_fin, Resultado, cod_prototipo, id_empleado)
 VALUES
-('1830ML', '3145FL', '2024-10-01 10:00:00', '2024-10-05 18:00:00', 'Resultado positivo en A1', 'Comentarios positivos para A1', 1, 5),
-('3145MFA', '4660ML', '2024-10-06 09:00:00', '2024-10-10 17:00:00', 'Resultado mixto en A2', 'Revisar estrategia en A2', 2, 6),
-('4660MC', '1830MF', '2024-10-11 08:30:00', '2024-10-15 16:00:00', 'Buen resultado en A3', 'Alta aceptación en A3', 3, 7),
-('1830FT', '3145MT', '2024-10-16 08:00:00', '2024-10-20 19:00:00', 'Excelente recepción en A4', 'Comentarios excelentes para A4', 4, 8);
+('1830ML', '3145FL', '2024-10-01 10:00:00', '2024-10-05 18:00:00', '1830ML', 1, 5),
+('3145MFA', '4660ML', '2024-10-06 09:00:00', '2024-10-10 17:00:00', '3145MFA', 2, 6),
+('4660MC', '1830MF', '2024-10-11 08:30:00', '2024-10-15 16:00:00', '4660MC', 3, 7),
+('1830FT', '3145MT', '2024-10-16 08:00:00', '2024-10-20 19:00:00', '1830FT', 4, 8);
+
+-- Inserción de datos en la tabla Tipo_recurso
+INSERT INTO Tipo_recurso (nombre_tipo)
+VALUES 
+    ('Foto'),
+    ('Video'),
+    ('Guion'),
+    ('Documento');
+
+
+INSERT INTO Recursos (nombre_recurso, url_recurso, id_tipo_recurso, cod_prototipo)
+VALUES 
+    ('Video introductorio', 'http://example.com/video_intro.mp4', 2,2),
+    ('Guion principal', 'http://example.com/guion_principal.pdf', 3,3);   
+INSERT INTO Recursos (nombre_recurso, url_recurso, id_tipo_recurso, cod_prototipo)
+VALUES 
+    ('Video 4', 'http://example.com/video_intro.mp4', 2,4),
+    ('Guion principal 4', 'http://example.com/guion_principal.pdf', 3,4);
+
+INSERT INTO Recursos (nombre_recurso, url_recurso, id_tipo_recurso, cod_prototipo)
+VALUES 
+    ('Video publicidad 1', 'http://example.com/foto_inicial.jpg', 2,1),
+    ('Guion 1', 'http://example.com/video_intro.mp4', 3,1),
+   ('Analisis prot1', 'http://example.com/docum4_principal.pdf',4,1),
+   ('Analisis prot4', 'http://example.com/docum4_principal.pdf',4,4);
+
 
 -- Tabla Vacante (sin cambios)
 INSERT INTO Vacante (estado, fecha_fin, fecha_inicio, comentario, id_puesto)
