@@ -203,8 +203,10 @@ CREATE TABLE promocion (
                            fecha_inicio DATE,
                            fecha_fin DATE,
                            dscto numeric (5, 2),
+                           precio_final numeric (5,2)
                            estado_promo BOOLEAN default FALSE,
                            dscrip_promo VARCHAR (250),
+                           vigencia NUMERIC (1,0),
                            ID_empleado INTEGER,
                            PRIMARY KEY(cod_promocion),
                            FOREIGN KEY(ID_empleado) REFERENCES Empleado(ID_empleado)
