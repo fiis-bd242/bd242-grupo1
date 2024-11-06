@@ -589,7 +589,6 @@ CREATE TABLE promocionxproducto (
     FOREIGN KEY (cod_promocion) REFERENCES Promocion(cod_promocion),
     FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto)
 );
-
 CREATE TABLE Prioridad_objetivo (
     ID_Prioridad_objetivo SERIAL PRIMARY KEY,
     nombre estado_prioridad_enum NOT NULL,
@@ -625,7 +624,7 @@ CREATE TABLE Evaluacion_objetivo (
 
 CREATE TABLE Asistencia (
     ID_Asistencia SERIAL PRIMARY KEY,
-    estado estado_asistencia_enum NOT NULL,
+    estado estado_asistencia_enum NOT NULL DEFAULT 'Presente',
     fecha DATE NOT NULL,
     hora_entrada TIME,
     hora_salida TIME,
@@ -641,10 +640,19 @@ CREATE TABLE Permiso (
     ID_permiso SERIAL PRIMARY KEY,
     fecha_inicio DATE NOT NULL,
     fecha_final DATE NOT NULL,
-    estado estado_permiso_enum NOT NULL,
-    comentario TEXT,
+    estado estado_permiso_enum NOT NULL DEFAULT 'Pendiente',
+    comentario TEXT, -- Justificación del empleado
+    comentario_admin TEXT, -- Comentario del administrador en caso de rechazo
     ID_empleado INT REFERENCES Empleado(ID_empleado),
-    ID_tipo_permiso INT REFERENCES Tipo_permiso(ID_tipo_permiso)
+    ID_tipo_permiso INT REFERENCES Tipo_permiso(ID_tipo_permiso),
+    fecha_cambio_estado TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Fecha de cambio de estado
+);
+CREATE TABLE EvidenciaPermiso (
+    ID_evidencia SERIAL PRIMARY KEY,
+    nombre_archivo VARCHAR(255) NOT NULL,
+    ruta_archivo TEXT NOT NULL, -- Ruta o URL donde se almacena el archivo
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ID_permiso INT REFERENCES Permiso(ID_permiso)
 );
 
 CREATE TABLE Departamento (
