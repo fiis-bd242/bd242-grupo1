@@ -19,6 +19,9 @@ public class VacanteService {
     private PostulanteService postulanteService; // Add this field
 
     @Autowired
+    private EmailService emailService;
+
+    @Autowired
     public VacanteService(VacanteRepository vacanteRepository) {
         this.vacanteRepository = vacanteRepository;
     }
@@ -32,7 +35,75 @@ public class VacanteService {
     }
 
     public Vacante save(Vacante vacante) {
-        return vacanteRepository.save(vacante);
+        Vacante existingVacante = null;
+        if (vacante.getId_vacante() != null) {
+            existingVacante = vacanteRepository.findById(vacante.getId_vacante());
+        }
+
+        // Guardar la vacante
+        Vacante savedVacante = vacanteRepository.save(vacante);
+
+        // Verificar si el estado cambió a "Cerrada"
+        if (existingVacante != null && 
+            !"Cerrada".equals(existingVacante.getEstado()) && 
+            "Cerrada".equals(vacante.getEstado())) {
+            
+            // Obtener postulantes y enviar correos
+            List<Postulante> postulantes = vacanteRepository.findPostulantesByVacanteId(vacante.getId_vacante());
+            for (Postulante postulante : postulantes) {
+                String emailContent = String.format(
+                    "Estimado/a %s,\n\n" +
+                    "Le informamos que la vacante a la que postuló ha sido cerrada.\n\n" +
+                    "Feedback sobre su postulación:\n%s\n\n" +
+                    "Gracias por su participación.",
+                    postulante.getNombre(),
+                    vacante.getComentario()
+                );
+                
+                emailService.sendEmail(
+                    postulante.getCorreo(),
+                    "Actualización sobre su postulación",
+                    emailContent
+                );
+            }
+        }
+
+        return savedVacante;
+    }
+
+    // Método para manejar la actualización cuando se contrata a alguien
+    public void handleContratacion(Long vacanteId) {
+        Vacante vacante = vacanteRepository.findById(vacanteId);
+        if (vacante != null) {
+            int nuevaCantidad = vacante.getCantidad() - 1;
+            vacante.setCantidad(nuevaCantidad);
+            
+            // Si la cantidad llega a 0, cerrar la vacante
+            if (nuevaCantidad == 0) {
+                vacante.setEstado("Cerrada");
+                
+                // Obtener postulantes y enviar correos
+                List<Postulante> postulantes = vacanteRepository.findPostulantesByVacanteId(vacanteId);
+                for (Postulante postulante : postulantes) {
+                    String emailContent = String.format(
+                        "Estimado/a %s,\n\n" +
+                        "Le informamos que la vacante a la que postuló ha sido cerrada debido a que se completó el proceso de contratación.\n\n" +
+                        "Feedback sobre su postulación:\n%s\n\n" +
+                        "Gracias por su participación.",
+                        postulante.getNombre(),
+                        vacante.getComentario()
+                    );
+                    
+                    emailService.sendEmail(
+                        postulante.getCorreo(),
+                        "Actualización sobre su postulación",
+                        emailContent
+                    );
+                }
+            }
+            
+            vacanteRepository.save(vacante);
+        }
     }
 
     public void deleteById(Long id) {

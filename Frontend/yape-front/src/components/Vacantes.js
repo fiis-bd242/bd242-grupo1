@@ -756,6 +756,25 @@ const Vacantes = () => {
         });
 
         alert('Postulante, entrevista y oferta laboral creados exitosamente');
+        
+        // Reset form data
+        setFormData({
+          comentario: '',
+          id_puesto: '',
+          fecha_fin: '',
+          cantidad: 1,
+          nombre: '',
+          correo: '',
+          telefono: '',
+          idiomas: [],
+          educaciones: [],
+          habilidades: [],
+          experienciasLaborales: []
+        });
+
+        // Actualizar la lista de postulantes
+        await fetchPostulantes(selectedVacante.id_vacante);
+        
         closeCreatePostulanteModal();
       }
     } catch (error) {
@@ -872,23 +891,26 @@ const Vacantes = () => {
     setShowPostulanteDetailsModal(true);
   }; // Add missing semicolon here
 
-  const fetchEntrevistasDetails = async (postulanteId) => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/postulantes/${postulanteId}/entrevistas`);
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-      const data = await response.json();
-      console.log('Fetched entrevistas details:', data);
-      setEntrevistasDetails(data);
-      setShowEntrevistasModal(true);
-    } catch (error) {
-      console.error('Error fetching entrevistas details:', error);
-      alert('Error al cargar las entrevistas');
+const fetchEntrevistasDetails = async (postulanteId) => {
+  try {
+    const response = await fetch(`http://localhost:8080/api/postulantes/${postulanteId}/entrevistas`);
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
     }
-  };
+    const data = await response.json();
+    
+    // Ordenar las entrevistas por fecha
+    const sortedData = data.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    
+    setEntrevistasDetails(sortedData);
+    setShowEntrevistasModal(true);
+  } catch (error) {
+    console.error('Error fetching entrevistas details:', error);
+    alert('Error al cargar las entrevistas');
+  }
+};
 
-  const handleVerEntrevistas = (postulanteId) => {
+  const handleVerEntrevistasPostulante = (postulanteId) => {
     fetchEntrevistasDetails(postulanteId);
     setShowPostulanteDetailsModal(false);
   };
@@ -1077,6 +1099,26 @@ const Vacantes = () => {
       }
     }
   };
+  // Asegúrate de tener una función para obtener detalles del postulante
+const fetchPostulanteDetails = async (postulanteId) => {
+  try {
+    const response = await fetch(`http://localhost:8080/api/postulantes/${postulanteId}`);
+    if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+    const data = await response.json();
+    setSelectedPostulante(data);
+    // Si tienes más estados relacionados al postulante, actualízalos aquí
+  } catch (error) {
+    console.error('Error al obtener detalles del postulante:', error);
+    alert('Error al cargar los detalles del postulante');
+  }
+};
+
+// Modifica el manejador para cerrar entrevistas y refrescar detalles
+const handleEntrevistasClose = () => {
+  setShowEntrevistasModal(false);
+  fetchPostulanteDetails(selectedPostulante.id_postulante);
+  setShowPostulanteDetailsModal(true); // Abre el modal de detalles del postulante
+};
 
   return (
     <div className="layout-container">
@@ -1646,7 +1688,7 @@ const Vacantes = () => {
                   </ul>
                   {selectedPostulante && (
                     <button 
-                        onClick={() => handleVerEntrevistas(selectedPostulante.id_postulante)} 
+                        onClick={() => handleVerEntrevistasPostulante(selectedPostulante.id_postulante)} 
                         className="manage-entrevistas-button"
                     >
                         Gestionar Entrevistas
@@ -2184,9 +2226,8 @@ const Vacantes = () => {
         {showEntrevistasModal && (
           <GestionarEntrevistas
             entrevistasDetails={entrevistasDetails}
-            onClose={() => setShowEntrevistasModal(false)}
+            onClose={handleEntrevistasClose}
             postulanteId={selectedPostulante.id_postulante}
-            empleadoId={employee.id_empleado} // Assuming employee is the interviewer
             fetchEntrevistasDetails={fetchEntrevistasDetails} // Pass the function
           />
         )}
