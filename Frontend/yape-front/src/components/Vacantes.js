@@ -1226,6 +1226,37 @@ const handleSendEmail = async (entrevistaId, postulanteEmail) => {
   }
 };
 
+const handleFileUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await fetch('http://localhost:8080/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setFormData((prevData) => ({
+        ...prevData,
+        nombre: data.nombre || '',
+        correo: data.correo || '',
+        telefono: data.telefono || '',
+      }));
+      alert('Datos extraídos exitosamente');
+    } else {
+      alert('Error al extraer datos del archivo');
+    }
+  } catch (error) {
+    console.error('Error al subir el archivo:', error);
+    alert('Error al subir el archivo');
+  }
+};
+
   return (
     <div className="layout-container">
       {/* Sidebar */}
@@ -1902,6 +1933,14 @@ const handleSendEmail = async (entrevistaId, postulanteEmail) => {
                         value={formData.telefono}
                         onChange={handleChange}
                         required
+                      />
+                    </label>
+                    <label>
+                      Subir CV (PDF):
+                      <input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={handleFileUpload}
                       />
                     </label>
                   </div>
