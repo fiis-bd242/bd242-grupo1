@@ -18,6 +18,20 @@ public class EmailService {
     @Autowired
     private ObservacionRepository observacionRepository;
 
+    public String getEmailContent(Long idPostulante) {
+        List<Observacion> observaciones = observacionRepository.findByPostulanteId(idPostulante);
+        StringBuilder emailBody = new StringBuilder("Estimado/a,\n\n");
+        emailBody.append("Le informamos que la vacante a la que postuló ha sido cerrada.\n\n");
+        emailBody.append("Feedback sobre su postulación:\n\n");
+
+        for (Observacion observacion : observaciones) {
+            emailBody.append("• ").append(observacion.getDescripcion()).append("\n");
+        }
+
+        emailBody.append("\nGracias por su participación.\n");
+        return emailBody.toString();
+    }
+
     public void sendEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("tu_correo@tu-dominio.com");
@@ -28,22 +42,7 @@ public class EmailService {
     }
 
     public void sendObservacionesEmail(Long idPostulante, String to, String subject) {
-        List<Observacion> observaciones = observacionRepository.findByPostulanteId(idPostulante);
-        StringBuilder emailBody = new StringBuilder("Estimado/a,\n\n");
-        emailBody.append("Le informamos que la vacante a la que postuló ha sido cerrada.\n\n");
-        emailBody.append("Feedback sobre su postulación:\n\n");
-
-        for (Observacion observacion : observaciones) {
-            emailBody.append("Observación: ").append(observacion.getDescripcion()).append("\n\n");
-        }
-
-        emailBody.append("Gracias por su participación.\n");
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("tu_correo@tu-dominio.com");
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(emailBody.toString());
-        mailSender.send(message);
+        String emailContent = getEmailContent(idPostulante);
+        sendEmail(to, subject, emailContent);
     }
 }

@@ -431,6 +431,16 @@ const Vacantes = () => {
         const vacantesResponse = await fetch('http://localhost:8080/vacantes');
         const updatedVacantes = await vacantesResponse.json();
         setVacantes(updatedVacantes);
+
+        // Enviar email a todos los postulantes si el estado se cambia a 'Cerrada'
+        if (editFormData.estado === 'Cerrada') {
+          const postulantesResponse = await fetch(`http://localhost:8080/vacantes/${selectedVacante.id_vacante}/postulantes`);
+          const postulantes = await postulantesResponse.json();
+
+          for (const p of postulantes) {
+            await handleSendEmail(p.id_postulante, p.correo);
+          }
+        }
         
         setShowEditModal(false);
         setSelectedVacante(null);
@@ -449,16 +459,17 @@ const Vacantes = () => {
 
   // Agregar esta nueva función después de handleEditSubmit
   const handleDelete = async (e, vacanteId) => {
-    e.stopPropagation(); // Prevenir que se abra el popup al hacer click en eliminar
-    if (window.confirm('¿Está seguro que desea eliminar esta vacante?')) {
-      try {
+    e.preventDefault();
+    
+    try {
+      if (window.confirm('¿Está seguro que desea eliminar esta vacante?')) {
         const response = await fetch(`http://localhost:8080/vacantes/${vacanteId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
           },
         });
-
+  
         if (response.ok) {
           // Actualizar la lista de vacantes eliminando la vacante eliminada
           setVacantes(prevVacantes => prevVacantes.filter(vacante => vacante.id_vacante !== vacanteId));
@@ -466,10 +477,10 @@ const Vacantes = () => {
         } else {
           alert('Error al eliminar la vacante');
         }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Error al eliminar la vacante');
       }
+    } catch (error) {
+      console.error('Error al eliminar la vacante:', error);
+      alert('No se pudo eliminar la vacante.');
     }
   };
 
@@ -1047,66 +1058,124 @@ const fetchEntrevistasDetails = async (postulanteId) => {
   };
 
   const handleContratar = async (postulante) => {
-    if (window.confirm('¿Está seguro que desea contratar a este postulante?')) {
-      try {
-        // Fetch the vacancy
-        const vacanteResponse = await fetch(`http://localhost:8080/vacantes/${postulante.id_vacante}`);
-        if (!vacanteResponse.ok) throw new Error('Error fetching vacante');
-        const vacante = await vacanteResponse.json();
-    
-        // Update the vacancy quantity and status if necessary
-        const updatedVacante = { 
-          ...vacante, 
-          cantidad: vacante.cantidad - 1,
-          estado: vacante.cantidad - 1 === 0 ? 'Cerrada' : vacante.estado
-        };
-        await fetch(`http://localhost:8080/vacantes/${vacante.id_vacante}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedVacante),
-        });
-    
-        // Create the new employee
-        const newEmployee = {
-          nombre: postulante.nombre,
-          apellido: postulante.apellido,
-          fecha_nacimiento: '2000-01-01',
-          fecha_ingreso: new Date().toISOString().split('T')[0],
-          estado: 'Activo',
-          documento_identidad: '9999',
-          telefono: postulante.telefono,
-          id_puesto: vacante.id_puesto,
-        };
+    if (!window.confirm('¿Está seguro que desea contratar a este postulante?')) {
+      return;
+    }
+  
+    try {
+      const vacanteId = postulante.id_vacante;
+      const postulanteId = postulante.id_postulante;
+  
+      // Obtener la vacante actualizada
+      const vacante = vacantes.find(v => v.id_vacante === vacanteId);
+      if (!vacante) {
+        alert('Vacante no encontrada');
+        return;
+      }
+  
+      // Restar en 1 la cantidad de la vacante
+      const nuevaCantidad = vacante.cantidad - 1;
+  
+      // Editar la vacante con la nueva cantidad
+      const response = await fetch(`http://localhost:8080/vacantes/${vacanteId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...vacante,
+          cantidad: nuevaCantidad,
+          estado: nuevaCantidad === 0 ? 'Cerrada' : vacante.estado,
+        }),
+      });
+  
+      if (response.ok) {
+        // Actualizar la cantidad y estado localmente
+        setVacantes(prevVacantes =>
+          prevVacantes.map(v =>
+            v.id_vacante === vacanteId
+              ? { ...v, cantidad: nuevaCantidad, estado: nuevaCantidad === 0 ? 'Cerrada' : v.estado }
+              : v
+          )
+        );
+  
+        // Enviar email a todos los postulantes si la cantidad es 0
+        if (nuevaCantidad === 0) {
+          const postulantesResponse = await fetch(`http://localhost:8080/vacantes/${vacanteId}/postulantes`);
+          const postulantes = await postulantesResponse.json();
+  
+          for (const p of postulantes) {
+            await handleSendEmail(p.id_postulante, p.correo);
+          }
+        }
+  
+        // Crear el empleado con datos del postulante
         await fetch('http://localhost:8080/empleados', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newEmployee),
+          body: JSON.stringify(postulante),
         });
-    
-        // Hide the hired applicant
-        setPostulantes((prevPostulantes) =>
-          prevPostulantes.filter((p) => p.id_postulante !== postulante.id_postulante)
+  
+        // Eliminar al postulante
+        await fetch(`http://localhost:8080/postulantes/${postulanteId}`, {
+          method: 'DELETE',
+        });
+  
+        // Actualizar la lista de postulantes localmente
+        setPostulantes(prevPostulantes =>
+          prevPostulantes.filter(p => p.id_postulante !== postulanteId)
         );
-    
-        alert('Postulante contratado exitosamente');
-        setShowPostulanteDetailsModal(false); // Close the modal
-
-        // Reload the page to see the updated vacancy status
-        window.location.reload();
-      } catch (error) {
-        console.error('Error al contratar postulante:', error);
-        alert('Error al contratar el postulante');
+  
+        alert('El postulante ha sido contratado exitosamente');
+        setShowPostulanteDetailsModal(false);
+        navigate('/menu/vacantes');
+      } else {
+        alert('Error al actualizar la vacante');
       }
+    } catch (error) {
+      console.error('Error al contratar:', error);
+      alert('Ocurrió un error al contratar al postulante');
     }
   };
+  
   // Asegúrate de tener una función para obtener detalles del postulante
 const fetchPostulanteDetails = async (postulanteId) => {
   try {
     const response = await fetch(`http://localhost:8080/api/postulantes/${postulanteId}`);
     if (!response.ok) throw new Error(`Error: ${response.statusText}`);
     const data = await response.json();
-    setSelectedPostulante(data);
-    // Si tienes más estados relacionados al postulante, actualízalos aquí
+
+    // Obtener todas las entrevistas del postulante
+    const entrevistasResponse = await fetch(`http://localhost:8080/api/postulantes/${postulanteId}/entrevistas`);
+    if (!entrevistasResponse.ok) {
+      throw new Error(`Error: ${entrevistasResponse.statusText}`);
+    }
+    const entrevistasData = await entrevistasResponse.json();
+    setEntrevistas(entrevistasData);
+
+    // Obtener las observaciones para cada entrevista
+    const allObservaciones = [];
+    for (const entrevista of entrevistasData) {
+      const observacionesResponse = await fetch(`http://localhost:8080/api/observaciones/entrevista/${entrevista.id_entrevista}`);
+      if (observacionesResponse.ok) {
+        const observacionesData = await observacionesResponse.json();
+        allObservaciones.push(...observacionesData.map(obs => ({
+          descripcion: obs.descripcion,
+          tipoEntrevista: entrevista.tipo_entrevista,
+          fecha: entrevista.fecha
+        })));
+      }
+    }
+    setObservacionesPostulante(allObservaciones);
+
+    // Calcular el puntaje promedio y actualizar los datos del postulante
+    const totalPuntaje = entrevistasData.reduce((sum, entrevista) => sum + (entrevista.puntaje_general || 0), 0);
+    const averagePuntaje = entrevistasData.length > 0 ? totalPuntaje / entrevistasData.length : 0;
+
+    setSelectedPostulante({
+      ...data,
+      puntaje: averagePuntaje
+    });
   } catch (error) {
     console.error('Error al obtener detalles del postulante:', error);
     alert('Error al cargar los detalles del postulante');
@@ -1114,10 +1183,47 @@ const fetchPostulanteDetails = async (postulanteId) => {
 };
 
 // Modifica el manejador para cerrar entrevistas y refrescar detalles
-const handleEntrevistasClose = () => {
+const handleEntrevistasClose = async () => {
   setShowEntrevistasModal(false);
-  fetchPostulanteDetails(selectedPostulante.id_postulante);
+  await fetchPostulanteDetails(selectedPostulante.id_postulante);
   setShowPostulanteDetailsModal(true); // Abre el modal de detalles del postulante
+};
+
+// Update the email sending code where it exists
+const handleSendEmail = async (entrevistaId, postulanteEmail) => {
+  try {
+    // Create form data
+    const formData = new FormData();
+    formData.append('to', postulanteEmail);
+    formData.append('subject', 'Resultados de tu entrevista');
+
+    // Log the data being sent (for debugging)
+    console.log('Sending email to:', postulanteEmail);
+    console.log('Interview ID:', entrevistaId);
+
+    const response = await fetch(`http://localhost:8080/api/entrevistas/${entrevistaId}/send-email`, {
+      method: 'POST',
+      headers: {
+        // Remove Content-Type header to let the browser set it automatically with boundary
+        'Accept': 'application/json',
+      },
+      body: formData
+    });
+
+    // Log the response for debugging
+    console.log('Response status:', response.status);
+    const responseText = await response.text();
+    console.log('Response body:', responseText);
+
+    if (response.ok) {
+      alert('Email enviado exitosamente');
+    } else {
+      throw new Error(`Error al enviar el email: ${responseText}`);
+    }
+  } catch (error) {
+    console.error('Error details:', error);
+    alert(`Error al enviar el email: ${error.message}`);
+  }
 };
 
   return (
