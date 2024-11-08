@@ -595,47 +595,4 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
                 </label>
                 <div className="modal-buttons">
                   <button type="submit">Crear Observación</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {showEditObservationModal && (
-          <div className="modal-overlay" onClick={() => setShowEditObservationModal(false)}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <button className="close-popup" onClick={() => setShowEditObservationModal(false)}>&times;</button>
-              <h2>Editar Observación</h2>
-              <form onSubmit={handleEditObservationSubmit} className="observacion-form">
-                <label>
-                  Nombre:
-                  <input
-                    type="text"
-                    name="nombre"
-                    value={editObservationFormData.nombre}
-                    onChange={handleEditObservationChange}
-                    required
-                  />
-                </label>
-                <label>
-                  Descripción:
-                  <textarea
-                    name="descripcion"
-                    value={editObservationFormData.descripcion}
-                    onChange={handleEditObservationChange}
-                    required
-                  />
-                </label>
-                <div className="modal-buttons">
-                  <button type="submit">Guardar Cambios</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default GestionarEntrevistas;
+                </div>              </form>            </div>          </div>        )}        {showEditObservationModal && (          <div className="modal-overlay" onClick={() => setShowEditObservationModal(false)}>            <div className="modal" onClick={(e) => e.stopPropagation()}>              <button className="close-popup" onClick={() => setShowEditObservationModal(false)}>&times;</button>              <h2>Editar Observación</h2>              <form onSubmit={handleEditObservationSubmit} className="observacion-form">                <label>                  Nombre:                  <input                    type="text"                    name="nombre"                    value={editObservationFormData.nombre}                    onChange={handleEditObservationChange}                    required                  />                </label>                <label>                  Descripción:                  <textarea                    name="descripcion"                    value={editObservationFormData.descripcion}                    onChange={handleEditObservationChange}                    required                  />                </label>                <div className="modal-buttons">                  <button type="submit">Guardar Cambios</button>                </div>              </form>            </div>          </div>        )}      </div>    </div>  );};export default GestionarEntrevistas;

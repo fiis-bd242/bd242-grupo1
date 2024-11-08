@@ -47,4 +47,9 @@ public class ObservacionRepository {
         String sql = "SELECT * FROM observacion WHERE id_entrevista = ?";
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Observacion.class), idEntrevista);
     }
+
+    public List<Observacion> findByPostulanteId(Long idPostulante) {
+        String sql = "SELECT o.* FROM observacion o JOIN entrevista e ON o.id_entrevista = e.id_entrevista WHERE e.id_postulante = ?";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Observacion.class), idPostulante);
+    }
 }
