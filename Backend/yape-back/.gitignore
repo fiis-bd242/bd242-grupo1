@@ -33,3 +33,5 @@ build/
 .vscode/
 
 .env
+
+# Mis credenciales están en .env
