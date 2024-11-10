@@ -433,9 +433,9 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
                     onChange={handleChange}
                     required
                   >
-                    <option value="tecnica">Técnica</option>
-                    <option value="hr">HR</option>
-                    <option value="manager">Manager</option>
+                    <option value="Tecnica">Técnica</option>
+                    <option value="HR">HR</option>
+                    <option value="Manager">Manager</option>
                   </select>
                 </label>
                 <label>
