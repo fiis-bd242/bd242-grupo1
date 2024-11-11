@@ -24,16 +24,9 @@ public class EntrevistaRepositoryImpl implements EntrevistaRepository {
 
     @Override
     public Entrevista update(Entrevista entrevista) {
-        // Primero verificar si la entrevista existe
-        String checkSql = "SELECT COUNT(*) FROM entrevista WHERE id_entrevista = ?";
-        int count = jdbcTemplate.queryForObject(checkSql, Integer.class, entrevista.getId_entrevista());
-        
-        if (count == 0) {
-            throw new EmptyResultDataAccessException(1);
-        }
-
         String sql = "UPDATE entrevista SET estado = ?, fecha = ?, puntaje_general = ?, id_postulante = ?, id_empleado = ?, tipo_entrevista = ? WHERE id_entrevista = ?";
-        jdbcTemplate.update(sql, 
+        
+        int rowsAffected = jdbcTemplate.update(sql, 
             entrevista.getEstado(),
             entrevista.getFecha(),
             entrevista.getPuntaje_general(),
@@ -43,8 +36,12 @@ public class EntrevistaRepositoryImpl implements EntrevistaRepository {
             entrevista.getId_entrevista()
         );
 
-        // Devolver la entrevista actualizada
-        return findById(entrevista.getId_entrevista()).orElseThrow(() -> new EmptyResultDataAccessException(1));
+        if (rowsAffected == 0) {
+            throw new EmptyResultDataAccessException("Entrevista not found with id: " + entrevista.getId_entrevista(), 1);
+        }
+
+        return findById(entrevista.getId_entrevista()).orElseThrow(() -> 
+            new EmptyResultDataAccessException("Failed to retrieve updated entrevista", 1));
     }
 
     @Override

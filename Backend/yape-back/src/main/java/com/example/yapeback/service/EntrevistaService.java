@@ -24,20 +24,13 @@ public class EntrevistaService {
     }
 
     public Entrevista update(Long id, Entrevista entrevista) {
-        Optional<Entrevista> existingEntrevistaOpt = entrevistaRepository.findById(id);
-        if (existingEntrevistaOpt.isPresent()) {
-            Entrevista existingEntrevista = existingEntrevistaOpt.get();
-            existingEntrevista.setEstado(entrevista.getEstado());
-            existingEntrevista.setFecha(entrevista.getFecha());
-            existingEntrevista.setPuntaje_general(entrevista.getPuntaje_general());
-            existingEntrevista.setId_postulante(entrevista.getId_postulante());
-            existingEntrevista.setId_empleado(entrevista.getId_empleado());
-            existingEntrevista.setTipo_entrevista(entrevista.getTipo_entrevista());
-            return entrevistaRepository.save(existingEntrevista);
-        } else {
-            // Handle the case where the Entrevista is not found
-            return null; // or throw an appropriate exception
-        }
+        Entrevista existingEntrevista = entrevistaRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Entrevista not found with id: " + id));
+        
+        // Set the ID from the path parameter to ensure we're updating the correct record
+        entrevista.setId_entrevista(id);
+        
+        return entrevistaRepository.update(entrevista);
     }
 
     public Entrevista findById(Long id) {
