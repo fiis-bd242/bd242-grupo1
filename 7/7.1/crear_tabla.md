@@ -21,6 +21,55 @@ CREATE TYPE tipo_permiso_enum AS ENUM ('Falta justificada', 'Vacaciones', 'Permi
 CREATE TYPE estado_permiso_enum AS ENUM ('Pendiente', 'Aprobado', 'Rechazado');
 
 
+CREATE TABLE Departamento (
+                              id_departamento SERIAL NOT NULL,
+                              descripcion VARCHAR(100) NOT NULL,
+                              id_departamento_padre INTEGER,
+                              PRIMARY KEY (id_departamento),
+                              FOREIGN KEY (id_departamento_padre) REFERENCES Departamento(id_departamento)
+);
+
+CREATE TABLE Funcion (
+                         id_funcion SERIAL PRIMARY KEY,
+                         nombre VARCHAR(50) NOT NULL,
+                         descripcion VARCHAR(250) NOT NULL
+);
+
+CREATE TABLE Puesto (
+                        id_puesto SERIAL PRIMARY KEY,
+                        nombre VARCHAR(50) NOT NULL,
+                        paga FLOAT NOT NULL,
+                        id_departamento INTEGER NOT NULL,
+                        FOREIGN KEY (id_departamento) REFERENCES Departamento(id_departamento)
+);
+
+CREATE TABLE Puesto_Funcion (
+                                id_puesto INT REFERENCES Puesto(id_puesto),
+                                id_funcion INT REFERENCES Funcion(id_funcion),
+                                PRIMARY KEY (id_puesto, id_funcion)
+);
+
+CREATE TABLE Empleado (
+                          ID_empleado SERIAL NOT NULL,
+                          Nombre VARCHAR(50) NOT NULL,
+                          Apellido VARCHAR(50) NOT NULL,
+                          fecha_nacimiento DATE NOT NULL,
+                          fecha_ingreso DATE NOT NULL,
+                          Estado VARCHAR(50) NOT NULL,
+                          Documento_identidad VARCHAR(50) NOT NULL,
+                          Telefono VARCHAR(20) NOT NULL,
+                          id_puesto INTEGER NOT NULL,
+                          PRIMARY KEY (ID_empleado),
+                          FOREIGN KEY (id_puesto) REFERENCES Puesto(id_puesto)
+);
+
+CREATE TABLE Estado_prototipo (
+
+                	cod_est_prot serial not null,
+                        estado_prot text,
+                	PRIMARY KEY (cod_est_prot)
+);
+
 CREATE TABLE seller (
                         cod_seller SERIAL NOT NULL,
                         nombre_seller VARCHAR (50),
@@ -29,13 +78,6 @@ CREATE TABLE seller (
                         telefono numeric (9) NOT NULL,
                         ruc numeric (11) NOT null,
                         PRIMARY KEY (cod_seller)
-);
-
-CREATE TABLE Estado_prototipo (
-
-                	cod_est_prot serial not null,
-                        estado_prot text,
-                	PRIMARY KEY (cod_est_prot)
 );
 
 CREATE TABLE Tipo_producto (
@@ -61,6 +103,28 @@ CREATE TABLE productoxseller (
                                  FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto),
                                  FOREIGN KEY (cod_seller) REFERENCES Seller(cod_seller)
 );
+
+CREATE TABLE promocion (
+                           cod_promocion SERIAL  NOT NULL,
+                           fecha_inicio DATE,
+                           fecha_fin DATE,
+                           dscto numeric (5, 2),
+                           estado_promo BOOLEAN default FALSE,
+                           dscrip_promo VARCHAR (250),
+                           ID_empleado INTEGER,
+                           PRIMARY KEY(cod_promocion),
+                           FOREIGN KEY(ID_empleado) REFERENCES Empleado(ID_empleado)
+);
+
+CREATE TABLE promocionxproducto (
+                                    cod_promocionxproducto SERIAL NOT NULL,
+                                    cod_promocion INTEGER NOT NULL,
+                                    cod_producto INTEGER NOT NULL,
+                                    PRIMARY KEY (cod_promocionxproducto),
+                                    FOREIGN KEY (cod_promocion) REFERENCES Promocion(cod_promocion),
+                                    FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto)
+);
+
 
 CREATE TABLE Ticket_general (
                                 cod_ticket SERIAL NOT NULL,
@@ -199,26 +263,6 @@ CREATE TABLE Solucion (
 					    FOREIGN KEY (cod_diag) REFERENCES Diagnostico(cod_diag)
 );
 
-CREATE TABLE promocion (
-                           cod_promocion SERIAL  NOT NULL,
-                           fecha_inicio DATE,
-                           fecha_fin DATE,
-                           dscto numeric (5, 2),
-                           estado_promo BOOLEAN default FALSE,
-                           dscrip_promo VARCHAR (250),
-                           ID_empleado INTEGER,
-                           PRIMARY KEY(cod_promocion),
-                           FOREIGN KEY(ID_empleado) REFERENCES Empleado(ID_empleado)
-);
-
-CREATE TABLE promocionxproducto (
-                                    cod_promocionxproducto SERIAL NOT NULL,
-                                    cod_promocion INTEGER NOT NULL,
-                                    cod_producto INTEGER NOT NULL,
-                                    PRIMARY KEY (cod_promocionxproducto),
-                                    FOREIGN KEY (cod_promocion) REFERENCES Promocion(cod_promocion),
-                                    FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto)
-);
 
 
 
@@ -310,12 +354,12 @@ CREATE TABLE Pre_test (
 	Fecha_fin timestamp,
 	Resultado varchar (255),
 	cod_prototipo INTEGER NOT NULL,
-	id_empleado Integer not null,
+	ID_empleado Integer not null,
 	PRIMARY KEY (id_pretest),
 	FOREIGN KEY (cod_prototipo) REFERENCES Prototipo(cod_prototipo),
 	foreign key (AudienciaB)references audiencia(id_audiencia),
 	foreign key (Resultado) references audiencia(id_audiencia),
-	foreign key (id_empleado) references Empleado(id_empleado)
+	foreign key (ID_empleado) references Empleado(ID_empleado)
 );
 
 CREATE TABLE Estado_ticket_asig (
@@ -533,62 +577,7 @@ CREATE TABLE SolicitudCapacitacion
 );
 
 
-CREATE TABLE seller (
-	cod_seller SERIAL NOT NULL, 
-	nombre_seller VARCHAR (50),
-	rubro VARCHAR (50),
-	correo VARCHAR (50),
-	telefono NUMERIC (9),
-	ruc NUMERIC (11),
-	PRIMARY KEY (cod_seller)
-);
 
-CREATE TABLE Tipo_producto (
-    cod_tipo_producto SERIAL NOT NULL,
-    nombre_tipo_producto VARCHAR(255) NOT NULL,
-    PRIMARY KEY (cod_tipo_producto)
-);
-
-CREATE TABLE Producto (
-    cod_producto SERIAL NOT NULL,
-    nombre_producto VARCHAR(255) NOT NULL,
-    empresa VARCHAR(255) NOT NULL,
-    cod_tipo_producto INTEGER NOT NULL,
-    PRIMARY KEY (cod_producto),
-    FOREIGN KEY (cod_tipo_producto) REFERENCES Tipo_poducto(cod_tipo_producto)
-);
-
-
-CREATE TABLE promocion (
-	cod_promocion SERIAL  NOT NULL, 
-	fecha_inicio DATE,
-	fecha_fin DATE,
-	dscto NUMERIC (5,2),
-	estado_promo BOOLEAN default FALSE,
-	dscrip_promo VARCHAR (250),
-	ID_empleado INTEGER,
-	PRIMARY KEY(cod_promocion),
-	FOREIGN KEY(ID_empleado) REFERENCES Empleado(ID_empleado) 
-);
-
-
-CREATE TABLE productoxseller (
-    cod_productoxseller SERIAL NOT NULL,
-    cod_producto INTEGER NOT NULL,
-    cod_seller INTEGER NOT NULL,
-    PRIMARY KEY (cod_productoxseller),
-    FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto),
-    FOREIGN KEY (cod_seller) REFERENCES Seller(cod_seller)
-);
-
-CREATE TABLE promocionxproducto (
-    cod_promocionxproducto SERIAL NOT NULL,
-	cod_promocion INTEGER NOT NULL,
-    cod_producto INTEGER NOT NULL,
-    PRIMARY KEY (cod_promocionxproducto),
-    FOREIGN KEY (cod_promocion) REFERENCES Promocion(cod_promocion),
-    FOREIGN KEY (cod_producto) REFERENCES Producto(cod_producto)
-);
 CREATE TABLE Prioridad_objetivo (
     ID_Prioridad_objetivo SERIAL PRIMARY KEY,
     nombre estado_prioridad_enum NOT NULL,
@@ -655,47 +644,6 @@ CREATE TABLE EvidenciaPermiso (
     ID_permiso INT REFERENCES Permiso(ID_permiso)
 );
 
-CREATE TABLE Departamento (
-                              id_departamento SERIAL NOT NULL,
-                              descripcion VARCHAR(100) NOT NULL,
-                              id_departamento_padre INTEGER,
-                              PRIMARY KEY (id_departamento),
-                              FOREIGN KEY (id_departamento_padre) REFERENCES Departamento(id_departamento)
-);
-
-CREATE TABLE Funcion (
-                         id_funcion SERIAL PRIMARY KEY,
-                         nombre VARCHAR(50) NOT NULL,
-                         descripcion VARCHAR(250) NOT NULL
-);
-
-CREATE TABLE Puesto (
-                        id_puesto SERIAL PRIMARY KEY,
-                        nombre VARCHAR(50) NOT NULL,
-                        paga FLOAT NOT NULL,
-                        id_departamento INTEGER NOT NULL,
-                        FOREIGN KEY (id_departamento) REFERENCES Departamento(id_departamento)
-);
-
-CREATE TABLE Puesto_Funcion (
-                                id_puesto INT REFERENCES Puesto(id_puesto),
-                                id_funcion INT REFERENCES Funcion(id_funcion),
-                                PRIMARY KEY (id_puesto, id_funcion)
-);
-
-CREATE TABLE Empleado (
-                          ID_empleado SERIAL NOT NULL,
-                          Nombre VARCHAR(50) NOT NULL,
-                          Apellido VARCHAR(50) NOT NULL,
-                          fecha_nacimiento DATE NOT NULL,
-                          fecha_ingreso DATE NOT NULL,
-                          Estado VARCHAR(50) NOT NULL,
-                          Documento_identidad VARCHAR(50) NOT NULL,
-                          Telefono VARCHAR(20) NOT NULL,
-                          id_puesto INTEGER NOT NULL,
-                          PRIMARY KEY (ID_empleado),
-                          FOREIGN KEY (id_puesto) REFERENCES Puesto(id_puesto)
-);
 
 CREATE TABLE Vacante (
                          id_vacante SERIAL NOT NULL,
@@ -816,4 +764,5 @@ CREATE TABLE Observacion (
                              nombre VARCHAR(50) NOT NULL,
                              descripcion TEXT NOT NULL
 );
+
 ```sql
