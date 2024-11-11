@@ -38,6 +38,11 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
   const [loadingObservations, setLoadingObservations] = useState(false);
   const observationsCache = useRef({}); // Usar useRef para caché
 
+  const [idiomas, setIdiomas] = useState([]);
+  const [educacion, setEducacion] = useState([]);
+  const [habilidades, setHabilidades] = useState([]);
+  const [experienciaLaboral, setExperienciaLaboral] = useState([]);
+
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
@@ -251,6 +256,21 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
   };
   
 
+  const fetchPostulanteDetails = async (postulanteId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/postulantes/${postulanteId}`);
+      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+      const data = await response.json();
+      setIdiomas(data.idiomas || []);
+      setEducacion(data.educacion || []);
+      setHabilidades(data.habilidades || []);
+      setExperienciaLaboral(data.experienciaLaboral || []);
+    } catch (error) {
+      console.error('Error fetching postulante details:', error);
+      alert('Error al cargar los detalles del postulante');
+    }
+  };
+
   const handleViewObservations = async (id_entrevista) => {
     const entrevista = entrevistasDetails.find(e => e.id_entrevista === id_entrevista);
     if (entrevista) {
@@ -296,6 +316,7 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
     } finally {
       setLoadingObservations(false);
     }
+    fetchPostulanteDetails(postulanteId); // Fetch additional details
   };
   
 
@@ -560,6 +581,38 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
                   )}
                 </div>
               )}
+              <div>
+                <h3>Idiomas</h3>
+                <ul>
+                  {idiomas.map((idioma, index) => (
+                    <li key={index}>{idioma}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3>Educación</h3>
+                <ul>
+                  {educacion.map((edu, index) => (
+                    <li key={index}>{edu}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3>Habilidades</h3>
+                <ul>
+                  {habilidades.map((habilidad, index) => (
+                    <li key={index}>{habilidad}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3>Experiencia Laboral</h3>
+                <ul>
+                  {experienciaLaboral.map((experiencia, index) => (
+                    <li key={index}>{experiencia}</li>
+                  ))}
+                </ul>
+              </div>
               <div className="modal-buttons">
                 <button type="button" onClick={() => setShowCreateObservationModal(true)}>Crear Observación</button>
                 <button type="button" onClick={() => setShowObservationsModal(false)}>Cerrar</button>

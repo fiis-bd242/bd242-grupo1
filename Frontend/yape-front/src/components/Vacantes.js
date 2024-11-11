@@ -914,6 +914,14 @@ const Vacantes = () => {
     }
   
     setShowPostulanteDetailsModal(true);
+    // Ensure all relevant fields are set
+    setFormData({
+      ...formData,
+      idiomas: postulante.idiomas || [],
+      educaciones: postulante.educaciones || [],
+      habilidades: postulante.habilidades || [],
+      experienciasLaborales: postulante.experienciasLaborales || []
+    });
   }; // Add missing semicolon here
 
 const fetchEntrevistasDetails = async (postulanteId) => {
