@@ -46,7 +46,7 @@ const GestionarEntrevistas = ({
   const observationsCache = useRef({}); // Opcional: Eliminar si no se necesita el caché
 
   const [isUpdating, setIsUpdating] = useState(false);
-  const [entrevistasDetailsState, setEntrevistasDetails] = useState(entrevistasDetails);
+  const [ setEntrevistasDetails] = useState(entrevistasDetails);
 
   useEffect(() => {
     const fetchEmployees = async () => {
