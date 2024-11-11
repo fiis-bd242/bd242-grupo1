@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/GestionarEntrevistas.css';
 
-const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetchEntrevistasDetails }) => {
+const GestionarEntrevistas = ({ 
+  entrevistasDetails, 
+  onClose, 
+  postulanteId, 
+  fetchEntrevistasDetails
+}) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showObservationsModal, setShowObservationsModal] = useState(false);
@@ -36,12 +41,12 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
   });
   const [selectedObservation, setSelectedObservation] = useState(null);
   const [loadingObservations, setLoadingObservations] = useState(false);
-  const observationsCache = useRef({}); // Usar useRef para caché
+  // const observationsCache = useRef({}); // Usar useRef para caché
+  // Comentado para deshabilitar el caché temporalmente
+  const observationsCache = useRef({}); // Opcional: Eliminar si no se necesita el caché
 
-  const [idiomas, setIdiomas] = useState([]);
-  const [educacion, setEducacion] = useState([]);
-  const [habilidades, setHabilidades] = useState([]);
-  const [experienciaLaboral, setExperienciaLaboral] = useState([]);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [entrevistasDetailsState, setEntrevistasDetails] = useState(entrevistasDetails);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -132,12 +137,21 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    const payload = {
-      ...editFormData,
-      id_postulante: postulanteId
-    };
+    if (isUpdating) return;
+
+    setIsUpdating(true);
 
     try {
+      const payload = {
+        id_entrevista: selectedEntrevista.id_entrevista,
+        estado: editFormData.estado,
+        fecha: editFormData.fecha,
+        puntaje_general: parseInt(editFormData.puntaje_general),
+        id_postulante: postulanteId,
+        id_empleado: parseInt(editFormData.id_empleado),
+        tipo_entrevista: editFormData.tipo_entrevista
+      };
+
       const response = await fetch(`http://localhost:8080/api/entrevistas/${selectedEntrevista.id_entrevista}`, {
         method: 'PUT',
         headers: {
@@ -147,16 +161,38 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
       });
 
       if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`Error del servidor: ${errorData}`);
+        throw new Error(`Error del servidor: ${await response.text()}`);
       }
 
+      const updatedEntrevista = await response.json();
+
+      // Actualizar la lista de entrevistas localmente
+      setEntrevistasDetails(prevEntrevistas => 
+        prevEntrevistas.map(entrevista => 
+          entrevista.id_entrevista === updatedEntrevista.id_entrevista
+            ? updatedEntrevista
+            : entrevista
+        )
+      );
+
+      // Cerrar el modal y limpiar el estado
+      setShowEditModal(false);
+      setSelectedEntrevista(null);
+      setEditFormData({
+        estado: '',
+        fecha: '',
+        tipo_entrevista: '',
+        id_empleado: '',
+        puntaje_general: 0
+      });
+
       alert('Entrevista actualizada exitosamente');
-      setShowEditModal(false); // Hide the form after successful update
-      fetchEntrevistasDetails(postulanteId); // Fetch updated list of interviews
+
     } catch (error) {
       console.error('Error al actualizar la entrevista:', error);
       alert(`Error al actualizar la entrevista: ${error.message}`);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -191,7 +227,6 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
       // Actualizar el estado local y el caché
       const updatedObservations = [...(observations || []), newObservation];
       setObservations(updatedObservations);
-      observationsCache.current[selectedEntrevista.id_entrevista] = updatedObservations;
       
       // Limpiar el formulario
       setCreateObservationFormData({
@@ -240,10 +275,6 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
           ? { ...obs, ...payload }
           : obs
       );
-  
-      // Update cache
-      const entrevistaId = selectedObservation.id_entrevista;
-      observationsCache.current[entrevistaId] = updatedObservations;
       
       // Update state
       setObservations(updatedObservations);
@@ -256,33 +287,12 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
   };
   
 
-  const fetchPostulanteDetails = async (postulanteId) => {
-    try {
-      const response = await fetch(`http://localhost:8080/postulantes/${postulanteId}`);
-      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
-      const data = await response.json();
-      setIdiomas(data.idiomas || []);
-      setEducacion(data.educacion || []);
-      setHabilidades(data.habilidades || []);
-      setExperienciaLaboral(data.experienciaLaboral || []);
-    } catch (error) {
-      console.error('Error fetching postulante details:', error);
-      alert('Error al cargar los detalles del postulante');
-    }
-  };
-
   const handleViewObservations = async (id_entrevista) => {
     const entrevista = entrevistasDetails.find(e => e.id_entrevista === id_entrevista);
     if (entrevista) {
       setSelectedEntrevista(entrevista);
     } else {
       alert('No se encontró la entrevista seleccionada.');
-      return;
-    }
-  
-    if (observationsCache.current[id_entrevista]) {
-      setObservations(observationsCache.current[id_entrevista]);
-      setShowObservationsModal(true);
       return;
     }
   
@@ -316,7 +326,8 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
     } finally {
       setLoadingObservations(false);
     }
-    fetchPostulanteDetails(postulanteId); // Fetch additional details
+    // Removemos la llamada a fetchPostulanteDetails ya que no necesitamos estos datos
+    // fetchPostulanteDetails(postulanteId);
   };
   
 
@@ -581,38 +592,6 @@ const GestionarEntrevistas = ({ entrevistasDetails, onClose, postulanteId, fetch
                   )}
                 </div>
               )}
-              <div>
-                <h3>Idiomas</h3>
-                <ul>
-                  {idiomas.map((idioma, index) => (
-                    <li key={index}>{idioma}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3>Educación</h3>
-                <ul>
-                  {educacion.map((edu, index) => (
-                    <li key={index}>{edu}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3>Habilidades</h3>
-                <ul>
-                  {habilidades.map((habilidad, index) => (
-                    <li key={index}>{habilidad}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3>Experiencia Laboral</h3>
-                <ul>
-                  {experienciaLaboral.map((experiencia, index) => (
-                    <li key={index}>{experiencia}</li>
-                  ))}
-                </ul>
-              </div>
               <div className="modal-buttons">
                 <button type="button" onClick={() => setShowCreateObservationModal(true)}>Crear Observación</button>
                 <button type="button" onClick={() => setShowObservationsModal(false)}>Cerrar</button>
