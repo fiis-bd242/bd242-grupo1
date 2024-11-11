@@ -6,6 +6,10 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import org.neo4j.driver.*;
 
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+
 public class DataMigration {
 
     public static void main(String[] args) {
@@ -139,7 +143,11 @@ public class DataMigration {
 
     public static void migrateEntrevista(Connection pgConn, Session neo4jSession) throws Exception {
         Statement stmt = pgConn.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT * FROM Entrevista");
+        ResultSet rs = stmt.executeQuery("SELECT * FROM Entrevista e " +
+                "JOIN Postulante p ON e.id_postulante = p.id_postulante " +
+                "JOIN Vacante v ON p.id_vacante = v.id_vacante " +
+                "JOIN Puesto pu ON v.id_puesto = pu.id_puesto " +
+                "JOIN Departamento d ON pu.id_departamento = d.id_departamento");
 
         while (rs.next()) {
             int id = rs.getInt("id_entrevista");
@@ -156,15 +164,22 @@ public class DataMigration {
                     "ON MATCH SET e.estado = $estado, e.fecha = $fecha, e.puntaje_general = $puntajeGeneral, e.tipo_entrevista = $tipoEntrevista";
             neo4jSession.run(cypher, Values.parameters("id", id, "estado", estado, "fecha", fecha, "puntajeGeneral", puntajeGeneral, "tipoEntrevista", tipoEntrevista));
 
-            // Usar MERGE para la relación también
-            String relCypherPostulante = "MATCH (p:Postulante {id: $idPostulante}), (e:Entrevista {id: $id}) " +
-                    "MERGE (p)-[:TIENE]->(e)";
-            neo4jSession.run(relCypherPostulante, Values.parameters("idPostulante", idPostulante, "id", id));
+            // Obtener el departamento
+            String departamento = rs.getString("descripcion");  // descripción del departamento
 
-            // Usar MERGE para la relación también
+            // Calcular el peso de la relación basado en el tipo de entrevista y departamento
+            double weight = getWeight(tipoEntrevista, departamento);
+
+            // Modificar las queries Cypher para incluir el peso en las relaciones
+            String relCypherPostulante = "MATCH (p:Postulante {id: $idPostulante}), (e:Entrevista {id: $id}) " +
+                    "MERGE (p)-[:TIENE {weight: $weight}]->(e)";
+            neo4jSession.run(relCypherPostulante,
+                    Values.parameters("idPostulante", idPostulante, "id", id, "weight", weight));
+
             String relCypherEmpleado = "MATCH (emp:Empleado {id: $idEmpleado}), (e:Entrevista {id: $id}) " +
-                    "MERGE (emp)-[:REALIZA]->(e)";
-            neo4jSession.run(relCypherEmpleado, Values.parameters("idEmpleado", idEmpleado, "id", id));
+                    "MERGE (emp)-[:REALIZA {weight: $weight}]->(e)";
+            neo4jSession.run(relCypherEmpleado,
+                    Values.parameters("idEmpleado", idEmpleado, "id", id, "weight", weight));
         }
     }
 
@@ -197,5 +212,168 @@ public class DataMigration {
                     "MERGE (p)-[:OCUPA]->(e)";
             neo4jSession.run(relCypher, Values.parameters("idPuesto", idPuesto, "id", id));
         }
+    }
+
+    public static void calculateRelativeScore(Session neo4jSession) {
+        String query = "MATCH (p:Postulante)-[r1:TIENE]->(e:Entrevista)-[r2:REALIZA]->(emp:Empleado)-[:OCUPA]->(pu:Puesto)-[:TIENE]->(d:Departamento) " +
+                "WITH p, e, d.descripcion AS departamento, e.tipo_entrevista AS tipo, e.puntaje_general AS puntaje, r1.weight as weight " +
+                "RETURN p.id AS postulanteId, " +
+                "       COLLECT({tipo: tipo, puntaje: puntaje, departamento: departamento, weight: weight}) AS entrevistas";
+
+        org.neo4j.driver.Result result = neo4jSession.run(query);
+
+        while (result.hasNext()) {
+            org.neo4j.driver.Record record = result.next();
+            int postulanteId = record.get("postulanteId").asInt();
+            List<Map<String, Object>> entrevistas = record.get("entrevistas").asList(Value::asMap);
+
+            double relativeScore = calculateWeightedAverage(entrevistas);
+            String updateQuery = "MATCH (p:Postulante {id: $postulanteId}) SET p.puntaje_relativo = $relativeScore";
+            neo4jSession.run(updateQuery, Values.parameters("postulanteId", postulanteId, "relativeScore", relativeScore));
+        }
+    }
+
+    public static void calculateRelativeScoreForPostulante(Session neo4jSession, int postulanteId) {
+        // Consulta corregida para reflejar las direcciones correctas de las relaciones
+        String query = "MATCH (p:Postulante {id: $postulanteId})<-[:TIENE]-(v:Vacante)" +
+                      "<-[:OFRECE]-(pu:Puesto)<-[:TIENE]-(d:Departamento) " +
+                      "OPTIONAL MATCH (p)-[:TIENE]->(e:Entrevista) " +
+                      "WHERE e.puntaje_general IS NOT NULL " +
+                      "RETURN p.id AS postulanteId, " +
+                      "       d.descripcion AS departamento, " +
+                      "       COLLECT({ " +
+                      "           tipo: e.tipo_entrevista, " +
+                      "           puntaje: toInteger(e.puntaje_general), " +
+                      "           departamento: d.descripcion " +
+                      "       }) AS entrevistas";
+
+        org.neo4j.driver.Result result = neo4jSession.run(query, Values.parameters("postulanteId", postulanteId));
+
+        if (result.hasNext()) {
+            org.neo4j.driver.Record record = result.next();
+            List<Map<String, Object>> entrevistas = record.get("entrevistas").asList(Value::asMap);
+
+            if (!entrevistas.isEmpty()) {
+                double relativeScore = calculateWeightedAverage(entrevistas);
+
+                // Debug
+                System.out.println("Puntaje relativo calculado para postulante " + postulanteId + ": " + relativeScore);
+
+                String updateQuery = "MATCH (p:Postulante {id: $postulanteId}) " +
+                                   "SET p.puntaje_relativo = $relativeScore";
+                neo4jSession.run(updateQuery,
+                    Values.parameters("postulanteId", postulanteId, "relativeScore", relativeScore));
+            } else {
+                System.out.println("El postulante " + postulanteId + " no tiene entrevistas con puntaje_general válido.");
+            }
+        }
+    }
+
+    private static double calculateWeightedAverage(List<Map<String, Object>> entrevistas) {
+        double totalScore = 0;
+        double totalWeight = 0;
+
+        for (Map<String, Object> entrevista : entrevistas) {
+            String tipo = (String) entrevista.get("tipo");
+            String departamento = (String) entrevista.get("departamento");
+
+            // Convertir el puntaje de manera segura
+            Object puntajeObj = entrevista.get("puntaje");
+            double puntaje = 0.0;
+            if (puntajeObj instanceof Number) {
+                puntaje = ((Number) puntajeObj).doubleValue();
+            }
+
+            double weight = getWeight(tipo, departamento);
+
+            // Debug
+            System.out.println(String.format(
+                "Entrevista - Tipo: %s, Departamento: %s, Puntaje: %.2f, Peso: %.2f",
+                tipo, departamento, puntaje, weight
+            ));
+
+            totalScore += puntaje * weight;
+            totalWeight += weight;
+        }
+
+        // Debug
+        System.out.println("Total Score: " + totalScore);
+        System.out.println("Total Weight: " + totalWeight);
+
+        return totalWeight > 0 ? totalScore / totalWeight : 0.0;
+    }
+
+    private static double getWeight(String tipo, String departamento) {
+        switch (departamento) {
+            case "Tribu tecnológica":
+                switch (tipo) {
+                    case "Tecnica": return 2.0;
+                    case "HR": return 0.8;
+                    case "Manager": return 1.2;
+                }
+                break;
+
+            case "Área de Marketing":
+            case "Departamento de publicidad":
+            case "Departamento de comunicación":
+                switch (tipo) {
+                    case "Tecnica": return 1.0;
+                    case "HR": return 1.2;
+                    case "Manager": return 1.8;
+                }
+                break;
+
+            case "Área de People and Culture":
+            case "Departamento de Contratación":
+            case "Departamento de gestión":
+                switch (tipo) {
+                    case "Tecnica": return 0.8;
+                    case "HR": return 2.0;
+                    case "Manager": return 1.2;
+                }
+                break;
+
+            case "Tribu de Experiencia":
+                switch (tipo) {
+                    case "Tecnica": return 1.8;
+                    case "HR": return 1.0;
+                    case "Manager": return 1.2;
+                }
+                break;
+
+            case "Área de Data & Analitycs":
+                switch (tipo) {
+                    case "Tecnica": return 2.0;
+                    case "HR": return 0.8;
+                    case "Manager": return 1.2;
+                }
+                break;
+
+            case "Área de Soporte":
+                switch (tipo) {
+                    case "Tecnica": return 1.5;
+                    case "HR": return 1.0;
+                    case "Manager": return 1.5;
+                }
+                break;
+
+            case "Área comercial":
+                switch (tipo) {
+                    case "Tecnica": return 1.0;
+                    case "HR": return 1.2;
+                    case "Manager": return 1.8;
+                }
+                break;
+
+            case "Gerencia de planeamiento":
+            case "CEO":
+                switch (tipo) {
+                    case "Tecnica": return 1.0;
+                    case "HR": return 1.0;
+                    case "Manager": return 2.0;
+                }
+                break;
+        }
+        return 1.0; // Default weight para cualquier otro caso
     }
 }

@@ -34,6 +34,7 @@ public class DataMigrationRunner implements CommandLineRunner {
             DataMigration.migrateEmpleado(pgConn, neo4jSession);
             DataMigration.migratePostulante(pgConn, neo4jSession);
             DataMigration.migrateEntrevista(pgConn, neo4jSession);
+            DataMigration.calculateRelativeScore(neo4jSession);
         } catch (Exception e) {
             e.printStackTrace();
         }
