@@ -138,6 +138,9 @@ const Vacantes = () => {
   // Añadir este nuevo estado después de los otros estados
   const [observacionesPostulante, setObservacionesPostulante] = useState([]);
 
+  // Añadir estado para almacenar el relative score
+  const [relativeScore, setRelativeScore] = useState(null);
+
   useEffect(() => {
     const timer = setInterval(() => { 
       setTime(new Date());
@@ -894,6 +897,17 @@ const Vacantes = () => {
         ...postulante,
         puntaje: averagePuntaje
       });
+
+      // Obtener el relative score
+      try {
+        const response = await fetch(`http://localhost:8080/get/relative-score/postulante?postulanteId=${postulante.id_postulante}`);
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+        const data = await response.json();
+        setRelativeScore(data.relativeScore);
+      } catch (error) {
+        console.error('Error fetching relative score:', error);
+        setRelativeScore(null);
+      }
   
     } catch (error) {
       console.error("Error fetching entrevistas and observaciones:", error);
@@ -1185,8 +1199,10 @@ const fetchPostulanteDetails = async (postulanteId) => {
 // Modifica el manejador para cerrar entrevistas y refrescar detalles
 const handleEntrevistasClose = async () => {
   setShowEntrevistasModal(false);
-  await fetchPostulanteDetails(selectedPostulante.id_postulante);
-  setShowPostulanteDetailsModal(true); // Abre el modal de detalles del postulante
+  // Volver a cargar detalles del postulante para actualizar el Relative Score
+  if (selectedPostulante) {
+    await fetchPostulanteDetails(selectedPostulante.id_postulante);
+  }
 };
 
 // Update the email sending code where it exists
@@ -1256,6 +1272,14 @@ const handleFileUpload = async (e) => {
     alert('Error al subir el archivo');
   }
 };
+
+// Modificar la función calculateGeneralScore para que retorne null si no hay puntaje
+const calculateGeneralScore = () => {
+  if (!selectedPostulante || !selectedPostulante.entrevistas || selectedPostulante.entrevistas.length === 0) return null;
+  const totalPuntaje = selectedPostulante.entrevistas.reduce((sum, entrevista) => sum + entrevista.puntaje_general, 0);
+  return (totalPuntaje / selectedPostulante.entrevistas.length).toFixed(2);
+};
+
 
   return (
     <div className="layout-container">
@@ -1815,6 +1839,12 @@ const handleFileUpload = async (e) => {
                 <div className="evaluation-column">
                   <h2>Evaluación</h2>
                   <p>Puntaje: {selectedPostulante.puntaje}</p>
+                  {calculateGeneralScore() !== null && (
+                    <p><strong>Puntaje:</strong> {calculateGeneralScore()}</p>
+                  )}
+                  {relativeScore !== null && (
+                    <p><strong>Relative Score:</strong> {relativeScore}</p>
+                  )}
                   <h4>Entrevistas</h4>
                   <ul className="entrevistas-list">
                     {entrevistas.map((entrevista) => (
