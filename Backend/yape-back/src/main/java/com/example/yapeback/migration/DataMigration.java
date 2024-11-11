@@ -40,6 +40,16 @@ public class DataMigration {
         }
     }
 
+    public static void migrateAll(Connection pgConn, Session neo4jSession) throws Exception {
+        // Perform data migration steps
+        migrateDepartamento(pgConn, neo4jSession);
+        migratePuesto(pgConn, neo4jSession);
+        migrateVacante(pgConn, neo4jSession);
+        migrateEmpleado(pgConn, neo4jSession);
+        migratePostulante(pgConn, neo4jSession);
+        migrateEntrevista(pgConn, neo4jSession);
+    }
+
     public static void migrateDepartamento(Connection pgConn, Session neo4jSession) throws Exception {
         Statement stmt = pgConn.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT * FROM Departamento");

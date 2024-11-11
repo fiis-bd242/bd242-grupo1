@@ -46,7 +46,7 @@ const GestionarEntrevistas = ({
   const observationsCache = useRef({}); // Opcional: Eliminar si no se necesita el caché
 
   const [isUpdating, setIsUpdating] = useState(false);
-  const [ setEntrevistasDetails] = useState(entrevistasDetails);
+  // const [ setEntrevistasDetails] = useState(entrevistasDetails);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -152,11 +152,10 @@ const GestionarEntrevistas = ({
         tipo_entrevista: editFormData.tipo_entrevista
       };
 
+      // 1. Update interview in SQL database
       const response = await fetch(`http://localhost:8080/api/entrevistas/${selectedEntrevista.id_entrevista}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
@@ -164,18 +163,28 @@ const GestionarEntrevistas = ({
         throw new Error(`Error del servidor: ${await response.text()}`);
       }
 
-      const updatedEntrevista = await response.json();
+      // 2. Migrate data to Neo4j
+      const migrationResponse = await fetch('http://localhost:8080/migrate', {
+        method: 'GET',
+      });
 
-      // Actualizar la lista de entrevistas localmente
-      setEntrevistasDetails(prevEntrevistas => 
-        prevEntrevistas.map(entrevista => 
-          entrevista.id_entrevista === updatedEntrevista.id_entrevista
-            ? updatedEntrevista
-            : entrevista
-        )
-      );
+      if (!migrationResponse.ok) {
+        throw new Error('Error al migrar los datos');
+      }
 
-      // Cerrar el modal y limpiar el estado
+      // 3. Calculate new relative score
+      const scoreResponse = await fetch(`http://localhost:8080/calculate/relative-score/postulante?postulanteId=${postulanteId}`, {
+        method: 'GET',
+      });
+
+      if (!scoreResponse.ok) {
+        throw new Error('Error al recalcular el puntaje relativo');
+      }
+
+      // 4. Fetch updated interviews
+      fetchEntrevistasDetails(postulanteId);
+
+      // Close modal and reset form
       setShowEditModal(false);
       setSelectedEntrevista(null);
       setEditFormData({
@@ -189,8 +198,8 @@ const GestionarEntrevistas = ({
       alert('Entrevista actualizada exitosamente');
 
     } catch (error) {
-      console.error('Error al actualizar la entrevista:', error);
-      alert(`Error al actualizar la entrevista: ${error.message}`);
+      console.error('Error:', error);
+      alert(`Error: ${error.message}`);
     } finally {
       setIsUpdating(false);
     }
@@ -328,6 +337,38 @@ const GestionarEntrevistas = ({
     }
     // Removemos la llamada a fetchPostulanteDetails ya que no necesitamos estos datos
     // fetchPostulanteDetails(postulanteId);
+  
+    // Ejecutar la migración de datos antes de recalcular el puntaje relativo
+    try {
+      const migrationResponse = await fetch('http://localhost:8080/migrate', {
+        method: 'GET',
+      });
+  
+      if (!migrationResponse.ok) {
+        throw new Error('Error al migrar los datos');
+      }
+    } catch (error) {
+      console.error('Error al migrar los datos:', error);
+      alert('Error al migrar los datos');
+      return; // Detener si hay error en la migración
+    }
+  
+    // Recalcular el puntaje relativo
+    try {
+      const scoreResponse = await fetch(`http://localhost:8080/calculate/relative-score/postulante?postulanteId=${postulanteId}`, {
+        method: 'GET',
+      });
+      
+      if (!scoreResponse.ok) {
+        throw new Error('Error al recalcular el puntaje relativo');
+      }
+      
+      // ...existing code to fetch observations...
+    } catch (error) {
+      console.error('Error al recalcular el puntaje relativo:', error);
+      alert('Error al recalcular el puntaje relativo');
+      // ...existing error handling...
+    }
   };
   
 

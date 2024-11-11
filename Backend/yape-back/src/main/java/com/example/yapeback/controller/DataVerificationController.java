@@ -224,4 +224,22 @@ public class DataVerificationController {
         }
         return result;
     }
+
+    @GetMapping("/migrate")
+    public synchronized String migrateData() {
+        try (var pgConn = dataSource.getConnection();
+             var neo4jSession = neo4jDriver.session()) {
+
+            // Clear existing data in Neo4j before migration
+            neo4jSession.run("MATCH (n) DETACH DELETE n");
+            
+            // Perform full migration
+            DataMigration.migrateAll(pgConn, neo4jSession);
+
+            return "Data migration completed successfully.";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error during data migration: " + e.getMessage();
+        }
+    }
 }
