@@ -10,4 +10,6 @@ public interface ReporteRepository {
     List<CantidadTipificaciones> obtenerCantidadTipificaciones();
     List<FrecuenciaModificaciones> obtenerFrecuenciaModificaciones();
     List<ReporteBusiness> obtenerReporteBusiness(int anio);
+    List<ReporteAnalistaSugerenciasCorrecciones> obtenerReporteSugerenciasCorrecciones(int anio);
+    List<ReporteAnalistaTasaAdopcion> obtenerReporteTasaAdopcion(int anio);
 }

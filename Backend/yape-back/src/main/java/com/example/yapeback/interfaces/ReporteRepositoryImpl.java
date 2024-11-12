@@ -120,30 +120,29 @@ public class ReporteRepositoryImpl implements ReporteRepository{
         });
     }
 
-    @Override
     // Reporte analista
-    // Reporte de volumen de contacto por categoría
+    @Override
     public List<ReporteBusiness> obtenerReporteBusiness(int anio) {
         String sql = """
-            SELECT 
-                t.categoria, 
-                t.tipologia, 
-                t.funcionalidad, 
-                t.motivo,
-                COUNT(tat.cod_ticket_asig) AS volumen_contacto
-            FROM 
-                tipificacion t
-            JOIN 
-                Ticket_asig_tip tat ON tat.cod_etiqueta = t.cod_etiqueta
-            JOIN 
-                conversacion c ON c.id_conv = tat.id_conv
-            WHERE 
-                EXTRACT(YEAR FROM c.fecha_inicio) = ?
-            GROUP BY 
-                t.categoria, t.tipologia, t.funcionalidad, t.motivo
-            ORDER BY 
-                volumen_contacto DESC;
-        """;
+        SELECT 
+            t.categoria, 
+            t.tipologia, 
+            t.funcionalidad, 
+            t.motivo,
+            COUNT(tat.cod_ticket_asig) AS volumen_contacto
+        FROM 
+            tipificacion t
+        JOIN 
+            Ticket_asig_tip tat ON tat.cod_etiqueta = t.cod_etiqueta
+        JOIN 
+            conversacion c ON c.id_conv = tat.id_conv
+        WHERE 
+            EXTRACT(YEAR FROM c.fecha_inicio) = ?
+        GROUP BY 
+            t.categoria, t.tipologia, t.funcionalidad, t.motivo
+        ORDER BY 
+            volumen_contacto DESC;
+    """;
 
         return jdbcTemplate.query(sql, new Object[]{anio}, (rs, rowNum) ->
                 new ReporteBusiness(
@@ -154,7 +153,6 @@ public class ReporteRepositoryImpl implements ReporteRepository{
                         rs.getInt("volumen_contacto")
                 )
         );
-
     }
 
     @Override
@@ -185,36 +183,16 @@ public class ReporteRepositoryImpl implements ReporteRepository{
         );
     }
 
-    @Override
     // Reporte de tasa de adopción de sugerencias por analista
+    @Override
     public List<ReporteAnalistaTasaAdopcion> obtenerReporteTasaAdopcion(int anio) {
-        String sql = """
-            SELECT 
-                h.realizado_por AS id_analista,
-                COUNT(*) AS total_sugerencias,
-                SUM(CASE WHEN n.tipo_noti = 'sugerencia' THEN 1 ELSE 0 END) AS sugerencias_adoptadas,
-                (SUM(CASE WHEN n.tipo_noti = 'sugerencia' THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) AS tasa_adopcion
-            FROM 
-                historial_asignacion h
-            LEFT JOIN 
-                Notificacion n ON h.cod_ticket_asig = n.cod_ticket_asig
-            WHERE 
-                h.tipo_accion = 'sugerencia'
-                AND EXTRACT(YEAR FROM h.fecha_accion) = ?
-            GROUP BY 
-                h.realizado_por
-            ORDER BY 
-                tasa_adopcion DESC;
-        """;
-
-        return jdbcTemplate.query(sql, new Object[]{anio}, (rs, rowNum) ->
-                new ReporteAnalistaTasaAdopcion(
-                        rs.getString("id_analista"),
-                        rs.getInt("total_sugerencias"),
-                        rs.getInt("sugerencias_adoptadas"),
-                        rs.getDouble("tasa_adopcion")
-                )
-        );
+        String sql = "SELECT h.realizado_por AS id_analista, COUNT(*) AS total_sugerencias, SUM(CASE WHEN n.tipo_noti = 'sugerencia' THEN 1 ELSE 0 END) AS sugerencias_adoptadas, (SUM(CASE WHEN n.tipo_noti = 'sugerencia' THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) AS tasa_adopcion FROM historial_asignacion h LEFT JOIN Notificacion n ON h.cod_ticket_asig = n.cod_ticket_asig WHERE h.tipo_accion = 'sugerencia' AND EXTRACT(YEAR FROM h.fecha_accion) = ? GROUP BY h.realizado_por ORDER BY tasa_adopcion DESC";
+        return jdbcTemplate.query(sql, new Object[]{anio}, (rs, rowNum) -> new ReporteAnalistaTasaAdopcion(
+                rs.getString("id_analista"),
+                rs.getInt("total_sugerencias"),
+                rs.getInt("sugerencias_adoptadas"),
+                rs.getDouble("tasa_adopcion")
+        ));
     }
 }
 
