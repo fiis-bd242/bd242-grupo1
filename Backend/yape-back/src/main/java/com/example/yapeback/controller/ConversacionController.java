@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api-asesor/{idEmpleado}/historial")
+@RequestMapping("/api-asesor/{idEmpleado}")
 public class ConversacionController {
 
     @Autowired
@@ -19,7 +19,7 @@ public class ConversacionController {
     private MensajeService mensajeService;
 
     // Ruta para obtener el historial de conversaciones de un asesor
-    @GetMapping
+    @GetMapping("/historial")
     public List<Conversacion> getHistorial(@PathVariable Long idEmpleado) {
         return conversacionService.findById(idEmpleado);
     }

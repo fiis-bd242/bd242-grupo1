@@ -16,6 +16,10 @@ public class EtiquetaBusquedaController {
 
     @GetMapping("/buscar")
     public List<EtiquetaBusqueda> buscarEtiqueta(@PathVariable Long idEmpleado, @RequestParam String busqueda) {
-        return etiquetaBusquedaService.buscarEtiqueta(busqueda);
+        List<EtiquetaBusqueda> etiquetas = etiquetaBusquedaService.buscarEtiqueta(busqueda);
+        if (etiquetas.isEmpty()) {
+            System.out.println("No se encontraron resultados para: " + busqueda);
+        }
+        return etiquetas;
     }
 }

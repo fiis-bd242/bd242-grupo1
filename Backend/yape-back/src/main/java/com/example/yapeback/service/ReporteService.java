@@ -1,10 +1,7 @@
 package com.example.yapeback.service;
 
 import com.example.yapeback.interfaces.ReporteRepository;
-import com.example.yapeback.model.CantidadTipificaciones;
-import com.example.yapeback.model.FrecuenciaModificaciones;
-import com.example.yapeback.model.FrecuenciaReasignacion;
-import com.example.yapeback.model.TiempoPromedioResolucion;
+import com.example.yapeback.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +27,21 @@ public class ReporteService {
 
     public List<FrecuenciaModificaciones> getFrecuenciaModificaciones() {
         return reporteRepository.obtenerFrecuenciaModificaciones();
+    }
+    //Reporte analista
+    // Método para obtener el reporte de negocio por año
+    public List<ReporteBusiness> obtenerReporteBusiness(int anio) {
+        return reporteRepository.obtenerReporteBusiness(anio);
+    }
+
+    // Método para obtener el reporte de analista de sugerencias y correcciones por año
+    public List<ReporteAnalistaSugerenciasCorrecciones> obtenerReporteSugerenciasCorrecciones(int anio) {
+        return reporteRepository.obtenerReporteSugerenciasCorrecciones(anio);
+    }
+
+    // Método para obtener el reporte de tasa de adopción por analista por año
+    public List<ReporteAnalistaTasaAdopcion> obtenerReporteTasaAdopcion(int anio) {
+        return reporteRepository.obtenerReporteTasaAdopcion(anio);
     }
 }
 

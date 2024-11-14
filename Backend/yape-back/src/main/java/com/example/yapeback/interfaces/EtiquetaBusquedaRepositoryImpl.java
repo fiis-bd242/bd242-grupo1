@@ -16,6 +16,8 @@ public class EtiquetaBusquedaRepositoryImpl implements EtiquetaBusquedaRepositor
 
     @Override
     public List<EtiquetaBusqueda> buscarEtiqueta(String busqueda) {
+        // Establece el umbral de similitud
+        jdbcTemplate.execute("SET pg_trgm.similarity_threshold = 0.023");
         String sql = """
             SELECT 
                 cod_etiqueta AS codigoEtiqueta,

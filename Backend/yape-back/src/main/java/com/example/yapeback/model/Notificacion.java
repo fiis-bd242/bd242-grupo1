@@ -1,15 +1,12 @@
 package com.example.yapeback.model;
 
 import lombok.Data;
-import java.time.LocalDateTime;
 
 @Data
 public class Notificacion {
-    private Long idNoti;
-    private LocalDateTime fechaEnvio;
-    private String mensaje;
-    private String tipoNoti;  // Puede ser 'sugerencia' o 'edicion'
-    private Long codTicketAsig; // Representa el cod_ticket_asig desde TicketAsigTip
-    private Long codEtiqueta;   // Representa el cod_etiqueta desde Tipificacion
-    private Long idEmpleado;    // Representa el id_empleado desde Empleado
+    private int codTicketAsig;    // Código del ticket asignado
+    private int codEtiqueta;      // Código de la etiqueta
+    private String tipo;          // Tipo de notificación (sugerencia, edición, etc.)
+    private String mensaje;       // Mensaje de la notificación
+    private int idEmpleado;       // ID del empleado que genera la notificación
 }
