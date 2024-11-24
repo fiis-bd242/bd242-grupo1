@@ -12,4 +12,5 @@ public class TicketAsigTip {
     private Long idEstado;
     private LocalDateTime fechaAsig;
     private String comentario;
+    private String nombreEstado;
 }

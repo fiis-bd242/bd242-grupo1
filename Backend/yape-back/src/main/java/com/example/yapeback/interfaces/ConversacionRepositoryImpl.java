@@ -33,6 +33,7 @@ public class ConversacionRepositoryImpl implements ConversacionRepository {
         return jdbcTemplate.query(query, new ConversacionRowMapper());
     }
 
+    @Override
     // Método para obtener el historial de conversaciones filtrado por idEmpleado (asesor)
     public List<Conversacion> findByIdEmpleado(Long idEmpleado) {
         String query = """

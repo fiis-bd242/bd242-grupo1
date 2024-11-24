@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface EtiquetaBusquedaRepository {
 
-    List<EtiquetaBusqueda> buscarEtiqueta(String busqueda);
+    List<EtiquetaBusqueda> buscarEtiqueta(String busqueda, String tipologia, String funcionalidad, String motivo);
 }

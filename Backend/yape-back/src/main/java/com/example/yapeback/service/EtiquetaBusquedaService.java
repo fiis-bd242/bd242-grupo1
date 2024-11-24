@@ -13,7 +13,7 @@ public class EtiquetaBusquedaService {
     @Autowired
     private EtiquetaBusquedaRepository etiquetaBusquedaRepository;
 
-    public List<EtiquetaBusqueda> buscarEtiqueta(String busqueda) {
-        return etiquetaBusquedaRepository.buscarEtiqueta(busqueda);
+    public List<EtiquetaBusqueda> buscarEtiqueta(String busqueda, String tipologia, String funcionalidad, String motivo) {
+        return etiquetaBusquedaRepository.buscarEtiqueta(busqueda,tipologia, funcionalidad,motivo);
     }
 }
