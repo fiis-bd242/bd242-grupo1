@@ -1,6 +1,7 @@
 package com.example.yapeback.controller;
 
 import com.example.yapeback.model.TicketAsigTip;
+import com.example.yapeback.model.TicketData;
 import com.example.yapeback.service.TicketAsigTipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,33 +18,40 @@ public class TicketAsigTipController {
 
     // Ruta para asignar una tipificación a una conversación
     @PostMapping("/asignar")
-    public void assignTicket(@PathVariable Long idEmpleado, @RequestBody TicketAsigTip ticket) {
+    public void assignTicket(@PathVariable Integer idEmpleado, @RequestBody TicketAsigTip ticket) {
         // Aquí puedes verificar si el asesor tiene acceso a esa conversación, etc.
-        ticketAsigTipService.assignTicket(ticket);
+        ticketAsigTipService.assignTicket(ticket,idEmpleado);
     }
     @PutMapping("/actualizar/{idTicket}")
     public ResponseEntity<String> actualizarTicket(
-            @PathVariable Long idTicket,
-            @RequestParam Long codEtiqueta,
-            @RequestParam String problemaIdent,
-            @RequestParam String nombreEstado,
-            @RequestParam String comentario) {
-        try {
-            boolean actualizado = ticketAsigTipService.actualizarTicket(idTicket, codEtiqueta, problemaIdent, nombreEstado, comentario);
-            if (actualizado) {
-                return ResponseEntity.ok("Ticket actualizado correctamente");
-            } else {
-                return ResponseEntity.status(404).body("No se encontró el ticket");
-            }
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Error en los datos del ticket: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error interno al actualizar el ticket");
+            @PathVariable Integer idEmpleado,
+            @PathVariable Integer idTicket,
+            @RequestBody TicketData ticketData) {
+
+        // Intentar realizar la actualización y devolver el resultado directamente
+        boolean actualizado = ticketAsigTipService.actualizarTicket(
+                idTicket,
+                ticketData.getCodEtiqueta(),
+                ticketData.getProblemaIdent(),
+                ticketData.getNombreEstado().toString(),
+                ticketData.getComentario(),
+                idEmpleado
+        );
+
+        // Devolver directamente la respuesta sin manejar errores
+        if (actualizado) {
+            return ResponseEntity.ok("Ticket actualizado correctamente");
+        } else {
+            return ResponseEntity.status(500).body("Error al actualizar el ticket. El ticket no fue encontrado.");
         }
     }
+
+
+
+
     // Ruta para obtener un ticket por su ID
     @GetMapping("/{idTicket}")
-    public ResponseEntity<TicketAsigTip> getTicket(@PathVariable Long idTicket) {
+    public ResponseEntity<TicketAsigTip> getTicket(@PathVariable Integer idEmpleado,@PathVariable Long idTicket) {
         TicketAsigTip ticket = ticketAsigTipService.getTicketById(idTicket);
         if (ticket != null) {
             return ResponseEntity.ok(ticket);

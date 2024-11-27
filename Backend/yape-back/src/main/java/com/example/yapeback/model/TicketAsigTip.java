@@ -6,10 +6,11 @@ import java.time.LocalDateTime;
 @Data
 public class TicketAsigTip {
 
-    private Long codEtiqueta;
+    private Integer codTicketAsig;
+    private Integer codEtiqueta;
     private String problemaIdent;
-    private Long idConv;
-    private Long idEstado;
+    private Integer idConv;
+    private Integer idEstado;
     private LocalDateTime fechaAsig;
     private String comentario;
     private String nombreEstado;

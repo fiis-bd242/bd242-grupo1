@@ -1,14 +1,13 @@
 package com.example.yapeback.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
-public class ReporteBusiness {
+public class ReporteTipificacionDetallado {
     private String categoria;
-    private String tipologia;
     private String funcionalidad;
     private String motivo;
-    private int volumenContacto;
+    private String tipologia;
+    private Integer volumenTipificacion;
+    private String periodo;
 }

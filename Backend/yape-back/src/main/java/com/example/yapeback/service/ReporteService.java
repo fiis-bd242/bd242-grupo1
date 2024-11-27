@@ -13,35 +13,33 @@ public class ReporteService {
     @Autowired
     private ReporteRepository reporteRepository;
 
-    public List<FrecuenciaReasignacion> getFrecuenciaReasignacion() {
-        return reporteRepository.obtenerFrecuenciaReasignacion();
+    public void ejecutarReporteBusiness(int anio, String periodo) {
+        // Ejecutamos el reporte de negocio
+        reporteRepository.ejecutarReporteBusiness(anio, periodo);
     }
 
-    public List<TiempoPromedioResolucion> getTiempoPromedioResolucion() {
-        return reporteRepository.obtenerTiempoPromedioResolucion();
+    public List<ReporteTiempoResolucionEtiqueta> obtenerTiempoResolucionEtiqueta(String periodo,double numeroPeriodo) {
+        return reporteRepository.obtenerTiempoResolucionEtiqueta(periodo,numeroPeriodo);
     }
 
-    public List<CantidadTipificaciones> getCantidadTipificaciones() {
-        return reporteRepository.obtenerCantidadTipificaciones();
+    public List<ReporteTipificacionGeneral> obtenerTipificacionGeneral(String periodo,double numeroPeriodo) {
+        return reporteRepository.obtenerTipificacionGeneral(periodo,numeroPeriodo);
     }
 
-    public List<FrecuenciaModificaciones> getFrecuenciaModificaciones() {
-        return reporteRepository.obtenerFrecuenciaModificaciones();
-    }
-    //Reporte analista
-    // Método para obtener el reporte de negocio por año
-    public List<ReporteBusiness> obtenerReporteBusiness(int anio) {
-        return reporteRepository.obtenerReporteBusiness(anio);
+    public List<ReporteTipificacionDetallado> obtenerTipificacionDetallada(String periodo,double numeroPeriodo) {
+        return reporteRepository.obtenerTipificacionDetallada(periodo,numeroPeriodo);
     }
 
-    // Método para obtener el reporte de analista de sugerencias y correcciones por año
-    public List<ReporteAnalistaSugerenciasCorrecciones> obtenerReporteSugerenciasCorrecciones(int anio) {
-        return reporteRepository.obtenerReporteSugerenciasCorrecciones(anio);
+
+    public List<ReporteVolumenTickets> obtenerVolumenTickets(String periodo,double numeroPeriodo) {
+        return reporteRepository.obtenerVolumenTickets(periodo,numeroPeriodo);
     }
 
-    // Método para obtener el reporte de tasa de adopción por analista por año
-    public List<ReporteAnalistaTasaAdopcion> obtenerReporteTasaAdopcion(int anio) {
-        return reporteRepository.obtenerReporteTasaAdopcion(anio);
+    public List<ReporteClientesActivos> obtenerClientesActivos(String periodo,double numeroPeriodo) {
+        return reporteRepository.obtenerClientesActivos(periodo,numeroPeriodo);
+    }
+
+    public List<ReporteTicketsEmpleado> obtenerTicketsPorEmpleado(String periodo,double numeroPeriodo) {
+        return reporteRepository.obtenerTicketsPorEmpleado(periodo,numeroPeriodo);
     }
 }
-

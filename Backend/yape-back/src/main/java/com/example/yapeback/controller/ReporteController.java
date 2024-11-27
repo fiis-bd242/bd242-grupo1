@@ -1,54 +1,65 @@
 package com.example.yapeback.controller;
 
-import com.example.yapeback.model.*;
 import com.example.yapeback.service.ReporteService;
+import com.example.yapeback.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/reportes")
+@RequestMapping("/api/reporte")
 public class ReporteController {
 
     @Autowired
-    private ReporteService reporteService;
+    private ReporteService reporteBusinessService;
 
-    @GetMapping("/business/frecuencia-reasignacion")
-    public List<FrecuenciaReasignacion> obtenerFrecuenciaReasignacion() {
-        return reporteService.getFrecuenciaReasignacion();
+    @PostMapping("/business/generar")
+    public void generarReporteBusiness(
+            @RequestParam("anio") int anio,
+            @RequestParam("periodo") String periodo) {
+        reporteBusinessService.ejecutarReporteBusiness(anio, periodo);
     }
 
-    @GetMapping("/business/tiempo-promedio-resolucion")
-    public List<TiempoPromedioResolucion> obtenerTiempoPromedioResolucion() {
-        return reporteService.getTiempoPromedioResolucion();
+    @GetMapping("/business/tiempo-resolucion")
+    public List<ReporteTiempoResolucionEtiqueta> obtenerTiempoResolucionEtiqueta(
+            @RequestParam String tipoPeriodo,
+            @RequestParam double numeroPeriodo){
+        return reporteBusinessService.obtenerTiempoResolucionEtiqueta(tipoPeriodo,numeroPeriodo);
     }
 
-    @GetMapping("/business/cantidad-tipificaciones")
-    public List<CantidadTipificaciones> obtenerCantidadTipificaciones() {
-        return reporteService.getCantidadTipificaciones();
+    @GetMapping("/business/tipificacion-general")
+    public List<ReporteTipificacionGeneral> obtenerTipificacionGeneral(
+            @RequestParam String tipoPeriodo,
+            @RequestParam double numeroPeriodo) {
+        return reporteBusinessService.obtenerTipificacionGeneral(tipoPeriodo,numeroPeriodo);
     }
 
-    @GetMapping("/business/frecuencia-modificaciones")
-    public List<FrecuenciaModificaciones> obtenerFrecuenciaModificaciones() {
-        return reporteService.getFrecuenciaModificaciones();
-    }
-    // Endpoint para obtener el reporte de negocio por año
-    @GetMapping("/analista/reporte-business/{anio}")
-    public List<ReporteBusiness> obtenerReporteBusiness(@PathVariable int anio) {
-        return reporteService.obtenerReporteBusiness(anio);
+    @GetMapping("/business/tipificacion-detallada")
+    public List<ReporteTipificacionDetallado> obtenerTipificacionDetallada(
+            @RequestParam String tipoPeriodo,
+            @RequestParam double numeroPeriodo) {
+        return reporteBusinessService.obtenerTipificacionDetallada(tipoPeriodo,numeroPeriodo);
     }
 
-    // Endpoint para obtener el reporte de sugerencias y correcciones por año
-    @GetMapping("/analista/reporte-sugerencias-correcciones/{anio}")
-    public List<ReporteAnalistaSugerenciasCorrecciones> obtenerReporteSugerenciasCorrecciones(@PathVariable int anio) {
-        return reporteService.obtenerReporteSugerenciasCorrecciones(anio);
+    @GetMapping("/business/volumen-tickets")
+    public List<ReporteVolumenTickets> obtenerVolumenTickets(
+            @RequestParam String tipoPeriodo,
+            @RequestParam double numeroPeriodo) {
+        return reporteBusinessService.obtenerVolumenTickets(tipoPeriodo,numeroPeriodo);
     }
 
-    // Endpoint para obtener el reporte de tasa de adopción por analista por año
-    @GetMapping("/analista/reporte-tasa-adopcion/{anio}")
-    public List<ReporteAnalistaTasaAdopcion> obtenerReporteTasaAdopcion(@PathVariable int anio) {
-        return reporteService.obtenerReporteTasaAdopcion(anio);
+    @GetMapping("/business/clientes-activos")
+    public List<ReporteClientesActivos> obtenerClientesActivos(
+            @RequestParam String tipoPeriodo,
+            @RequestParam double numeroPeriodo) {
+        return reporteBusinessService.obtenerClientesActivos(tipoPeriodo,numeroPeriodo);
+    }
+
+    @GetMapping("/business/tickets-empleado")
+    public List<ReporteTicketsEmpleado> obtenerTicketsPorEmpleado(
+            @RequestParam String tipoPeriodo,
+            @RequestParam double numeroPeriodo) {
+        return reporteBusinessService.obtenerTicketsPorEmpleado(tipoPeriodo,numeroPeriodo);
     }
 }
-

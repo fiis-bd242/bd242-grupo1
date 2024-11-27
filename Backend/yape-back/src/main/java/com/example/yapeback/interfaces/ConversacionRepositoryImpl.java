@@ -71,4 +71,14 @@ public class ConversacionRepositoryImpl implements ConversacionRepository {
             return conversacion;
         }
     }
+    @Override
+    public void actualizarEstadoConversacion(Integer codTicket, String estadoConv) {
+        String updateConversacionQuery = """
+        UPDATE conversacion
+        SET estado_conv = CAST(? AS estado_conv_enum)
+        WHERE cod_ticket = ?;
+    """;
+        jdbcTemplate.update(updateConversacionQuery, estadoConv, codTicket);
+    }
+
 }

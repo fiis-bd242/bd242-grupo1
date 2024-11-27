@@ -4,6 +4,7 @@ import com.example.yapeback.interfaces.TicketAsigTipRepository;
 import com.example.yapeback.model.TicketAsigTip;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,11 +15,12 @@ public class TicketAsigTipService {
     private TicketAsigTipRepository ticketAsigTipRepository;
 
     // Método para asignar una tipificación a una conversación
-    public void assignTicket(TicketAsigTip ticket) {
-        ticketAsigTipRepository.insertTicketAsigTip(ticket);
+    public void assignTicket(TicketAsigTip ticket, Integer realizadoPor) {
+        ticketAsigTipRepository.insertTicketAsigTip(ticket,realizadoPor);
     }
-    public boolean actualizarTicket(Long idTicketAsigTip, Long codEtiqueta, String problemaIdent, String nombreEstado, String comentario) {
-        return ticketAsigTipRepository.actualizarTicket(idTicketAsigTip, codEtiqueta, problemaIdent, nombreEstado, comentario);
+
+    public boolean actualizarTicket(Integer idTicketAsigTip, Integer codEtiqueta, String problemaIdent, String nombreEstado, String comentario, Integer realizadoPor) {
+        return ticketAsigTipRepository.actualizarTicket(idTicketAsigTip, codEtiqueta, problemaIdent, nombreEstado, comentario,realizadoPor);
     }
     // Método para obtener un ticket por su ID
     public TicketAsigTip getTicketById(Long idTicketAsigTip) {

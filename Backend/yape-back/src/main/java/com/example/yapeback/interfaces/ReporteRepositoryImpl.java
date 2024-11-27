@@ -1,12 +1,6 @@
 package com.example.yapeback.interfaces;
 
-import com.example.yapeback.model.CantidadTipificaciones;
-import com.example.yapeback.model.FrecuenciaReasignacion;
-import com.example.yapeback.model.FrecuenciaModificaciones;
-import com.example.yapeback.model.ReporteAnalistaSugerenciasCorrecciones;
-import com.example.yapeback.model.ReporteAnalistaTasaAdopcion;
-import com.example.yapeback.model.ReporteBusiness;
-import com.example.yapeback.model.TiempoPromedioResolucion;
+import com.example.yapeback.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -14,185 +8,133 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class ReporteRepositoryImpl implements ReporteRepository{
+public class ReporteRepositoryImpl implements ReporteRepository {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    @Override
-    public List<FrecuenciaReasignacion> obtenerFrecuenciaReasignacion() {
-        String sql = """
-            SELECT 
-                t.cod_etiqueta, 
-                COUNT(*) AS frecuencia_reasignacion
-            FROM 
-                historial_asignacion h
-            JOIN 
-                tipificacion t ON h.cod_etiqueta = t.cod_etiqueta
-            WHERE 
-                h.tipo_accion IN ('sugerencia', 'edicion')
-                AND EXTRACT(YEAR FROM h.fecha_accion) = 2023
-            GROUP BY 
-                t.cod_etiqueta
-            ORDER BY 
-                frecuencia_reasignacion DESC
-        """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
-            FrecuenciaReasignacion fr = new FrecuenciaReasignacion();
-            fr.setCodEtiqueta(rs.getLong("cod_etiqueta"));
-            fr.setFrecuenciaReasignacion(rs.getInt("frecuencia_reasignacion"));
-            return fr;
-        });
+    // Ejecuta el procedimiento almacenado
+    public void ejecutarReporteBusiness(int anio, String periodo) {
+        String sql = "CALL reporte_business(?, ?)";
+        jdbcTemplate.update(sql, anio, periodo);
     }
-    @Override
-    public List<TiempoPromedioResolucion> obtenerTiempoPromedioResolucion() {
-        String sql = """
-            SELECT 
-                t.cod_etiqueta, 
-                AVG(EXTRACT(EPOCH FROM (c.fecha_fin - c.fecha_inicio)) / 3600) AS tiempo_promedio_resolucion_horas
-            FROM 
-                conversacion c
-            JOIN 
-                Ticket_asig_tip t ON c.cod_ticket = t.cod_ticket_asig
-            JOIN 
-                Estado_ticket_asig eta ON t.id_estado = eta.id_estado
-            WHERE 
-                eta.id_estado = 3
-                AND EXTRACT(YEAR FROM c.fecha_inicio) = 2023
-            GROUP BY 
-                t.cod_etiqueta
-            ORDER BY 
-                tiempo_promedio_resolucion_horas
-        """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
-            TiempoPromedioResolucion tr = new TiempoPromedioResolucion();
-            tr.setCodEtiqueta(rs.getLong("cod_etiqueta"));
-            tr.setTiempoPromedioResolucionHoras(rs.getDouble("tiempo_promedio_resolucion_horas"));
-            return tr;
-        });
+    // Método privado para obtener el rango de periodo basado en el tipo y número de periodo
+    private Object[] getPeriodoRango(String tipoPeriodo, double numeroPeriodo) {
+        double inicio = 0;
+        double fin = 0;
+
+        switch (tipoPeriodo.toLowerCase()) {
+            case "mes":
+                // Para el mes (1 a 12), solo retornamos el mes correspondiente
+                inicio = numeroPeriodo;
+                fin = numeroPeriodo;
+                break;
+            case "trimestre":
+                // Para el trimestre (1, 2, 3, 4), mapea a los periodos respectivos
+                inicio = 0.25 * (numeroPeriodo * 4 - 3);   // Primer mes del trimestre
+                fin = 0.25 * (numeroPeriodo * 4);           // Último mes del trimestre
+                break;
+            case "semestre":
+                // Para el semestre (1, 2), mapea a los periodos respectivos
+                inicio = numeroPeriodo == 1 ? 1.0 : 2.0;  // Primer mes del semestre
+                fin = numeroPeriodo == 1 ? 1.5 : 2.5;     // Último mes del semestre
+                break;
+            case "anio":
+                // Para el año (1, 2, ...), mapea a todo el año
+                inicio = 1.0;   // Primer mes del año
+                fin = 12.0;     // Último mes del año
+                break;
+            default:
+                throw new IllegalArgumentException("Tipo de periodo desconocido");
+        }
+        return new Object[]{inicio, fin};
     }
-    @Override
-    public List<CantidadTipificaciones> obtenerCantidadTipificaciones() {
-        String sql = """
-            SELECT 
-                EXTRACT(YEAR FROM t.fecha_creacion) AS año,
-                COUNT(*) AS cantidad_tipificaciones
-            FROM 
-                tipificacion t
-            WHERE 
-                EXTRACT(YEAR FROM t.fecha_creacion) = 2023
-            GROUP BY 
-                EXTRACT(YEAR FROM t.fecha_creacion)
-            ORDER BY 
-                año
-        """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
-            CantidadTipificaciones ct = new CantidadTipificaciones();
-            ct.setAño(rs.getInt("año"));
-            ct.setCantidadTipificaciones(rs.getInt("cantidad_tipificaciones"));
-            return ct;
-        });
-    }
-    @Override
-    public List<FrecuenciaModificaciones> obtenerFrecuenciaModificaciones() {
-        String sql = """
-            SELECT 
-                h.realizado_por AS id_analista, 
-                COUNT(*) AS frecuencia_modificaciones
-            FROM 
-                historial_asignacion h
-            WHERE 
-                h.tipo_accion = 'modificacion'
-                AND EXTRACT(YEAR FROM h.fecha_accion) = 2023
-            GROUP BY 
-                h.realizado_por
-            ORDER BY 
-                frecuencia_modificaciones DESC
-        """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
-            FrecuenciaModificaciones fm = new FrecuenciaModificaciones();
-            fm.setIdAnalista(rs.getString("id_analista"));
-            fm.setFrecuenciaModificaciones(rs.getInt("frecuencia_modificaciones"));
-            return fm;
+    // Consulta de tiempo promedio por etiqueta con filtro de rango en periodo
+    public List<ReporteTiempoResolucionEtiqueta> obtenerTiempoResolucionEtiqueta(String tipoPeriodo, double numeroPeriodo) {
+        Object[] rangoPeriodo = getPeriodoRango(tipoPeriodo, numeroPeriodo);
+        String sql = "SELECT * FROM reporte_tiempo_resolucion_etiqueta WHERE periodo BETWEEN ? AND ?";
+        return jdbcTemplate.query(sql, rangoPeriodo, (rs, rowNum) -> {
+            ReporteTiempoResolucionEtiqueta reporte = new ReporteTiempoResolucionEtiqueta();
+            reporte.setCodEtiqueta(rs.getString("cod_etiqueta"));
+            reporte.setTiempoPromedioResolucionHoras(rs.getDouble("tiempo_promedio_resolucion_horas"));
+            double periodoDb = rs.getDouble("periodo");
+            reporte.setPeriodo(String.valueOf(periodoDb)); // Transformar el período si es necesario
+            return reporte;
         });
     }
 
-    // Reporte analista
+    // Consulta de volumen general de tipificación con filtro de rango en periodo
     @Override
-    public List<ReporteBusiness> obtenerReporteBusiness(int anio) {
-        String sql = """
-        SELECT 
-            t.categoria, 
-            t.tipologia, 
-            t.funcionalidad, 
-            t.motivo,
-            COUNT(tat.cod_ticket_asig) AS volumen_contacto
-        FROM 
-            tipificacion t
-        JOIN 
-            Ticket_asig_tip tat ON tat.cod_etiqueta = t.cod_etiqueta
-        JOIN 
-            conversacion c ON c.id_conv = tat.id_conv
-        WHERE 
-            EXTRACT(YEAR FROM c.fecha_inicio) = ?
-        GROUP BY 
-            t.categoria, t.tipologia, t.funcionalidad, t.motivo
-        ORDER BY 
-            volumen_contacto DESC;
-    """;
-
-        return jdbcTemplate.query(sql, new Object[]{anio}, (rs, rowNum) ->
-                new ReporteBusiness(
-                        rs.getString("categoria"),
-                        rs.getString("tipologia"),
-                        rs.getString("funcionalidad"),
-                        rs.getString("motivo"),
-                        rs.getInt("volumen_contacto")
-                )
-        );
+    public List<ReporteTipificacionGeneral> obtenerTipificacionGeneral(String tipoPeriodo, double numeroPeriodo) {
+        Object[] rangoPeriodo = getPeriodoRango(tipoPeriodo, numeroPeriodo);
+        String sql = "SELECT * FROM reporte_tipificacion_general WHERE periodo BETWEEN ? AND ?";
+        return jdbcTemplate.query(sql, rangoPeriodo, (rs, rowNum) -> {
+            ReporteTipificacionGeneral reporte = new ReporteTipificacionGeneral();
+            reporte.setVolumenTipificacion(rs.getInt("VolumenTipificacion"));
+            reporte.setPeriodo(rs.getString("periodo"));
+            return reporte;
+        });
     }
 
+    // Consulta de volumen detallado de tipificación con filtro de rango en periodo
     @Override
-    // Reporte de sugerencias y correcciones por analista
-    public List<ReporteAnalistaSugerenciasCorrecciones> obtenerReporteSugerenciasCorrecciones(int anio) {
-        String sql = """
-            SELECT 
-                h.realizado_por AS id_analista, 
-                SUM(CASE WHEN h.tipo_accion = 'sugerencia' THEN 1 ELSE 0 END) AS cantidad_sugerencias,
-                SUM(CASE WHEN h.tipo_accion = 'correccion' THEN 1 ELSE 0 END) AS cantidad_correcciones
-            FROM 
-                historial_asignacion h
-            WHERE 
-                h.tipo_accion IN ('sugerencia', 'correccion')
-                AND EXTRACT(YEAR FROM h.fecha_accion) = ?
-            GROUP BY 
-                h.realizado_por
-            ORDER BY 
-                id_analista;
-        """;
-
-        return jdbcTemplate.query(sql, new Object[]{anio}, (rs, rowNum) ->
-                new ReporteAnalistaSugerenciasCorrecciones(
-                        rs.getString("id_analista"),
-                        rs.getInt("cantidad_sugerencias"),
-                        rs.getInt("cantidad_correcciones")
-                )
-        );
+    public List<ReporteTipificacionDetallado> obtenerTipificacionDetallada(String tipoPeriodo, double numeroPeriodo) {
+        Object[] rangoPeriodo = getPeriodoRango(tipoPeriodo, numeroPeriodo);
+        String sql = "SELECT * FROM reporte_tipificacion_detallado WHERE periodo BETWEEN ? AND ?";
+        return jdbcTemplate.query(sql, rangoPeriodo, (rs, rowNum) -> {
+            ReporteTipificacionDetallado reporte = new ReporteTipificacionDetallado();
+            reporte.setCategoria(rs.getString("categoria"));
+            reporte.setFuncionalidad(rs.getString("funcionalidad"));
+            reporte.setMotivo(rs.getString("motivo"));
+            reporte.setTipologia(rs.getString("tipologia"));
+            reporte.setVolumenTipificacion(rs.getInt("VolumenTipificacion"));
+            reporte.setPeriodo(rs.getString("periodo"));
+            return reporte;
+        });
     }
 
-    // Reporte de tasa de adopción de sugerencias por analista
+    // Consulta de clientes más activos por empresa con filtro de rango en periodo
     @Override
-    public List<ReporteAnalistaTasaAdopcion> obtenerReporteTasaAdopcion(int anio) {
-        String sql = "SELECT h.realizado_por AS id_analista, COUNT(*) AS total_sugerencias, SUM(CASE WHEN n.tipo_noti = 'sugerencia' THEN 1 ELSE 0 END) AS sugerencias_adoptadas, (SUM(CASE WHEN n.tipo_noti = 'sugerencia' THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) AS tasa_adopcion FROM historial_asignacion h LEFT JOIN Notificacion n ON h.cod_ticket_asig = n.cod_ticket_asig WHERE h.tipo_accion = 'sugerencia' AND EXTRACT(YEAR FROM h.fecha_accion) = ? GROUP BY h.realizado_por ORDER BY tasa_adopcion DESC";
-        return jdbcTemplate.query(sql, new Object[]{anio}, (rs, rowNum) -> new ReporteAnalistaTasaAdopcion(
-                rs.getString("id_analista"),
-                rs.getInt("total_sugerencias"),
-                rs.getInt("sugerencias_adoptadas"),
-                rs.getDouble("tasa_adopcion")
-        ));
+    public List<ReporteClientesActivos> obtenerClientesActivos(String tipoPeriodo, double numeroPeriodo) {
+        Object[] rangoPeriodo = getPeriodoRango(tipoPeriodo, numeroPeriodo);
+        String sql = "SELECT * FROM reporte_clientes_activos WHERE periodo BETWEEN ? AND ?";
+        return jdbcTemplate.query(sql, rangoPeriodo, (rs, rowNum) -> {
+            ReporteClientesActivos reporte = new ReporteClientesActivos();
+            reporte.setEmpresaCli(rs.getString("empresa_cli"));
+            reporte.setClientesMasActivos(rs.getInt("ClientesMasActivos"));
+            reporte.setPeriodo(rs.getString("periodo"));
+            return reporte;
+        });
     }
+
+    // Consulta de volumen de tickets atendidos con filtro de rango en periodo
+    @Override
+    public List<ReporteVolumenTickets> obtenerVolumenTickets(String tipoPeriodo, double numeroPeriodo) {
+        Object[] rangoPeriodo = getPeriodoRango(tipoPeriodo, numeroPeriodo);
+        String sql = "SELECT * FROM reporte_volumen_tickets WHERE periodo BETWEEN ? AND ?";
+        return jdbcTemplate.query(sql, rangoPeriodo, (rs, rowNum) -> {
+            ReporteVolumenTickets reporte = new ReporteVolumenTickets();
+            reporte.setVolumenTicketsAtendidos(rs.getInt("VolumenTicketsAtendidos"));
+            reporte.setPeriodo(rs.getString("periodo"));
+            return reporte;
+        });
+    }
+
+    // Consulta de tickets gestionados por empleado con filtro de rango en periodo
+    @Override
+    public List<ReporteTicketsEmpleado> obtenerTicketsPorEmpleado(String tipoPeriodo, double numeroPeriodo) {
+        Object[] rangoPeriodo = getPeriodoRango(tipoPeriodo, numeroPeriodo);
+        String sql = "SELECT * FROM reporte_tickets_empleado WHERE periodo BETWEEN ? AND ?";
+        return jdbcTemplate.query(sql, rangoPeriodo, (rs, rowNum) -> {
+            ReporteTicketsEmpleado reporte = new ReporteTicketsEmpleado();
+            reporte.setIdEmpleado(rs.getInt("ID_empleado"));
+            reporte.setTicketsGestionados(rs.getInt("TicketsGestionados"));
+            reporte.setPeriodo(rs.getString("periodo"));
+            return reporte;
+        });
+    }
+
 }
-

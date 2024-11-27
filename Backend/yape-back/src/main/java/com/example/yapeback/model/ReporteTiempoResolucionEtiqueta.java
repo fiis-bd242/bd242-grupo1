@@ -3,10 +3,9 @@ package com.example.yapeback.model;
 import lombok.Data;
 
 @Data
-public class TiempoPromedioResolucion {
-    private Long codEtiqueta;
+public class ReporteTiempoResolucionEtiqueta {
+    private String codEtiqueta;
     private Double tiempoPromedioResolucionHoras;
-
-    // Getters y setters
+    private String periodo;
 }
 
