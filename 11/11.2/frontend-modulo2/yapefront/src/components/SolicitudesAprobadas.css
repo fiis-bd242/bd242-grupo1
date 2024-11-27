@@ -1,0 +1,89 @@
+/* SolicitudesAprobadas.css */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .solicitudes-aprobadas {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: #f9f9f9;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+  }
+  
+
+  
+  .btn-regresar {
+    align-self: flex-start;
+    padding: 10px 20px;
+    background-color: #24c4a8 !important;
+    color: white !important;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  h2 {
+    color: #4b2a85;
+    text-align: left;
+  }
+  
+
+  
+  .lista-solicitudes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .solicitud {
+    display: flex;
+    gap: 25px;
+    padding: 15px;
+    background-color: #f5e6f3 !important;
+    border: 1px solid #d7bce9 !important;
+    border-radius: 10px;
+    align-items: center;
+  }
+  
+  .solicitud img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+  }
+  
+  .solicitud div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  button {
+    padding: 10px 15px;
+    background-color: #4b2a85;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #361b5d;
+  }
+  

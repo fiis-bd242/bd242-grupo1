@@ -1,0 +1,99 @@
+
+  .admin-publicidad {
+    display: flex;
+    flex-direction: column;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: #f9f9f9;
+    
+    box-sizing: border-box;
+  }
+
+  .sidebar {
+    width: 20%;
+    background-color: #6c3483;
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .sidebar .logo h1 {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .sidebar nav ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar nav ul li {
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  
+  .sidebar nav ul li.active {
+    background-color: #a569bd;
+  }
+  
+  .sidebar .logout {
+    margin: 20px;
+    padding: 10px;
+    background-color: #1abc9c;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  main33 {
+    width: 100%;
+    padding: 15px;
+  }
+  
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .options {
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .card {
+    width: 400px;
+  text-align: center;
+  border: 1px solid #a02dca;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(219, 219, 219, 0.1); /* Subtle shadow effect */
+  transition: transform 0.2s ease-in-out;
+  }
+  
+  .card:hover {
+    transform: scale(1.05);
+  }
+  
+  .card img {
+    width: 350px;
+    height: 400px;
+    margin-bottom: 10px;
+  }
+  
+  .card button {
+    background-color: #1abc9c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .card button:hover {
+    background-color: #16a085;
+  }
+  

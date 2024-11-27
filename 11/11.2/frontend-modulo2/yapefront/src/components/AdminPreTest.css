@@ -1,0 +1,69 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .admin-pretest {
+    background-color: #e8dbf2;
+    padding: 0;
+    margin: 0;
+    height: 100vh; /* ¡Fuerza a ocupar toda la altura de la ventana! */
+    display: flex; /* Asegura que sea un contenedor flexible */
+    width: 100%; /* ¡Asegura el ancho total de la pantalla! */
+  }
+  
+  main77 {
+    width: 100%;
+    padding: 20px;
+  }
+  
+  main header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .solicitudes table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .solicitudes th,
+  .solicitudes td {
+    border: 1px solid #dcdcdc;
+    text-align: center;
+    padding: 10px;
+  }
+  
+  .solicitudes th {
+    background-color: #9b59b6;
+    color: white;
+  }
+  
+  footer1 {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  footer1 .guardar{
+    padding: 10px 20px;
+    background-color: #1abc9c;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  footer1 .audiencia{
+    padding: 10px 20px;
+    background-color: #1abc9c;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  footer1 .volver {
+    padding: 10px 20px;
+    background-color: #1abc9c;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }

@@ -1,0 +1,109 @@
+.crear-prototipo {
+  padding: 15px;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column; /* Cambia a columna para alinear los elementos verticalmente */
+  align-items: center; /* Centra horizontalmente */
+  height: 100vh; /* Ocupa toda la altura de la pantalla */
+  width: 100%; /* Ocupa todo el ancho */
+  background-color: #ffffff; /* Opcional, establece un color de fondo si lo necesitas */
+}
+
+  .campaign-specs {
+    border: 2px solid #8f9db8;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    width: 100%; /* Ajusta el ancho según prefieras */
+    
+  }
+  
+  header66 {
+    padding: 15px;
+    text-align: justify;
+    width: 100%;
+    margin-bottom: 20px; /* Añade un espacio debajo del header */
+}
+header66 p {
+  font-size: 1rem; /* Tamaño de fuente para la hora */
+  color: #888; /* Color gris para el texto de la hora */
+}
+header66 h1 {
+  font-size: 28px; /* Tamaño de fuente para el título */
+  margin: 0; /* Elimina el margen por defecto */
+  padding-bottom: 5px; /* Espacio debajo del texto */
+  border-bottom: 2px solid #000; /* Agrega la línea de subrayado */
+}
+  .specifications-header {
+    background-color: #7a1c87;
+    color: white;
+    padding: 15px;
+    font-weight: bold;
+    border-radius: 20px 20px 20px 20px;
+    text-align: center;
+  }
+  
+  form label {
+    display: block;
+    margin-bottom: 15px;
+    font-size: 18px;
+  }
+  
+  input[type="text"],
+  input[type="number"],
+  textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #8f9db8;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  
+  .channel-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-top: 10px;
+  }
+  
+  .channel-option {
+    display: flex;
+    align-items: center;
+  }
+  
+  .channel-option label {
+    margin-left: 5px;
+    font-size: 14px;
+  }
+  
+  .audience-fields {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+  }
+  
+  input[type="checkbox"] {
+    transform: scale(1.2);
+  }
+  
+  .next-button {
+    background-color: #4cc4ac;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .next-button:hover {
+    background-color: #4bac99;
+  }
+  

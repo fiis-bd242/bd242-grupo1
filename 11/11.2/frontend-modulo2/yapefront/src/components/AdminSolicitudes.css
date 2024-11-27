@@ -1,0 +1,38 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.admin-solicitudes-container {
+  display: flex ;
+  height: 100vh ;
+  background-color: #e8dbf2;
+  display: flex !important; /* Asegura que sea un contenedor flexible */
+  width: 100% !important; /* ¡Asegura el ancho total de la pantalla! */
+}
+
+
+mainadmin {
+  flex: 1 ;
+  padding: 20px ;
+  background-color: #e8dbf2 ;
+  display: flex ;
+  flex-direction: column ;
+}
+
+.solicitudes table {
+  width: 100% ;
+  border-collapse: collapse ;
+  background-color: white;
+}
+
+.solicitudes td {
+  border: 1px solid #dcdcdc ;
+  padding: 10px ;
+}
+
+.solicitudes th {
+  background-color: #9b59b6;
+  color: white;
+}
+

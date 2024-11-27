@@ -1,0 +1,53 @@
+.campaign-dashboard {
+  flex-grow: 1;
+  padding: 30px;
+  
+}
+
+.campaign-dashboard h1 {
+  font-size: 28px;
+  margin-bottom: 26px;
+}
+
+.campaign-options {
+  display: flex;
+  flex-wrap: wrap;  /* Enables wrapping for smaller screens */
+  gap: 20px;
+  justify-content: center; /* Centers the options */
+}
+
+.option-card {
+  width: 400px;
+  text-align: center;
+  border: 1px solid #a02dca;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(219, 219, 219, 0.1); /* Subtle shadow effect */
+  transition: transform 0.2s ease-in-out;
+}
+
+.option-card:hover {
+  transform: scale(1.05); /* Slight scale on hover */
+}
+
+.option-card img {
+  width: 200px;
+  height: 225px;
+  max-width: 100%; /* Ensures images are responsive */
+  margin-bottom: 10px;
+}
+
+.option-card button {
+  background-color: #4cc4ac;
+  color: white;
+  border: none;
+  padding: 20px;
+  cursor: pointer;
+  border-radius: 30px;
+  margin-top: 20px;
+  transition: background-color 0.3s ease; /* Smooth transition for hover */
+}
+
+.option-card button:hover {
+  background-color: #4a9080; /* Darker shade on hover */
+}

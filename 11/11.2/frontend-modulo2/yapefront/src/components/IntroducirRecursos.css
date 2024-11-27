@@ -1,0 +1,87 @@
+.introducir-recursos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  margin-top: 20px;
+
+  width: 100%;
+}
+
+h15 {
+  padding: 15px;
+  font-size: 30px;
+  font-family: Arial, sans-serif;
+  margin-bottom: 18px;
+  border-bottom: 2px solid #b762de;
+  width: 95%;
+}
+
+h2 {
+  font-size: 18px;
+  color: #4a0c66; /* Color morado similar al de la barra */
+  background-color: #efc9ff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  
+}
+
+.resources-grid {
+  padding: 15px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 80%; /* Ajusta el tamaño de la cuadrícula */
+  margin-bottom: 20px;
+  justify-items: center; /* Centra los elementos dentro de cada celda de la cuadrícula */
+}
+
+.resource-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  height: 150px;
+  width: 100%;
+  background-color: #f7f7f7;
+  padding: 10px;
+}
+
+label {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #333;
+}
+
+.upload-button {
+  background-color: #63deb7;
+  color: #fff3f3;
+  font-size: 16px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 20px; /* Agrega un margen arriba del botón */
+}
+
+.upload-button:hover {
+  background-color: #1b30d3;
+}
+
+.save-button {
+  background-color: #28d8a1;
+  color: #fff;
+  font-size: 16px;
+  padding: 10px 30px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 20px; /* Agrega un margen arriba del botón */
+}
+
+.save-button:hover {
+  background-color: #26c291;
+}

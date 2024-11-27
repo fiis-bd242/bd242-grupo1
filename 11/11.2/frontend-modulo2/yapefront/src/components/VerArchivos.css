@@ -1,0 +1,88 @@
+.archivos-grid {
+    display: grid ;
+    grid-template-columns: repeat(2, 1fr) ; /* 2 columnas */
+    gap: 20px ;
+    width: 100% ; /* Asegura que ocupa todo el ancho */
+    margin: 0 auto ; /* Centra la grilla */
+    
+}
+
+
+
+main12 {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra los elementos dentro de main12 */
+    width: 100%;
+}
+
+.ver-archivos-container {
+    display: flex;
+    flex-direction: column; /* Alinea los elementos verticalmente */
+   
+    justify-content: flex-start; /* Asegura que los elementos estén al principio del contenedor */
+    width: 100%;
+    padding: 20px;
+}
+
+
+
+.archivo-seccion {
+    border: 1px solid #ccc;
+    padding: 15px;
+    text-align: center;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.archivo-seccion h3 {
+    margin-bottom: 10px;
+}
+
+.image-size-control {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%; /* Asegura alineación completa */
+}
+
+.image-size-control label {
+    font-weight: bold;
+}
+
+.archivo-boton {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.archivo-boton:hover {
+    background-color: #0056b3;
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+
+footer .btn {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+footer .btn:hover {
+    background-color: #218838;
+}
+
+p {
+    color: #888;
+}

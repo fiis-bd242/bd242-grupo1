@@ -1,0 +1,57 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    box-sizing: border-box;
+  }
+  
+  .app1 {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+  
+
+  main3{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    width: 100%; /* Ocupa el ancho completo */
+
+}
+
+  
+  .proposals-list1 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px; /* Ajusta según el tamaño máximo que deseas */
+
+}
+  
+  .proposal-card1 {
+    display: flex;
+    flex-direction: column;
+    background-color: #f5e6f3;
+    border: 1px solid #d7bce9;
+    border-radius: 50px;
+    padding: 15px;
+    gap: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+  }
+  
+  .proposal image {
+    width: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+  }
+
