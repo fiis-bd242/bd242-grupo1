@@ -1,0 +1,27 @@
+package com.example.yapeback.service;
+
+import com.example.yapeback.interfaces.PreTestRepository;
+import com.example.yapeback.model.PreTest;
+
+import java.time.LocalDateTime;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class PreTestService {
+
+    @Autowired
+    private PreTestRepository preTestRepository;
+
+    // Función para crear un nuevo PreTest
+    public String createPreTest(PreTest preTest) {
+    	preTest.setFecha_inicio(LocalDateTime.now());
+        int rows = preTestRepository.insertPreTest(preTest);
+        if (rows > 0) {
+            return "PreTest creado exitosamente";
+        } else {
+            return "Error al crear PreTest";
+        }
+    }
+}

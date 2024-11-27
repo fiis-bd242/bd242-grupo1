@@ -1,0 +1,22 @@
+package com.example.yapeback.service;
+
+import java.time.LocalDateTime;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.example.yapeback.data.PreTest;
+import com.example.yapeback.interfaces.PreTestRepository;
+
+public class PreTestService {
+	@Autowired
+    private PreTestRepository preTestRepository;
+
+    public PreTest registrarPreTest(String audienciaA, LocalDateTime fechaInicio, Integer codPrototipo, Integer idEmpleado) {
+        PreTest preTest = new PreTest();
+        preTest.setAudienciaA(audienciaA);
+        preTest.setFechaInicio(fechaInicio);
+        preTest.setCodPrototipo(codPrototipo);
+        preTest.setIdEmpleado(idEmpleado);
+        return preTestRepository.save(preTest);
+    }
+}

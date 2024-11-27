@@ -1,0 +1,71 @@
+package com.example.yapeback.controller;
+
+import com.example.yapeback.model.PreTest;
+import com.example.yapeback.service.PreTestService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@RestController
+@RequestMapping("/pretest")
+public class PreTestController {
+
+    private final PreTestService preTestService;
+
+    @Autowired
+    public PreTestController(PreTestService preTestService) {
+        this.preTestService = preTestService;
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<PreTest>> getAllPreTests() {
+        List<PreTest> preTests = preTestService.getAllPreTestsOrderedByPrototipo();
+        if (preTests.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(preTests);
+    }
+    @PostMapping("/registrar")
+    public String insertarPreTest(@RequestBody PreTest preTest) {
+        try {
+            preTestService.insertarPreTest(preTest);
+            return "PreTest insertado exitosamente.";
+        } catch (Exception e) {
+            return "Error al insertar PreTest: " + e.getMessage();
+        }
+    }
+    @PutMapping("/actualizarAudienciaB/{id}")
+    public String actualizarAudienciaB(@PathVariable("id") Integer idPreTest, @RequestParam("audienciaB") String audienciaB) {
+        try {
+            preTestService.actualizarAudienciaB(idPreTest, audienciaB);
+            return "AudienciaB actualizada exitosamente.";
+        } catch (Exception e) {
+            return "Error al actualizar AudienciaB: " + e.getMessage();
+        }
+    }
+    @PutMapping("/actualizarResultadoYFechaFin/{id}")
+    public ResponseEntity<?> actualizarResultadoYFechaFin(
+            @PathVariable("id") Integer idPretest,
+            @RequestParam("resultado") String resultado,
+            @RequestParam("fechaFin") String fechaFin) {
+        try {
+            preTestService.actualizarResultadoYFechaFin(idPretest, resultado, fechaFin);
+            return ResponseEntity.ok("Resultado y Fecha de fin actualizados con éxito");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar los datos: " + e.getMessage());
+        }
+    }
+}
+

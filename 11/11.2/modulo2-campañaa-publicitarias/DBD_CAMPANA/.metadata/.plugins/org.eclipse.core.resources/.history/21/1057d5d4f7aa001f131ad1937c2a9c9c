@@ -1,0 +1,18 @@
+package com.example.yapeback.model;
+
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+@Data
+public class CampanaPublicitaria {
+    private Integer codCampana;
+    private String resultado;
+    private Double presupuesto;
+    private String nombreCampana;
+    private String audiencia;
+    private LocalDateTime fechaPublicacion;
+    private LocalDateTime fechaFinalizacion;
+    private Integer codPromocion;
+    private Integer codPrototipo;
+}

@@ -1,0 +1,33 @@
+package com.example.yapeback.controller;
+
+import com.example.yapeback.service.CampanaService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/campanas")
+public class CampanaController {
+
+    @Autowired
+    private CampanaService campanaService;
+
+    @GetMapping("/detalles/{codPrototipo}")
+    public ResponseEntity<Map<String, Object>> obtenerDetallesCampana(@PathVariable Integer codPrototipo) {
+        Map<String, Object> detalles = campanaService.obtenerDetallesPrototipo(codPrototipo);
+        return ResponseEntity.ok(detalles);
+    }
+    
+    @PutMapping("/NuevaCampaña/{codPrototipo}")
+    public void crearCampana(int codPrototipo) {
+        int filasInsertadas = campanaService.insertarCampanaPublicitaria(codPrototipo);
+        if (filasInsertadas > 0) {
+            System.out.println("Campaña publicitaria creada exitosamente.");
+        } else {
+            System.out.println("No se pudo crear la campaña publicitaria.");
+        }
+    }
+    
+}

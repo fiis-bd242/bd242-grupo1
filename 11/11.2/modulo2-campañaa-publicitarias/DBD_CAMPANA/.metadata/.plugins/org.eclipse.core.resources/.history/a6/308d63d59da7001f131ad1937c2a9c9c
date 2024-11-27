@@ -1,0 +1,23 @@
+package com.example.yapeback.interfaces;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import com.example.yapeback.model.PreTest;
+@Repository
+public class PreTestRepository{
+
+	 @Autowired
+	    private JdbcTemplate jdbcTemplate;
+
+	    // Función para insertar un nuevo PreTest
+	    public int insertPreTest(PreTest preTest) {
+	        String sql = "INSERT INTO Pre_test (audienciaA, fecha_inicio, cod_prototipo, id_empleado) VALUES (?, ?, ?, ?)";
+	        return jdbcTemplate.update(sql, 
+	                preTest.getAudienciaA(), 
+	                preTest.getFecha_inicio(), 
+	                preTest.getCod_prototipo(),
+	                preTest.getId_empleado());
+	    }
+}

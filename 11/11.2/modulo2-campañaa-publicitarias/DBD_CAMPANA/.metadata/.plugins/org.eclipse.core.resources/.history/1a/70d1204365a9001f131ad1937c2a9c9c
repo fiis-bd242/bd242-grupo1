@@ -1,0 +1,20 @@
+package com.example.yapeback.interfaces;
+
+import com.example.yapeback.model.Prototipo;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface PrototipoRepository extends JpaRepository<Prototipo, Integer> {
+
+    // Query para obtener los prototipos con el estado 'Pendiente'
+    @Query("SELECT p.cod_prototipo, p.fecha_estado, CONCAT(e.nombre, ' ', e.apellido) AS autor, ep.estado_prot " +
+           "FROM Prototipo p " +
+           "JOIN Estado_prototipo ep ON p.cod_est_prot = ep.cod_est:prot " +
+           "JOIN Empleado e ON p.ID_empleado = e.ID_empleado " +
+           "WHERE ep.estado_prot = :estado")
+    List<Object[]> findPrototiposByEstado(String estado);
+}

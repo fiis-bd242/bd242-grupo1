@@ -1,0 +1,9 @@
+package com.example.yapeback.model;
+
+import lombok.Data;
+
+@Data
+public class TipoRecurso {
+    private Integer idTipoRecurso;
+    private String nombreTipo;
+}

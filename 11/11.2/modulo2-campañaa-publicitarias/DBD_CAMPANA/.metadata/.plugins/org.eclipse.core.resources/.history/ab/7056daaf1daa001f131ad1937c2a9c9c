@@ -1,0 +1,56 @@
+package com.example.yapeback.controller;
+
+import com.example.yapeback.interfaces.RecursosServiceInterface;
+import com.example.yapeback.model.Recursos;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/recursos")
+public class RecursosController {
+
+    private final RecursosServiceInterface recursosService;
+    private final String UPLOAD_DIR = "C:/uploads/";
+
+    @Autowired
+    public RecursosController(RecursosServiceInterface recursosService) {
+        this.recursosService = recursosService;
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadFile(
+        @RequestParam("file") MultipartFile file,        
+        @RequestParam("nombre_recurso") String nombre_recurso, 
+        @RequestParam("id_tipo_recurso") Integer id_tipo_recurso, 
+        @RequestParam("cod_prototipo") Integer cod_prototipo) {
+        try {
+            // Verifica si el recurso ya existe
+            Recursos recursoExistente = recursosService.encontrarPorPrototipoYTipo(cod_prototipo, id_tipo_recurso);
+            if (recursoExistente != null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Recurso ya existe para este prototipo y tipo.");
+            }
+
+            recursosService.actualizarUrlDeRecurso(file, cod_prototipo, id_tipo_recurso);
+            return ResponseEntity.ok("Archivo subido y URL actualizada correctamente.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al subir el archivo: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/por-prototipo/{codPrototipo}")
+    public ResponseEntity<List<Recursos>> obtenerRecursosPorPrototipo(@PathVariable Integer codPrototipo) {
+        List<Recursos> recursos = recursosService.obtenerRecursosPorPrototipo(codPrototipo);
+        if (recursos.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        return ResponseEntity.ok(recursos);
+    }
+}
+

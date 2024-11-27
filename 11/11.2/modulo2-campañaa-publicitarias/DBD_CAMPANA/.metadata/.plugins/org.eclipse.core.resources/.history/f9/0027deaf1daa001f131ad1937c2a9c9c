@@ -1,0 +1,81 @@
+package com.example.yapeback.service;
+
+import com.example.yapeback.interfaces.RecursosRepository;
+import com.example.yapeback.interfaces.RecursosServiceInterface;
+import com.example.yapeback.model.Recursos;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
+@Service
+public class RecursosService implements RecursosServiceInterface {
+
+    private final String RUTA_DIRECTORIO = "C:/uploads/";
+
+    @Autowired
+    private RecursosRepository recursosRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Override
+    public void guardarRecurso(Recursos recurso) {
+        recursosRepository.save(recurso);
+    }
+
+    @Override
+    public Recursos encontrarPorPrototipoYTipo(Integer cod_prototipo, Integer id_tipo_recurso) {
+        return recursosRepository.findByCod_prototipoAndId_tipo_recurso(cod_prototipo, id_tipo_recurso);
+    }
+
+    @Override
+    public void actualizarUrlDeRecurso(MultipartFile file, Integer cod_prototipo, Integer id_tipo_recurso) {
+        // Guardar el archivo y obtener la URL relativa
+        String url_recurso = guardarArchivo(file);
+
+        // Si no existe, se crea el recurso
+        Recursos recurso = new Recursos();
+        recurso.setCod_prototipo(cod_prototipo);
+        recurso.setId_tipo_recurso(id_tipo_recurso);
+        recurso.setUrl_recurso(url_recurso);
+        recurso.setNombre_recurso(file.getOriginalFilename());
+
+        guardarRecurso(recurso);  // Guardar en base de datos
+    }
+
+    @Override
+    public String guardarArchivo(MultipartFile file) {
+        String nombreArchivo = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        Path rutaArchivo = Paths.get(RUTA_DIRECTORIO + nombreArchivo);
+        try {
+            Files.createDirectories(Paths.get(RUTA_DIRECTORIO)); // Crear el directorio si no existe
+            file.transferTo(rutaArchivo.toFile()); // Guardar el archivo
+            return "uploads/" + nombreArchivo; // Retornar la ruta relativa
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al guardar el archivo", e);
+        }
+    }
+
+    @Override
+    public List<Recursos> obtenerRecursosPorPrototipo(Integer codPrototipo) {
+        return jdbcTemplate.query("SELECT * FROM recursos WHERE cod_prototipo = ?", 
+                (rs, rowNum) -> new Recursos(
+                        rs.getInt("id_recurso_prot"),
+                        rs.getString("nombre_recurso"),
+                        rs.getString("url_recurso"),
+                        rs.getInt("id_tipo_recurso"),
+                        rs.getInt("cod_prototipo")
+                ), codPrototipo);
+    }
+
+	
+}
+

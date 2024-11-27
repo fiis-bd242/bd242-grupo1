@@ -1,0 +1,20 @@
+package com.example.yapeback.interfaces;
+
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+
+import com.example.yapeback.model.Recursos;
+
+public interface RecursosRepository extends CrudRepository<Recursos, Integer> {
+
+    // Método para actualizar la URL del recurso existente
+	@Modifying
+	@Query("UPDATE Recursos r SET r.url_recurso = :url_recurso WHERE r.cod_prototipo = :cod_prototipo AND r.id_tipo_recurso = :id_tipo_recurso")
+	void actualizarUrlRecurso(@Param("url_recurso") String url_recurso, @Param("cod_prototipo") Integer cod_prototipo, @Param("id_tipo_recurso") Integer id_tipo_recurso);
+
+	@Query("SELECT r FROM Recursos r WHERE r.cod_prototipo = :cod_prototipo AND r.id_tipo_recurso = :id_tipo_recurso")
+	Recursos findByCodPrototipoAndIdTipoRecurso(@Param("cod_prototipo") Integer cod_prototipo, @Param("id_tipo_recurso") Integer id_tipo_recurso);
+
+}

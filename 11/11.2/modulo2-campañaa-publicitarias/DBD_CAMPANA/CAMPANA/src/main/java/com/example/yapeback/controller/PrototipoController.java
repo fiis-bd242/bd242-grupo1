@@ -1,0 +1,143 @@
+package com.example.yapeback.controller;
+
+import com.example.yapeback.interfaces.PrototipoServiceInterface;
+
+import com.example.yapeback.model.Audiencia;
+import com.example.yapeback.model.Prototipo;
+import com.example.yapeback.model.PrototipoDTO;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/prototipos")
+public class PrototipoController {
+
+    private final PrototipoServiceInterface prototipoService;
+
+    @Autowired
+    public PrototipoController(PrototipoServiceInterface prototipoService) {
+        this.prototipoService = prototipoService;
+    }
+    
+    
+    @PostMapping("/crear")
+    public ResponseEntity<Map<String, Object>> crearPrototipo(@RequestBody Map<String, Object> payload) {
+        System.out.println("Payload recibido: " + payload);  // Agregar esto para ver el contenido
+        
+        // Verificar si el campo "cod_canales" está presente en el payload y no es null
+        List<Integer> codCanales = (List<Integer>) payload.get("cod_canales");
+        if (codCanales == null || codCanales.isEmpty()) {
+            return ResponseEntity.status(400).body(Map.of("error", "La lista de canales no puede estar vacía."));
+        }
+
+        // Crear el prototipo
+        Prototipo prototipo = new Prototipo();
+        prototipo.setNombre_prot((String) payload.get("nombre_prot"));
+        prototipo.setDescripcion((String) payload.get("descripcion"));
+        
+        // Convertir prop_presupuesto a Double
+        Object presupuestoObj = payload.get("prop_presupuesto");
+        if (presupuestoObj instanceof Double) {
+            prototipo.setProp_presupuesto((Double) presupuestoObj);
+        } else if (presupuestoObj instanceof String) {
+            // Si se recibe como String (por ejemplo, "220,00"), convertirlo a Double
+            String presupuestoStr = (String) presupuestoObj;
+            presupuestoStr = presupuestoStr.replace(",", ".");  // Reemplazar coma por punto
+            prototipo.setProp_presupuesto(Double.valueOf(presupuestoStr));
+        }
+
+        prototipo.setID_empleado((Integer) payload.get("id_empleado"));
+
+        // Crear la audiencia
+        Audiencia audiencia = new Audiencia();
+        audiencia.setEdad_rango((String) payload.get("edad_rango"));
+        audiencia.setGenero((String) payload.get("genero"));
+        audiencia.setUbicacion((String) payload.get("ubicacion"));
+
+        // Llamar al servicio para crear el prototipo, incluyendo los canales y audiencia
+        Prototipo prototipoCreado = prototipoService.crearPrototipo(prototipo, audiencia, (String) payload.get("objetivos"), codCanales);
+
+        // Retornar la respuesta con el cod_prototipo
+        return ResponseEntity.ok(Map.of("codPrototipo", prototipoCreado.getCod_prototipo()));
+    }
+    
+
+    @PostMapping("/asociar-canales")
+    public ResponseEntity<String> asociarCanales(@RequestBody Map<String, Object> payload) {
+        int codPrototipo = (Integer) payload.get("cod_prototipo");
+        String codCanalesStr = (String) payload.get("cod_canales"); // Recibir como una cadena de texto
+        List<Integer> codCanales = parseCanales(codCanalesStr); // Convertir la cadena en una lista de enteros
+        prototipoService.asociarPrototipoConCanales(codPrototipo, codCanales);
+        return ResponseEntity.ok("Canales asociados con el prototipo");
+    }
+
+    // Método para convertir la cadena de canales a una lista de enteros
+    private List<Integer> parseCanales(String codCanalesStr) {
+        List<Integer> codCanales = new ArrayList<>();
+        String[] codCanalesArray = codCanalesStr.split(",");
+        for (String codCanal : codCanalesArray) {
+            codCanales.add(Integer.parseInt(codCanal.trim())); // Convertir a entero y agregar a la lista
+        }
+        return codCanales;
+    }
+    
+    @GetMapping("/pendientes")
+    public List<PrototipoDTO> getPrototiposPendientes() {
+        return prototipoService.getPrototiposPendientes();
+    }
+    
+    @PutMapping("/actualizarEstado/{codPrototipo}")
+    public ResponseEntity<String> actualizarEstadoPrototipo(
+            @PathVariable Integer codPrototipo) {
+        try {
+            prototipoService.actualizarEstadoPrototipo(codPrototipo);
+            return ResponseEntity.ok("Estado actualizado exitosamente.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al actualizar el estado.");
+        }
+    }
+    
+    @PutMapping("/cambiarEstado/{codPrototipo}")
+    public ResponseEntity<String> cambiarEstadoPrototipo(
+            @PathVariable int codPrototipo,
+            @RequestBody Map<String, String> requestBody) {
+        String nuevoEstado = requestBody.get("estado");
+        try {
+            prototipoService.cambiarEstado(codPrototipo, nuevoEstado);
+            return ResponseEntity.ok("Estado cambiado exitosamente a: " + nuevoEstado);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Error al cambiar el estado: " + e.getMessage());
+        }
+    }
+    @GetMapping("/aprobados")
+    public List<Map<String, Object>> getApprovedPrototypesWithPhotos() {
+        return prototipoService.getApprovedPrototypesWithPhotos();
+    }
+    @PutMapping("/marcar-terminado/{codPrototipo}")
+    public ResponseEntity<String> marcarPrototipoComoTerminado(@PathVariable Integer codPrototipo) {
+        int filasAfectadas = prototipoService.marcarPrototipoComoTerminado(codPrototipo);
+
+        if (filasAfectadas > 0) {
+            return ResponseEntity.ok("El prototipo con ID " + codPrototipo + " se marcó como 'Terminado'.");
+        } else {
+            return ResponseEntity.status(404).body("Prototipo no encontrado o no se pudo actualizar el estado.");
+        }
+    }
+    @GetMapping("/empleado/{idEmpleado}")
+    public ResponseEntity<List<Map<String, Object>>> getPrototiposByEmpleado(@PathVariable Integer idEmpleado) {
+        List<Map<String, Object>> prototipos = prototipoService.getPrototiposByEmpleado(idEmpleado);
+        if (prototipos.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(prototipos);
+    }
+}

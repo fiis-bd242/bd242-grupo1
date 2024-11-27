@@ -1,0 +1,45 @@
+package com.example.yapeback.controller;
+
+import com.example.yapeback.model.PreTest;
+import com.example.yapeback.service.PreTestService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/pretest")
+public class PreTestController {
+
+    private final PreTestService preTestService;
+
+    @Autowired
+    public PreTestController(PreTestService preTestService) {
+        this.preTestService = preTestService;
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<PreTest>> getAllPreTests() {
+        List<PreTest> preTests = preTestService.getAllPreTestsOrderedByPrototipo();
+        if (preTests.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(preTests);
+    }
+    @PostMapping("/registrar")
+    public String insertarPreTest(@RequestBody PreTest preTest) {
+        try {
+            preTestService.insertarPreTest(preTest);
+            return "PreTest insertado exitosamente.";
+        } catch (Exception e) {
+            return "Error al insertar PreTest: " + e.getMessage();
+        }
+    }
+}
+

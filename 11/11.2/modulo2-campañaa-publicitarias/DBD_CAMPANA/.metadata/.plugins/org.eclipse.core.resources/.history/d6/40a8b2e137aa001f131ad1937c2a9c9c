@@ -1,0 +1,11 @@
+spring.application.name=CAMPANA
+spring.datasource.url=jdbc:postgresql://localhost:5434/postgres
+spring.datasource.username=benjamin
+spring.datasource.password=hola
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.servlet.multipart.enabled=true
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+spring.servlet.multipart.location=C:/uploads
+spring.web.resources.static-locations=file:/C:/uploads/
+

@@ -1,0 +1,12 @@
+package com.example.yapeback.model;
+
+import lombok.Data;
+
+@Data
+public class PrototipoXCanal {
+    private Integer codPrototipo;
+    private Integer codCanal;
+    private int impresiones;
+    private int clics;
+    private int conversiones;
+}

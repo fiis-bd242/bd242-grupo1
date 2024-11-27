@@ -1,0 +1,15 @@
+package com.example.yapeback.utils;
+
+import java.io.File;
+
+public class FileUploader {
+    public static void createUploadsDirectory() {
+        // Aquí debes especificar la ruta absoluta de la carpeta donde guardarás los archivos.
+        // Ejemplo: C:/uploads o una ruta dentro del proyecto como 'uploads/'
+        File uploadsDir = new File("uploads"); // Esto es relativo a la raíz del proyecto.
+        
+        if (!uploadsDir.exists()) {
+            uploadsDir.mkdirs();  // Crear el directorio si no existe
+        }
+    }
+}

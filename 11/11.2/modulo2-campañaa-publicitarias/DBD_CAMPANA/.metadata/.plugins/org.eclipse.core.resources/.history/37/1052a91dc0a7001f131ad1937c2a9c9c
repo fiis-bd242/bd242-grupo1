@@ -1,0 +1,55 @@
+package com.example.yapeback.service;
+
+import com.example.yapeback.interfaces.PreTestRepository;
+import com.example.yapeback.model.PreTest;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class PreTestService {
+
+    @Autowired
+    private PreTestRepository preTestRepository;
+
+    public String createPreTest(PreTest preTest) {
+    	preTest.setFecha_inicio(LocalDateTime.now());
+        int rows = preTestRepository.insertPreTest(preTest);
+        if (rows > 0) {
+            return "PreTest creado exitosamente";
+        } else {
+            return "Error al crear PreTest";
+        }
+    }
+    public List<PreTest> getAllPreTests() {
+        return preTestRepository.getAllPreTests();
+    }
+    public boolean updateAudienciaB(Integer codPrototipo, String nuevaAudienciaB) {
+        String sql = "UPDATE Pre_test SET AudienciaB = ? WHERE cod_prototipo = ?";
+        String url = "jdbc:postgresql://localhost:5434/postgres"; // Cambia esto según tu configuración
+        String username = "tu_usuario"; // Cambia esto según tu configuración
+        String password = "tu_contraseña"; // Cambia esto según tu configuración
+
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            // Seteamos los parámetros para la consulta
+            preparedStatement.setString(1, nuevaAudienciaB);
+            preparedStatement.setInt(2, codPrototipo);
+
+            // Ejecutamos la actualización
+            int filasActualizadas = preparedStatement.executeUpdate();
+            return filasActualizadas > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+}
