@@ -1,0 +1,11 @@
+package com.example.yapeback.interfaces;
+
+import com.example.yapeback.data.Prototipo;
+import com.example.yapeback.data.Audiencia;
+import java.util.List;
+
+public interface PrototipoServiceInterface {
+    Prototipo crearPrototipo(Prototipo prototipo, Audiencia audiencia, String objetivosStr, List<Integer> codCanales);
+    void asociarPrototipoConCanales(int codPrototipo, List<Integer> codCanales);
+	/*boolean cambiarEstadoPendiente(int codPrototipo);*/
+}

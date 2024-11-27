@@ -1,0 +1,177 @@
+package com.example.yapeback.service;
+
+import com.example.yapeback.interfaces.PrototipoServiceInterface;
+import com.example.yapeback.model.Audiencia;
+import com.example.yapeback.model.Prototipo;
+import com.example.yapeback.model.PrototipoDTO;
+
+import jakarta.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Service;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class PrototipoService implements PrototipoServiceInterface {
+
+    private final JdbcTemplate jdbcTemplate;
+    private final AudienciaService audienciaService;
+
+    @Autowired
+    public PrototipoService(JdbcTemplate jdbcTemplate, AudienciaService audienciaService) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.audienciaService = audienciaService;
+    }
+    
+    @Transactional
+    @Override
+    public Prototipo crearPrototipo(Prototipo prototipo, Audiencia audiencia, String objetivosStr, List<Integer> codCanales) {
+        // Crear la audiencia y obtener su id_audiencia
+        Audiencia createdAudiencia = audienciaService.crearAudiencia(audiencia);
+        String idAudiencia = createdAudiencia.getId_audiencia();
+
+        // Insertar el prototipo y obtener el cod_prototipo generado
+        String insertPrototipoSql = "INSERT INTO Prototipo (nombre_prot, descripcion, Prop_presupuesto, Fecha_creacion, Prop_audiencia, ID_empleado) " +
+                                    "VALUES (?, ?, ?, ?, ?, ?) RETURNING cod_prototipo";
+        Integer codPrototipo = jdbcTemplate.queryForObject(insertPrototipoSql,
+                                                           Integer.class,
+                                                           prototipo.getNombre_prot(),
+                                                           prototipo.getDescripcion(),
+                                                           prototipo.getProp_presupuesto(),
+                                                           LocalDateTime.now(),
+                                                           idAudiencia,
+                                                           prototipo.getID_empleado());
+
+        // Establecer el id_audiencia y cod_prototipo en el prototipo
+        prototipo.setProp_audiencia(idAudiencia);
+        prototipo.setCod_prototipo(codPrototipo);
+
+        // Crear los objetivos y asociarlos al prototipo
+        crearObjetivos(codPrototipo, objetivosStr);
+
+        // Asociar el prototipo con los canales proporcionados
+        asociarPrototipoConCanales(codPrototipo, codCanales);
+
+        return prototipo;
+    }
+
+
+    public void crearObjetivos(int codPrototipo, String objetivosStr) {
+        // Dividir los objetivos por coma
+        String[] objetivos = objetivosStr.split(",");
+
+        // Insertar cada objetivo en la base de datos
+        String sql = "INSERT INTO Objetivos (cod_prototipo, descripcion) VALUES (?, ?)";
+        for (String objetivo : objetivos) {
+            // Limpiar los espacios adicionales que puedan quedar
+            objetivo = objetivo.trim();
+            jdbcTemplate.update(sql, codPrototipo, objetivo);
+        }
+    }
+    
+    
+    @Override
+    public void asociarPrototipoConCanales(int codPrototipo, List<Integer> codCanales) {
+        if (codCanales == null || codCanales.isEmpty()) {
+            System.out.println("La lista de canales está vacía o es null.");
+            return;
+        }
+
+        String sql = "INSERT INTO prototipoxcanal (cod_prototipo, cod_canal) VALUES (?, ?)";
+        for (Integer codCanal : codCanales) {
+            try {
+                int rowsAffected = jdbcTemplate.update(sql, codPrototipo, codCanal);
+                if (rowsAffected > 0) {
+                    System.out.println("Asociación exitosa en prototipoxcanal para canal ID: " + codCanal);
+                } else {
+                    System.out.println("No se insertó la asociación para canal ID: " + codCanal);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Error al intentar asociar canal ID: " + codCanal + " con el prototipo.");
+            }
+        }
+    }
+    	
+    public List<PrototipoDTO> getPrototiposPendientes() {
+        String sql = "SELECT " +
+                     "p.cod_prototipo, " +
+                     "p.fecha_estado, " +
+                     "e.Nombre || ' ' || e.Apellido AS Autor, " +
+                     "ep.estado_prot " +
+                     "FROM " +
+                     "Prototipo p " +
+                     "JOIN Estado_prototipo ep ON p.cod_est_prot = ep.cod_est_prot " +
+                     "JOIN Empleado e ON p.ID_empleado = e.ID_empleado " +
+                     "WHERE ep.estado_prot = 'Pendiente'";
+
+        return jdbcTemplate.query(sql, new RowMapper<PrototipoDTO>() {
+            @Override
+            public PrototipoDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+                PrototipoDTO prototipoDTO = new PrototipoDTO();
+
+                prototipoDTO.setCod_prototipo(rs.getInt("cod_prototipo"));
+                prototipoDTO.setFecha_estado(rs.getObject("fecha_estado", java.time.LocalDateTime.class));
+                prototipoDTO.setAutor(rs.getString("Autor"));
+                prototipoDTO.setEstado_prot(rs.getString("estado_prot"));
+
+                return prototipoDTO;
+            }
+        });
+    }
+    public void actualizarEstadoPrototipo(Integer codPrototipo) {
+        // Consulta SQL para actualizar el estado del prototipo
+        String sql = "UPDATE Prototipo " +
+                     "SET cod_est_prot = (SELECT cod_est_prot FROM Estado_prototipo WHERE estado_prot = 'Pendiente'), " +
+                     "fecha_estado = NOW() " +
+                     "WHERE cod_prototipo = ?";
+
+        // Ejecutar la consulta con parámetros
+        jdbcTemplate.update(sql, codPrototipo);
+    }
+    public void cambiarEstado(int codPrototipo, String nuevoEstado) {
+        String sql = """
+            UPDATE Prototipo
+            SET 
+                cod_est_prot = (SELECT cod_est_prot FROM Estado_prototipo WHERE estado_prot = ?),
+                fecha_estado = NOW()
+            WHERE cod_prototipo = ?;
+        """;
+
+        jdbcTemplate.update(sql, nuevoEstado, codPrototipo);
+    }
+
+    @Override
+    public List<Map<String, Object>> getApprovedPrototypesWithPhotos() {
+        String sql = """
+            SELECT 
+        		p.cod_prototipo	    
+                p.nombre_prot,
+                p.fecha_estado,
+                p.Descripcion,
+                r.url_recurso
+            FROM 
+                Prototipo p
+            JOIN 
+                Estado_prototipo ep ON p.cod_est_prot = ep.cod_est_prot
+            LEFT JOIN 
+                Recursos r ON p.cod_prototipo = r.cod_prototipo
+                           AND r.id_tipo_recurso = (SELECT id_tipo_recurso 
+                                                    FROM Tipo_recurso 
+                                                    WHERE nombre_tipo = 'Foto')
+            WHERE 
+                ep.estado_prot = 'Aprobado'
+            ORDER BY 
+                p.Fecha_creacion DESC
+        """;
+
+        return jdbcTemplate.queryForList(sql);
+    }
+}

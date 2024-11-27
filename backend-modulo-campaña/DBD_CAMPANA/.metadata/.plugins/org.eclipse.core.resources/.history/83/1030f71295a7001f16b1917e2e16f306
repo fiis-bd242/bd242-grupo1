@@ -1,0 +1,17 @@
+package com.example.yapeback.data;
+
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+@Data
+public class PreTest {
+    private Integer id_pretest;
+    private String audienciaA;
+    private String audienciaB;
+    private LocalDateTime fecha_inicio;
+    private LocalDateTime fecha_fin;
+    private String resultado;
+    private Integer cod_prototipo;
+    private Integer id_empleado;
+}

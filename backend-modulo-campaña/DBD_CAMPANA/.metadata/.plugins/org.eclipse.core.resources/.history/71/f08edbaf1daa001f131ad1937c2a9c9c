@@ -1,0 +1,22 @@
+package com.example.yapeback.interfaces;
+
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.yapeback.model.Recursos;
+
+public interface RecursosServiceInterface {
+
+	void guardarRecurso(Recursos recurso);
+
+	Recursos encontrarPorPrototipoYTipo(Integer cod_prototipo, Integer id_tipo_recurso);
+
+	void actualizarUrlDeRecurso(MultipartFile file, Integer cod_prototipo, Integer id_tipo_recurso);
+
+	String guardarArchivo(MultipartFile file);
+
+	List<Recursos> obtenerRecursosPorPrototipo(Integer codPrototipo);
+    
+}
+

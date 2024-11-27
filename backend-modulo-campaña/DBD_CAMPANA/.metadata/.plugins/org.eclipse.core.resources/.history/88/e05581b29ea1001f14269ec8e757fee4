@@ -1,0 +1,5 @@
+spring.application.name=CAMPANA
+spring.datasource.url=jdbc:postgresql://localhost:5434/postgres
+spring.datasource.username=benjamin
+spring.datasource.password=hola
+spring.datasource.driver-class-name=org.postgresql.Driver

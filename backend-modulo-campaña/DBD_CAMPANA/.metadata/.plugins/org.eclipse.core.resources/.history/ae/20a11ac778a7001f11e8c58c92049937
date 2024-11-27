@@ -1,0 +1,34 @@
+package com.example.yapeback.data;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+@Data
+@Entity // Anotación que define esta clase como una entidad de JPA
+@Table(name = "PreTest") // Mapea esta clase con la tabla "PreTest" en la base de datos
+public class PreTest {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Define que el ID se genera automáticamente
+    private Integer idPretest;
+
+    @Column(nullable = false) // Configura esta columna como no nula
+    private String audienciaA;
+
+    private String audienciaB;
+
+    @Column(nullable = false) // Configura esta columna como no nula
+    private LocalDateTime fechaInicio;
+
+    private LocalDateTime fechaFin;
+
+    private String resultado;
+
+    @Column(nullable = false)
+    private Integer codPrototipo;
+
+    @Column(nullable = false)
+    private Integer idEmpleado;
+}

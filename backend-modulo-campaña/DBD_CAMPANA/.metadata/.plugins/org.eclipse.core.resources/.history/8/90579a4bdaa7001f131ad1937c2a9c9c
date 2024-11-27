@@ -1,0 +1,39 @@
+package com.example.yapeback.controller;
+
+import com.example.yapeback.model.PreTest;
+import com.example.yapeback.service.PreTestService;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/pretest")
+public class PreTestController {
+
+    @Autowired
+    private PreTestService preTestService;
+
+    // Endpoint para crear un nuevo PreTest
+    @PostMapping("/registrar")
+    public String createPreTest(@RequestBody PreTest preTest) {
+        return preTestService.createPreTest(preTest);
+    }
+    @GetMapping("/all")
+    public List<PreTest> getAllPreTests() {
+        return preTestService.getAllPreTests();
+    }
+    @PutMapping("/updateAudienciaB")
+    public ResponseEntity<String> updateAudienciaB(@RequestParam Integer id_pretest, @RequestParam String nuevaAudienciaB) {
+        boolean actualizado = preTestService.updateAudienciaB(id_pretest, nuevaAudienciaB);
+        if (actualizado) {
+            return ResponseEntity.ok("AudienciaB actualizada exitosamente.");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se pudo actualizar la AudienciaB.");
+        }
+    }
+
+}

@@ -1,0 +1,13 @@
+FROM openjdk:17-jdk-slim
+
+# Define el directorio de trabajo dentro del contenedor
+WORKDIR /app
+
+# Copia el archivo JAR generado al contenedor (asegurándote de usar el archivo .jar correcto)
+COPY target/CAMPANA-0.0.1-SNAPSHOT.jar app.jar
+
+# Expone el puerto 8080 para que la aplicación sea accesible
+EXPOSE 8080
+
+# Comando para ejecutar la aplicación
+ENTRYPOINT ["java", "-jar", "app.jar"]

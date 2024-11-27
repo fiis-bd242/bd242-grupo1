@@ -1,0 +1,12 @@
+package com.example.yapeback.utils;
+
+import java.io.File;
+
+public class FileUploader {
+    public static void createUploadsDirectory() {
+        File uploadsDir = new File("C:/uploads");
+        if (!uploadsDir.exists()) {
+            uploadsDir.mkdirs();
+        }
+    }
+}

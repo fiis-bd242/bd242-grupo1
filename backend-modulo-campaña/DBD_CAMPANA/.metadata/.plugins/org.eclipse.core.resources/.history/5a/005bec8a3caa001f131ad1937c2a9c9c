@@ -1,0 +1,44 @@
+package com.example.yapeback.service;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CampanaService {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public Map<String, Object> obtenerDetallesPrototipo(Integer codPrototipo) {
+        String sql = "SELECT " +
+                     "p.nombre_prot, " +
+                     "e.Nombre || ' ' || e.Apellido AS Autor, " +
+                     "ep.estado_prot, " +
+                     "STRING_AGG(DISTINCT c.nombre_canal, ', ') AS Canal_difusion, " +
+                     "a.id_audiencia, " +
+                     "a.Edad_rango, " +
+                     "a.Genero, " +
+                     "a.Ubicacion, " +
+                     "p.Prop_presupuesto AS Presupuesto, " +
+                     "STRING_AGG(DISTINCT o.Descripcion, ', ') AS Objetivos, " +
+                     "COALESCE(r.url_recurso, 'No disponible') AS Foto " +  
+                     "FROM Prototipo p " +
+                     "JOIN Empleado e ON p.ID_empleado = e.ID_empleado " +
+                     "JOIN Audiencia a ON p.Prop_audiencia = a.id_audiencia " +
+                     "LEFT JOIN Estado_prototipo ep ON p.cod_est_prot = ep.cod_est_prot " +
+                     "LEFT JOIN prototipoxcanal pc ON p.cod_prototipo = pc.cod_prototipo " +
+                     "LEFT JOIN Canal c ON pc.cod_canal = c.cod_canal " +
+                     "LEFT JOIN Objetivos o ON p.cod_prototipo = o.cod_prototipo " +
+                     "LEFT JOIN Recursos r ON p.cod_prototipo = r.cod_prototipo " +
+                     "AND r.id_tipo_recurso = (SELECT id_tipo_recurso FROM Tipo_recurso WHERE nombre_tipo = 'Foto') " +
+                     "WHERE p.cod_prototipo = ? " +
+                     "GROUP BY p.cod_prototipo, e.Nombre, e.Apellido, ep.estado_prot, " +
+                     "a.id_audiencia, a.Edad_rango, a.Genero, a.Ubicacion, p.Prop_presupuesto, r.url_recurso " +
+        			 "LIMIT 1";
+        return jdbcTemplate.queryForMap(sql, codPrototipo);
+    }
+}
+

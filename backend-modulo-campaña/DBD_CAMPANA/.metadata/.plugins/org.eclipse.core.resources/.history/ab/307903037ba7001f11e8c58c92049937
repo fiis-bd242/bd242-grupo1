@@ -1,0 +1,20 @@
+package com.example.yapeback.controller;
+
+import com.example.yapeback.data.PreTest;
+import com.example.yapeback.service.PreTestService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/pretest")
+public class PreTestController {
+
+    @Autowired
+    private PreTestService preTestService;
+
+    // Endpoint para crear un nuevo PreTest
+    @PostMapping("/create")
+    public String createPreTest(@RequestBody PreTest preTest) {
+        return preTestService.createPreTest(preTest);
+    }
+}

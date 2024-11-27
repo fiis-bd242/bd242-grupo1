@@ -1,0 +1,32 @@
+package com.example.yapeback.controller;
+
+import java.time.LocalDateTime;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.yapeback.data.PreTest;
+import com.example.yapeback.service.PreTestService;
+
+@RestController
+@RequestMapping("/pretest")
+public class PreTestController {
+    @Autowired
+    private PreTestService preTestService;
+
+    @PostMapping("/registrar")
+    public ResponseEntity<PreTest> registrarPreTest(@RequestBody Map<String, Object> datos) {
+        String audienciaA = (String) datos.get("audienciaA");
+        LocalDateTime fechaInicio = LocalDateTime.now(); // Generar la fecha de inicio actual
+        Integer codPrototipo = (Integer) datos.get("codPrototipo");
+        Integer idEmpleado = (Integer) datos.get("idEmpleado");
+
+        PreTest preTest = preTestService.registrarPreTest(audienciaA, fechaInicio, codPrototipo, idEmpleado);
+        return ResponseEntity.ok(preTest);
+    }
+}

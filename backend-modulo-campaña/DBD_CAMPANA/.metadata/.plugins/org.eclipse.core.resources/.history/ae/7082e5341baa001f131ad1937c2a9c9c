@@ -1,0 +1,9 @@
+package com.example.yapeback.interfaces;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.yapeback.model.Recursos;
+
+public interface RecursosRepository extends JpaRepository<Recursos, Integer> {
+    Recursos findByCodPrototipoAndIdTipoRecurso(Integer codPrototipo, Integer idTipoRecurso);
+    void actualizarUrlRecurso(String urlRecurso, Integer codPrototipo, Integer idTipoRecurso);
+}

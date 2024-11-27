@@ -1,0 +1,112 @@
+package com.example.yapeback.service;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Service;
+
+import com.example.yapeback.model.PreTest;
+
+@Service
+public class PreTestService {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    public PreTestService(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public List<PreTest> getAllPreTestsOrderedByPrototipo() {
+        String sql = """
+            SELECT 
+                pt.id_pretest, 
+                pt.audienciaa, 
+                pt.audienciab, 
+                pt.fecha_inicio, 
+                pt.fecha_fin, 
+                pt.resultado, 
+                pt.cod_prototipo, 
+                pt.id_empleado
+            FROM pre_test pt
+            ORDER BY pt.id_pretest DESC
+            """;
+
+        return jdbcTemplate.query(sql, new PreTestRowMapper());
+    }
+
+    private static class PreTestRowMapper implements RowMapper<PreTest> {
+        @Override
+        public PreTest mapRow(ResultSet rs, int rowNum) throws SQLException {
+            PreTest preTest = new PreTest();
+            preTest.setId_pretest(rs.getInt("id_pretest"));
+            preTest.setAudienciaA(rs.getString("audienciaa"));
+            preTest.setAudienciaB(rs.getString("audienciab"));
+            
+            // Manejar valores null para fecha_inicio y fecha_fin
+            if (rs.getTimestamp("fecha_inicio") != null) {
+                preTest.setFecha_inicio(rs.getTimestamp("fecha_inicio").toLocalDateTime());
+            } else {
+                preTest.setFecha_inicio(null);
+            }
+
+            if (rs.getTimestamp("fecha_fin") != null) {
+                preTest.setFecha_fin(rs.getTimestamp("fecha_fin").toLocalDateTime());
+            } else {
+                preTest.setFecha_fin(null);
+            }
+
+            preTest.setResultado(rs.getString("resultado"));
+            preTest.setCod_prototipo(rs.getInt("cod_prototipo"));
+            preTest.setId_empleado(rs.getInt("id_empleado"));
+            return preTest;
+        }
+    }
+    public void insertarPreTest(PreTest preTest) {
+        String sql = "INSERT INTO Pre_test (AudienciaA, Fecha_inicio, cod_prototipo, id_empleado) " +
+                     "VALUES (?, ?, ?, ?)";
+
+        jdbcTemplate.update(sql,
+                preTest.getAudienciaA(),
+                preTest.getFecha_inicio(), // Puede ser null
+                preTest.getCod_prototipo(), // Puede ser null
+                preTest.getId_empleado() // Puede ser null
+        );
+    }
+    public void actualizarAudienciaB(Integer idPreTest, String audienciaB) {
+        String sql = "UPDATE Pre_test SET AudienciaB = ? WHERE id_pretest = ?";
+
+        jdbcTemplate.update(sql, audienciaB, idPreTest);
+    }
+    public void actualizarResultadoYFechaFin(Integer idPretest, String resultado, String fechaFin) {
+        // Formato esperado para parsear el String a LocalDateTime
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime fechaFinParsed = LocalDateTime.parse(fechaFin, formatter);
+
+        // Query de actualización
+        String sql = "UPDATE Pre_test SET Resultado = ?, Fecha_fin = ? WHERE id_pretest = ?";
+
+        // Ejecutar la actualización
+        jdbcTemplate.update(sql, resultado, fechaFinParsed, idPretest);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

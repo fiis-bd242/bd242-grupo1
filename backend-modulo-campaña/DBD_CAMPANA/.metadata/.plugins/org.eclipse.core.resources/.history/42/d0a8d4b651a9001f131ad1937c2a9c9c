@@ -1,0 +1,85 @@
+package com.example.yapeback.service;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+
+import com.example.yapeback.model.Audiencia;
+
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+
+import java.sql.PreparedStatement;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class AudienciaService {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public AudienciaService(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+    
+
+    public Audiencia crearAudiencia(Audiencia audiencia) {
+        String insertAudienciaSql = "INSERT INTO Audiencia (Edad_rango, Genero, Ubicacion) VALUES (?, ?, ?) RETURNING id_audiencia";
+        
+        // Usar KeyHolder para capturar el id generado
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(insertAudienciaSql, new String[]{"id_audiencia"});
+            ps.setString(1, audiencia.getEdad_rango());
+            ps.setString(2, audiencia.getGenero());
+            ps.setString(3, audiencia.getUbicacion());
+            return ps;
+        }, keyHolder);
+
+        // Obtener el id generado como String, directamente desde keyHolder
+        String generatedId = keyHolder.getKeyList().get(0).get("id_audiencia").toString();  // Tratarlo como String
+        audiencia.setId_audiencia(generatedId);  // Asignar la clave generada
+        return audiencia;
+    }
+    public Audiencia buscarOCrearAudiencia(Audiencia audiencia) {
+        // Generar el ID base (sin el número final)
+        String idBase = generarIdBase(audiencia.getEdad_rango(), audiencia.getGenero(), audiencia.getUbicacion());
+
+        // Buscar coincidencias en la base de datos
+        String buscarSql = "SELECT id_audiencia, Ubicacion FROM Audiencia WHERE id_audiencia LIKE ?";
+        List<Map<String, Object>> coincidencias = jdbcTemplate.queryForList(buscarSql, idBase + "%");
+
+        // Verificar coincidencias
+        for (Map<String, Object> coincidencia : coincidencias) {
+            String idAudiencia = (String) coincidencia.get("id_audiencia");
+            String ubicacion = (String) coincidencia.get("Ubicacion");
+            if (ubicacion.equalsIgnoreCase(audiencia.getUbicacion())) {
+                // Si la ubicación coincide, retornar el ID existente
+                audiencia.setId_audiencia(idAudiencia);
+                return audiencia;
+            }
+        }
+
+        // Si no hay coincidencias, insertar una nueva audiencia
+        return crearAudiencia(audiencia, idBase, coincidencias.size() + 1);
+    }
+
+    private Audiencia crearAudiencia(Audiencia audiencia, String idBase, int numeroFinal) {
+        // Generar el nuevo ID completo con el número final
+        String nuevoId = idBase + numeroFinal;
+
+        String insertAudienciaSql = "INSERT INTO Audiencia (id_audiencia, Edad_rango, Genero, Ubicacion) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(insertAudienciaSql, nuevoId, audiencia.getEdad_rango(), audiencia.getGenero(), audiencia.getUbicacion());
+
+        audiencia.setId_audiencia(nuevoId);
+        return audiencia;
+    }
+
+    private String generarIdBase(String edadRango, String genero, String ubicacion) {
+        // Combinar los valores para formar el ID base sin el número final
+        String idBase = edadRango.replace("-", "") + genero.substring(0, 1).toUpperCase() + ubicacion.substring(0, 1).toUpperCase();
+        return idBase;
+    }
+}
+
+

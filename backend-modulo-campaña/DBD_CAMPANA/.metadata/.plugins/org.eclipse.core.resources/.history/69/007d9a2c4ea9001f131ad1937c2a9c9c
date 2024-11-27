@@ -1,0 +1,43 @@
+package com.example.yapeback.service;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+
+import com.example.yapeback.model.Audiencia;
+
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+
+import java.sql.PreparedStatement;
+
+@Service
+public class AudienciaService {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public AudienciaService(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public Audiencia crearAudiencia(Audiencia audiencia) {
+        String insertAudienciaSql = "INSERT INTO Audiencia (Edad_rango, Genero, Ubicacion) VALUES (?, ?, ?) RETURNING id_audiencia";
+        
+        // Usar KeyHolder para capturar el id generado
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(insertAudienciaSql, new String[]{"id_audiencia"});
+            ps.setString(1, audiencia.getEdad_rango());
+            ps.setString(2, audiencia.getGenero());
+            ps.setString(3, audiencia.getUbicacion());
+            return ps;
+        }, keyHolder);
+
+        // Obtener el id generado como String, directamente desde keyHolder
+        String generatedId = keyHolder.getKeyList().get(0).get("id_audiencia").toString();  // Tratarlo como String
+        audiencia.setId_audiencia(generatedId);  // Asignar la clave generada
+        return audiencia;
+    }
+}
+
+

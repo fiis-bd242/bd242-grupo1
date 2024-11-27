@@ -1,0 +1,73 @@
+package com.example.yapeback.controller;
+
+import com.example.yapeback.interfaces.RecursosServiceInterface;
+import com.example.yapeback.model.Recursos;
+
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/recursos")
+public class RecursosController {
+
+    private final RecursosServiceInterface recursosService;
+    private final String UPLOAD_DIR = "C:/uploads/";
+
+    @Autowired
+    public RecursosController(RecursosServiceInterface recursosService) {
+        this.recursosService = recursosService;
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("nombre_recurso") String nombre_recurso,
+            @RequestParam("id_tipo_recurso") Integer id_tipo_recurso,
+            @RequestParam("cod_prototipo") Integer cod_prototipo) {
+
+        System.out.println("cod_prototipo recibido: " + cod_prototipo);
+
+        if (cod_prototipo == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El parámetro codPrototipo es obligatorio.");
+        }
+
+        // Guardar el archivo usando el servicio
+        String fileUrl = recursosService.guardarArchivo(file);
+
+        if (fileUrl == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo.");
+        }
+
+        // Lógica para actualizar o crear el recurso
+        Recursos recursoExistente = recursosService.encontrarPorPrototipoYTipo(cod_prototipo, id_tipo_recurso);
+        if (recursoExistente != null) {
+            recursoExistente.setUrl_recurso(fileUrl);
+            recursoExistente.setNombre_recurso(nombre_recurso);
+            recursosService.guardarRecurso(recursoExistente);
+            return ResponseEntity.ok("Archivo subido y recurso actualizado exitosamente.");
+        } else {
+            Recursos nuevoRecurso = new Recursos();
+            nuevoRecurso.setNombre_recurso(nombre_recurso);
+            nuevoRecurso.setUrl_recurso(fileUrl);
+            nuevoRecurso.setId_tipo_recurso(id_tipo_recurso);
+            nuevoRecurso.setCod_prototipo(cod_prototipo);
+            recursosService.guardarRecurso(nuevoRecurso);
+            return ResponseEntity.ok("Archivo subido y recurso registrado exitosamente.");
+        }
+    }
+
+
+	@GetMapping("/por-prototipo/{codPrototipo}")
+    public List<Recursos> obtenerRecursosPorPrototipo(@PathVariable Integer codPrototipo) {
+        return recursosService.obtenerRecursosPorPrototipo(codPrototipo);
+    }
+    
+    
+}
