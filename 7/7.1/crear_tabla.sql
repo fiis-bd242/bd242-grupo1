@@ -51,12 +51,6 @@ CREATE TABLE seller (
                         PRIMARY KEY (cod_seller)
 );
 
-CREATE TABLE Estado_prototipo (
-
-                                  cod_est_prot serial not null,
-                                  estado_prot text,
-                                  PRIMARY KEY (cod_est_prot)
-);
 
 CREATE TABLE Tipo_producto (
                                cod_tipo_producto SERIAL NOT NULL,
@@ -292,12 +286,25 @@ CREATE TABLE Audiencia (
     Ubicacion VARCHAR(255)
 );
 
+CREATE TABLE Estado_prototipo (
+
+                                  cod_est_prot serial not null,
+                                  estado_prot text,
+                                  PRIMARY KEY (cod_est_prot)
+);
+
+CREATE TABLE Audiencia (
+	id_audiencia varchar (20) primary key, 
+    Edad_rango varchar (20) NOT NULL,
+    Genero VARCHAR(2) NOT NULL,
+    Ubicacion VARCHAR(50) NOT NULL
+);
 
 CREATE TABLE Prototipo (
 	cod_prototipo SERIAL NOT NULL,
 	nombre_prot VARCHAR(255) not null,
 	Descripcion Varchar(255) not null,
-	Prop_presupuesto NUMERIC NOT NULL,
+	Prop_presupuesto numeric(10,2) NOT NULL,
 	Fecha_creacion timestamp not null,
 	Fecha_estado timestamp,
 	Prop_audiencia varchar (255) not null,
@@ -382,6 +389,138 @@ CREATE TABLE Pre_test (
 	foreign key (id_empleado) references Empleado(id_empleado)
 	
 );
+
+CREATE TABLE audiencia_sequence (
+    current_value BIGINT DEFAULT 0
+);
+
+-- Inicializamos con un valor inicial
+INSERT INTO audiencia_sequence DEFAULT VALUES;
+
+
+CREATE OR REPLACE FUNCTION generate_initials(input_string VARCHAR)
+RETURNS VARCHAR AS $$
+DECLARE
+    initials VARCHAR := '';
+    word VARCHAR;
+BEGIN
+    -- Convertir la cadena de entrada a minúsculas y luego a mayúsculas
+    FOR word IN SELECT unnest(string_to_array(input_string, ' ')) LOOP
+        -- Concatenar la primera letra de cada palabra
+        initials := initials || UPPER(SUBSTRING(word FROM 1 FOR 1));
+    END LOOP;
+    
+    RETURN initials;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION generate_id_audiencia()
+RETURNS TRIGGER AS $$
+DECLARE
+    sequence_number BIGINT;
+BEGIN
+    -- Incrementar el contador y obtener el nuevo valor
+    UPDATE audiencia_sequence
+    SET current_value = current_value + 1
+    RETURNING current_value INTO sequence_number;
+
+    -- Construir el id_audiencia
+    NEW.id_audiencia := CONCAT(
+        SUBSTRING(NEW.Edad_rango FROM 1 FOR 2), -- Min Edad
+        SUBSTRING(NEW.Edad_rango FROM 4 FOR 2), -- Max Edad
+        NEW.Genero,
+        generate_initials(NEW.Ubicacion),       -- Siglas de la ubicación
+        sequence_number                         -- Número secuencial
+    );
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_generate_id_audiencia ON Audiencia;
+
+CREATE TRIGGER trg_generate_id_audiencia
+BEFORE INSERT ON Audiencia
+FOR EACH ROW
+EXECUTE FUNCTION generate_id_audiencia();
+
+
+--recursos
+CREATE OR REPLACE FUNCTION insert_null_resources()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Insertar recursos con valores NULL para el nuevo prototipo
+    INSERT INTO Recursos (nombre_recurso, url_recurso, id_tipo_recurso, cod_prototipo)
+    VALUES 
+        (NULL, NULL, (SELECT id_tipo_recurso FROM Tipo_recurso WHERE nombre_tipo = 'Foto'), NEW.cod_prototipo),
+        (NULL, NULL, (SELECT id_tipo_recurso FROM Tipo_recurso WHERE nombre_tipo = 'Video'), NEW.cod_prototipo),
+        (NULL, NULL, (SELECT id_tipo_recurso FROM Tipo_recurso WHERE nombre_tipo = 'Guion'), NEW.cod_prototipo),
+        (NULL, NULL, (SELECT id_tipo_recurso FROM Tipo_recurso WHERE nombre_tipo = 'Documento'), NEW.cod_prototipo);
+        
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+--Crear el trigger
+CREATE TRIGGER after_insert_prototipo
+AFTER INSERT ON Prototipo
+FOR EACH ROW
+EXECUTE FUNCTION insert_null_resources();
+
+
+
+
+
+CREATE OR REPLACE FUNCTION update_prop_audiencia()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Verificamos que el campo Resultado no sea NULL
+    IF NEW.Resultado IS NOT NULL THEN
+        -- Actualizamos la columna Prop_audiencia en Prototipo con el valor de Resultado
+        UPDATE Prototipo
+        SET Prop_audiencia = NEW.Resultado
+        WHERE cod_prototipo = NEW.cod_prototipo;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+    
+CREATE TRIGGER trigger_update_prop_audiencia
+AFTER UPDATE OF Resultado
+ON Pre_test
+FOR EACH ROW
+EXECUTE FUNCTION update_prop_audiencia();
+
+
+--datos para reporte
+CREATE OR REPLACE FUNCTION fill_random_prototipoxcanal_trigger()
+RETURNS TRIGGER AS $$
+DECLARE
+    random_impresiones NUMERIC;
+    random_clics NUMERIC;
+    random_conversiones NUMERIC;
+BEGIN
+    -- Generar valores aleatorios mayores a 1000 y cumplir las relaciones
+    random_impresiones := 1000 + trunc(random() * 9000); -- Entre 1001 y 10000
+    random_clics := 1000 + trunc(random() * (random_impresiones - 1000)); -- Menor que impresiones
+    random_conversiones := 1000 + trunc(random() * (random_clics - 1000)); -- Menor que clics
+
+    -- Actualizar las columnas de la fila recién insertada
+    NEW.impresiones := random_impresiones;
+    NEW.clics := random_clics;
+    NEW.conversiones := random_conversiones;
+
+    -- Retornar la nueva fila con los valores generados
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_fill_random_prototipoxcanal
+BEFORE INSERT ON prototipoxcanal
+FOR EACH ROW
+EXECUTE FUNCTION fill_random_prototipoxcanal_trigger();
+
 
 CREATE TABLE Estado_ticket_asig (
     id_estado SERIAL PRIMARY KEY,
