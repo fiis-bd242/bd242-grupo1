@@ -12,8 +12,8 @@ const Login = () => {
       e.preventDefault();
       // Aquí puedes agregar la lógica para autenticar al usuario
       // Por ejemplo, puedes hacer una solicitud a un servidor para verificar las credenciales
-      if (username === 'Modulo3' && password === '12345') {
-        navigate('/menu');
+      if (username === 'Modulo6' && password === '12345') {
+        navigate('/menuIncidente');
       } else {
         setError('Credenciales incorrectas');
       }

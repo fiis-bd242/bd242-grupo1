@@ -43,7 +43,7 @@
   display: grid;
   justify-content: center;
   align-items: center;
-  grid-template-columns: repeat(2, 1fr); /* Tres columnas iguales */
+  grid-template-columns: repeat(3, 1fr); /* Tres columnas iguales */
   gap: 20px; /* Espacio entre las tarjetas */
   margin-top: 20px;
 }
