@@ -1,0 +1,138 @@
+/* General Styles */
+.titulo-principal {
+    font-weight: bold; /* Aplica negrita al texto */
+  }
+h1{
+    color: #8b139bb4; /* Cambia el color del texto */
+    font-size: 28px; /* Tamaño de letra */
+    font-weight: 600; /* Grosor */
+    text-align: center; /* Centrar el texto */
+  }
+  h2{
+    color: #000000c0; /* Cambia el color del texto */
+    font-size: 28px; /* Tamaño de letra */
+    font-weight: 600; /* Grosor */
+    text-align: center; /* Centrar el texto */
+  }
+  
+
+  /* Error Message */
+  p {
+    color: red;
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  /* General Button Styles */
+  button {
+    border: none;
+    padding: 10px 20px;
+    margin: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    background-color: #00D2B2;
+    color: #ffffff;
+  }
+  
+  /* Hover Effect */
+  button:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Specific Button Styles */
+  button.editar {
+    background-color: #ffc107; /* Yellow for Edit */
+    color: black;
+  }
+  
+  button.editar:hover {
+    background-color: #e0a800; /* Darker Yellow */
+  }
+  
+  button.eliminar {
+    background-color: #dc3545; /* Red for Delete */
+    color: white;
+  }
+  
+  button.eliminar:hover {
+    background-color: #c82333; /* Darker Red */
+  }
+  
+  button.general {
+    background-color: #63dbc7; /* Blue for General Buttons */
+    color: white;
+  }
+  
+  button.general:hover {
+    background-color: #58b7ac;
+  }
+  
+  /* Filter Section */
+  label {
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  
+  input[type="text"],
+  input[type="number"] {
+    padding: 8px;
+    margin-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  /* Table Styles */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  th,
+  td {
+    text-align: left;
+    padding: 12px;
+    border: 1px solid #8A139B;
+  }
+  
+  th {
+    background-color: #8A139B;
+    color: white;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  tr:hover {
+    background-color: #8b139b38;
+  }
+  
+  /* Checkbox Styling */
+  input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    div {
+      padding: 10px;
+    }
+  
+    table {
+      font-size: 14px;
+    }
+  
+    button {
+      font-size: 14px;
+      padding: 8px 15px;
+    }
+  }
+  .contenido {
+    margin-left: 290px; /* Incrementa el margen izquierdo */
+    padding: 20px;
+    flex: 1;
+    background-color: #ecf0f1; /* Fondo del contenido principal */
+  }

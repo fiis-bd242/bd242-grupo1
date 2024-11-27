@@ -1,0 +1,52 @@
+/* Estilo general del sidebar */
+.sidebar {
+    width: 250px;
+    background-color: #712480; /* Color de fondo */
+    color: white;
+    height: 100vh; /* Altura completa de la ventana */
+    padding: 20px;
+    position: fixed; /* Sidebar fijo */
+  }
+  
+  .sidebar h3 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  
+  /* Estilo de los botones del sidebar */
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar ul li {
+    margin-bottom: 15px;
+  }
+  
+  /* Estilo inicial de los enlaces (botones) */
+  .sidebar ul li a {
+    display: block; /* Ocupa todo el espacio del contenedor */
+    text-decoration: none; /* Quita el subrayado */
+    color: white;
+    font-size: 16px;
+    padding: 10px 15px;
+    border-radius: 4px; /* Bordes redondeados */
+    transition: background-color 0.3s, transform 0.2s; /* Transición suave */
+  }
+  
+  /* Efecto al pasar el mouse */
+  .sidebar ul li a:hover {
+    background-color: #34495e; /* Un tono más oscuro al pasar el mouse */
+  }
+  
+  .sidebar ul li a.active {
+    background-color: #ffffff; /* Color para la pestaña activa */
+    color: #8A139B;
+  }
+  
+  /* Efecto al presionar (click) */
+  .sidebar ul li a:active {
+    background-color: #1c2833; /* Color mucho más oscuro al presionar */
+    transform: scale(0.98); /* Efecto visual de "presión" */
+  }
+  
