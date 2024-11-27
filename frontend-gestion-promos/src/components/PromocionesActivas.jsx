@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import "./PromocionesActivas.css"
 
 const PromocionesActivas = () => {
   const [promociones, setPromociones] = useState([]);
