@@ -1,0 +1,18 @@
+.detalle-permiso-container {
+    margin: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .detalle-permiso-container h1 {
+    margin-bottom: 20px;
+  }
+  
+  .detalle-permiso-container ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .detalle-permiso-container li {
+    margin-bottom: 10px;
+  }
+  

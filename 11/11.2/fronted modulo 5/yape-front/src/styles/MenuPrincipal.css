@@ -1,0 +1,204 @@
+.layout-container {
+    display: flex;
+    height: 100vh; /* Asegura que el contenedor ocupe toda la altura de la pantalla */
+  }
+  
+  .sidebar {
+    width: 256px;
+    background-color: #8A139B;
+    color: white;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    align-items: center;
+    top: 0;
+    bottom: 0;
+    left: 0;
+  }
+  
+  .sidebar-content {
+    flex-grow: 1;
+  }
+  
+  .main-content {
+    flex-grow: 1;
+    margin-left: 256px; /* Asegura que el contenido principal no se superponga con la barra lateral */
+    padding: 20px;
+    overflow-y: auto; /* Permite el desplazamiento si el contenido es demasiado grande */
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .cards-grid {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    grid-template-columns: repeat(2, 1fr); /* Tres columnas iguales */
+    gap: 20px; /* Espacio entre las tarjetas */
+    margin-top: 20px;
+  }
+  
+  .card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    height: 400px; /* Ajusta la altura según sea necesario */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .card:hover {
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-icon {
+    margin-bottom: 10px;
+    font-size: 2rem; /* Ajusta el tamaño del ícono */
+  }
+  
+  .card-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .card-description {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .icon {
+    width: 2rem;
+    height: 2rem;
+    color: #4b5563;
+  }
+  
+  .logo-container {
+    display: flex;
+    flex-direction: column; /* Asegura que los elementos hijos se apilen verticalmente */
+    align-items: center; /* Centra horizontalmente */
+    justify-content: center; 
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    height: 10rem;
+    width: 10rem;
+  }
+  
+  .user-profile {
+    background-color: #4b5563;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .avatar {
+    width: 3rem;
+    height: 3rem;
+    background-color: #6b7280;
+    border-radius: 9999px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .welcome-text {
+    font-size: 0.875rem;
+  }
+  
+  .user-name {
+    font-size: 0.875rem;
+    font-weight: bold;
+  }
+  
+  .nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .nav-button {
+    width: 100%;
+    text-align: left;
+    padding: 1rem 1.5rem; /* Aumenta el padding para agrandar el botón */
+    border-radius: 0.25rem;
+    width: 250px;
+    transition: background-color 0.2s;
+  }
+  
+  .nav-button:hover {
+    background-color: #7c3aed;
+  }
+  
+  .logout-button {
+    background-color: #10b981;
+    color: white;
+    padding: 0.5rem 1rem;
+    width: 250px;
+    height: 50px;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+    margin-top: auto;
+  }
+  
+  .logout-button:hover {
+    background-color: #059669;
+  }
+  
+  .time {
+    color: #4b5563;
+  }
+  
+  .subtitle-container {
+    margin-bottom: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 1.125rem;
+    color: #4b5563;
+    text-align: center;
+  }
+  
+  .question-mark {
+    width: 2rem;
+    height: 2rem;
+    background-color: #4b5563;
+    border-radius: 9999px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .card-title {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  
+  .card-description {
+    font-size: 0.875rem;
+    color: #4b5563;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .cards-grid {
+      grid-template-columns: 1fr;
+    }
+  }

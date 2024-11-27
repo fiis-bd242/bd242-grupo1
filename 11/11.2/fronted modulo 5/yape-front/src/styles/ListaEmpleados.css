@@ -1,0 +1,78 @@
+/* Contenedor principal */
+.lista-empleados-container {
+  margin: 20px;
+  font-family: Arial, sans-serif;
+}
+
+/* Filtros */
+.filtros-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filtros-form input,
+.filtros-form select,
+.filtros-form button {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.filtros-form button {
+  background-color: #10b981;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.filtros-form button:hover {
+  background-color: #059669;
+}
+
+/* Tabla */
+.tabla-container {
+  max-height: 500px; /* Ajusta el alto máximo según necesidad */
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabla-empleados {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-empleados th,
+.tabla-empleados td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.tabla-empleados th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.tabla-empleados tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.tabla-empleados tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filtros-form {
+    flex-direction: column;
+  }
+
+  .tabla-empleados th,
+  .tabla-empleados td {
+    font-size: 12px;
+  }
+}
