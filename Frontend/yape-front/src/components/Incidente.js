@@ -1,17 +1,17 @@
-
 // src/components/Incidentes.js
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Asegúrate de usar 'useNavigate' correctamente
 import '../styles/Incidente.css';
 
 const Incidentes = () => {
-  // Estado para el formulario
   const [mensajeIncidente, setMensajeIncidente] = useState('');
   const [categoria, setCategoria] = useState('');
   const [codTicketInc, setCodTicketInc] = useState('');
-
-  // Estado para la lista de incidentes
   const [incidentes, setIncidentes] = useState([]);
   const [message, setMessage] = useState('');
+  const [reporte, setReporte] = useState(null);
+
+  const navigate = useNavigate();
 
   // Función para obtener todos los incidentes
   const fetchIncidentes = async () => {
@@ -31,19 +31,16 @@ const Incidentes = () => {
   // Función para crear un incidente
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const nuevoIncidente = {
       mensajeIncidente,
       categoria,
-      codTicketInc: parseInt(codTicketInc),  // Aseguramos que el código de ticket es un número
+      codTicketInc: parseInt(codTicketInc),
     };
 
     try {
       const response = await fetch('http://localhost:8080/incidentes/crear-incidente', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nuevoIncidente),
       });
 
@@ -51,7 +48,7 @@ const Incidentes = () => {
 
       if (response.ok) {
         setMessage(result);
-        fetchIncidentes(); // Actualiza la lista de incidentes
+        fetchIncidentes();
         setMensajeIncidente('');
         setCategoria('');
         setCodTicketInc('');
@@ -60,6 +57,21 @@ const Incidentes = () => {
       }
     } catch (error) {
       setMessage('Error al registrar el incidente');
+    }
+  };
+
+  // Función para obtener el reporte
+  const fetchReporte = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/reportes/categorias');
+      if (response.ok) {
+        const data = await response.json();
+        setReporte(data);
+      } else {
+        setMessage('Error al obtener el reporte');
+      }
+    } catch (error) {
+      setMessage('Error al obtener el reporte');
     }
   };
 
@@ -72,10 +84,8 @@ const Incidentes = () => {
     <div className="incidentes-container">
       <h1>Gestión de Incidentes</h1>
 
-      {/* Mostrar mensaje de éxito o error */}
       {message && <div className={`alert ${message.includes('con éxito') ? 'success' : 'error'}`}>{message}</div>}
 
-      {/* Formulario para crear un nuevo incidente */}
       <form onSubmit={handleSubmit} className="incidente-form">
         <h2>Crear un Nuevo Incidente</h2>
 
@@ -115,7 +125,38 @@ const Incidentes = () => {
         <button type="submit" className="submit-btn">Registrar Incidente</button>
       </form>
 
-      {/* Lista de incidentes */}
+      {/* Botón para mostrar el reporte */}
+      <div className="report-btn-container">
+        <button className="report-btn" onClick={() => navigate('/menuIncidente/Reporte')}>Generar Reporte</button>
+      </div>
+
+      {/* Mostrar reporte */}
+      {reporte && (
+        <div className="reporte-container">
+          <h2>Reporte Detallado</h2>
+          <table className="reporte-table">
+            <thead>
+              <tr>
+                <th>Categoría</th>
+                <th>Total</th>
+                <th>Porcentaje</th>
+                <th>Grado de Incidencia</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reporte.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.Categoria}</td>
+                  <td>{item.Total}</td>
+                  <td>{item.Porcentaje}%</td>
+                  <td>{item["Grado de Incidencia"]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       <div className="incidente-list">
         <h2>Incidentes Registrados</h2>
         {incidentes.length > 0 ? (
@@ -125,7 +166,6 @@ const Incidentes = () => {
                 <p><strong>ID:</strong> {incidente.cod_incidente}</p>
                 <p><strong>Mensaje:</strong> {incidente.mensaje_incidente}</p>
                 <p><strong>Categoría:</strong> {incidente.categoria}</p>
-                <p><strong>Código de Ticket:</strong> {incidente.cod_ticket_inc}</p>
                 <button className="delete-btn">Eliminar</button>
               </li>
             ))}

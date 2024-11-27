@@ -6,6 +6,8 @@ import Vacantes from './components/Vacantes';
 import GestionarEntrevistas from './components/GestionarEntrevistas';
 import Incidente from './components/Incidente';
 import MenuIncidente from './components/MenuIncidente';
+import Diagnostico from './components/Diagnostico';
+import ReporteIncidente from './components/ReporteIncidente';
 
 function App() {
   return (
@@ -19,6 +21,10 @@ function App() {
         <Route path="/gestionar-entrevistas" element={<GestionarEntrevistas />} />
         {/* Modulo 6 */}
         <Route path="/menuIncidente/Registro" element={<Incidente />} />
+        <Route path="/menuIncidente/Diagnostico" element={<Diagnostico />} />
+        <Route path="/menuIncidente/Reporte" element={<ReporteIncidente />} />
+
+
         
 
       </Routes>

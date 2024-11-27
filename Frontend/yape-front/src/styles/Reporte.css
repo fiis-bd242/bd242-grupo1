@@ -1,0 +1,52 @@
+/* src/styles/Reporte.css */
+.reporte-container {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+  
+  .alert {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .alert.success {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .alert.error {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .reporte-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .reporte-table th,
+  .reporte-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  .reporte-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .reporte-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
