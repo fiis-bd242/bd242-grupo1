@@ -42,8 +42,8 @@ public class ReporteRepositoryImpl implements ReporteRepository {
                 break;
             case "anio":
                 // Para el año (1, 2, ...), mapea a todo el año
-                inicio = 1.0;   // Primer mes del año
-                fin = 12.0;     // Último mes del año
+                inicio = numeroPeriodo;   // Primer mes del año
+                fin = numeroPeriodo;     // Último mes del año
                 break;
             default:
                 throw new IllegalArgumentException("Tipo de periodo desconocido");
