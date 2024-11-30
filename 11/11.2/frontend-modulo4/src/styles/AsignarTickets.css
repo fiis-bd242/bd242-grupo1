@@ -1,0 +1,130 @@
+/* Mejora general */
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+}
+
+/* Contenedor del formulario */
+.form-container {
+    background-color: #ffffff;
+    padding: 30px;
+    max-width: 800px;
+    /* Ancho más amplio para el formulario */
+    margin: 40px auto;
+    border-radius: 15px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+/* Mejorar títulos */
+h1 {
+    font-size: 2rem;
+    color: #6a0dad;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Etiquetas */
+.ticket-form label {
+    font-size: 1rem;
+    color: #444;
+    margin-top: 15px;
+    display: block;
+    font-weight: 500;
+}
+
+/* Inputs */
+.ticket-form input,
+.ticket-form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #f9f9f9;
+}
+
+.ticket-form input:focus,
+.ticket-form textarea:focus {
+    border-color: #6a0dad;
+    box-shadow: 0 0 5px rgba(106, 13, 173, 0.3);
+}
+
+/* Botones */
+.search-button,
+.submit-button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.search-button {
+    background-color: #6a0dad;
+    color: white;
+    margin-bottom: 15px;
+    border: none;
+}
+
+.search-button:hover {
+    background-color: #590c99;
+}
+
+.submit-button {
+    background-color: #ff4500;
+    color: white;
+    border: none;
+}
+
+.submit-button:hover {
+    background-color: #d73800;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Centrar vertical y horizontalmente */
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    max-width: 500px;
+    width: 90%;
+    /* Ajustar el ancho del modal */
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6a0dad;
+}
+
+.close:hover {
+    color: #590c99;
+}
