@@ -786,4 +786,9 @@ CREATE TABLE Observacion (
                              descripcion TEXT NOT NULL
 );
 
+CREATE SEQUENCE promocion_seq START 41;
+
+ALTER TABLE promocion
+ALTER COLUMN cod_promocion SET DEFAULT nextval('promocion_seq');
+
 ```sql
