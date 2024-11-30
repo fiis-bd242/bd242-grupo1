@@ -13,7 +13,9 @@ import MenuAnalista from './components/MenuAnalista';
 import MenuBusiness from './components/MenuBusiness';
 import MenuAsesor from './components/MenuAsesor';
 import MensajesConversacion from './components/MensajeConversacion';
-
+import ListaTickets from './components/ListaTickets';
+import ReporteBusiness from './components/ReporteBusiness';
+import ActualizarTickets from './components/ActualizarTickets';
 
 function App() {
   return (
@@ -30,12 +32,15 @@ function App() {
         <Route path="/menu" element={<MenuPrincipal />} />
         <Route path="/menu/analista" element={<MenuAnalista />} />
         <Route path="/menu/business" element={<MenuBusiness />} />
+        <Route path="/menu/business/reporte-business" element={<ReporteBusiness />} />
         <Route path="/menu/asesor" element={<MenuAsesor />} />
         <Route path="/menu/analista/sugerencias" element={<Sugerencias />} />
         <Route path="/menu/asesor/conversaciones-historial" element={<HistorialConversaciones />} />
         <Route path="/menu/asesor/conversaciones/:idEmpleado/:idConv" element={<MensajesConversacion />} />
+        <Route path="/menu/asesor/ticketsAsignados" element={<ListaTickets />} />
         <Route path="/menu/asesor/etiquetas/buscar" element={<BuscarEtiquetas />} />
         <Route path="/menu/asesor/tickets/asignar" element={<AsignarTickets />} />
+        <Route path="/menu/asesor/actualizar/ticket/:idTicket" element={<ActualizarTickets />} />
       </Routes>
     </div>
   );

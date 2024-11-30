@@ -33,7 +33,7 @@ const MenuBusiness = () => {
                     <nav className="nav-menu">
                         <button className="nav-button" onClick={() => navigate('/menu/lista-tipificaciones')}>Lista de Tipificaciones</button>
                         <button className="nav-button" onClick={() => navigate('/menu/historial-tipificaciones')}>Historial de Tipificaciones</button>
-                        <button className="nav-button" onClick={() => navigate('/menu/reporte-business')}>Reporte Business</button>
+                        <button className="nav-button" onClick={() => navigate('/menu/business/reporte-business')}>Reporte Business</button>
                     </nav>
                 </div>
                 <button className="logout-button" onClick={() => navigate('/login')}>

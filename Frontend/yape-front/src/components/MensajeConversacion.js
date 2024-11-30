@@ -40,6 +40,7 @@ const MensajesConversacion = () => {
         navigate(`/menu/asesor/tickets/asignar?idEmpleado=${idEmpleado}&idConv=${idConv}&idCliente=${idCliente}`);
     };
 
+
     return (
         <div>
             <h1>Mensajes de la Conversación {idConv}</h1>

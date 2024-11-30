@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { obtenerHistorial } from '../services/conversacionService';
 import { asignarTicket } from '../services/ticketService';
+import '../styles/HistorialConversaciones.css';
 
 const HistorialConversaciones = () => {
     const [conversaciones, setConversaciones] = useState([]);
@@ -33,42 +34,52 @@ const HistorialConversaciones = () => {
 
     const handleAsignar = async (idConv) => {
         const ticket = {
-            codEtiqueta: "3",           // Esto lo puedes personalizar según tu aplicación
-            problemaIdent: "problemaX", // Igualmente, puedes cambiar este valor según la conversación
+            codEtiqueta: "3", // Personalizar según tu aplicación
+            problemaIdent: "problemaX",
             idConv: idConv,
-            idEstado: 1,                // Estado de ejemplo
-            fechaAsig: new Date().toISOString(),  // Fecha actual
-            comentario: "Comentario de ejemplo para el ticket", // Comentario de ejemplo
+            idEstado: 1,
+            fechaAsig: new Date().toISOString(),
+            comentario: "Comentario de ejemplo para el ticket",
         };
         try {
             await asignarTicket(idEmpleado, ticket);
             alert('Ticket asignado con éxito');
-            // Puedes actualizar la UI aquí si necesitas reflejar cambios en tiempo real
         } catch (error) {
             alert('Error al asignar el ticket');
         }
     };
 
     return (
-        <div>
-            <h1>Historial de Conversaciones</h1>
-            {loading && <p>Cargando historial...</p>}
+        <div className="historial-container">
+            <h1 className="historial-title">Historial de Conversaciones</h1>
+            {loading && <p className="loading">Cargando historial...</p>}
             {error && <p className="error">{error}</p>}
             {!loading && !error && conversaciones.length === 0 && (
-                <p>No se encontraron conversaciones para este usuario.</p>
+                <p className="no-data">No se encontraron conversaciones para este usuario.</p>
             )}
             {!loading && !error && conversaciones.length > 0 && (
-                <ul>
+                <ul className="conversation-list">
                     {conversaciones.map((conv) => (
-                        <li key={conv.idConv}>
-                            <strong>Cliente:</strong>{' '}
-                            <Link to={`/menu/asesor/conversaciones/${idEmpleado}/${conv.idConv}?idCliente=${conv.idCliente}`}>
-                                {conv.nombreCompleto}
-                            </Link>
-
-                            <br />
-                            <strong>Estado:</strong> {conv.estadoConv} <br />
-                            <strong>Ticket:</strong> {conv.codTicket}
+                        <li className="conversation-item" key={conv.idConv}>
+                            <div className="conversation-header">
+                                <strong>Cliente:</strong>{' '}
+                                <Link
+                                    to={`/menu/asesor/conversaciones/${idEmpleado}/${conv.idConv}?idCliente=${conv.idCliente}`}
+                                    className="client-link"
+                                >
+                                    {conv.nombreCompleto}
+                                </Link>
+                            </div>
+                            <div className="conversation-details">
+                                <strong>Estado:</strong> {conv.estadoConv} <br />
+                                <strong>Ticket:</strong> {conv.codTicket}
+                            </div>
+                            <button
+                                className="assign-button"
+                                onClick={() => handleAsignar(conv.idConv)}
+                            >
+                                Asignar Ticket
+                            </button>
                         </li>
                     ))}
                 </ul>

@@ -1,0 +1,26 @@
+.reporte-container {
+    padding: 20px;
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 15px;
+    margin-bottom: 20px;
+}
+
+.filters label {
+    display: block;
+}
+
+.report-links {
+    margin-top: 20px;
+}
+
+.reporte-content {
+    margin-top: 20px;
+    font-family: monospace;
+    background-color: #f4f4f4;
+    padding: 15px;
+    border-radius: 8px;
+}

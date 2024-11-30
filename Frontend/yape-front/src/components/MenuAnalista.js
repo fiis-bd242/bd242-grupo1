@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/MenuPrincipal.css';
+import '../styles/MenuAnalista.css';
 
 const MenuAnalista = () => {
     const navigate = useNavigate();
