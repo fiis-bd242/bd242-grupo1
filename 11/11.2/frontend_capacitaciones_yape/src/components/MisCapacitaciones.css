@@ -1,0 +1,141 @@
+/* Configuración del contenedor principal */
+.main-container {
+  display: flex; /* Hace que el contenedor sea un layout flexible */
+  min-height: 100vh; /* Asegura que ocupe toda la altura de la ventana */
+}
+
+/* Sidebar ocupa espacio fijo a la izquierda */
+.sidebar {
+  width: 250px; /* Ancho fijo del Sidebar */
+  background-color: #6a0dad;
+  color: white;
+  padding: 20px;
+  flex-shrink: 0; /* Evita que el Sidebar se reduzca */
+}
+
+/* Contenedor del contenido principal */
+.mis-capacitaciones-container {
+  flex-grow: 1; /* Toma el espacio restante */
+  padding: 20px;
+  background-color: #f5f5f5; /* Fondo claro para diferenciarlo */
+  font-family: Arial, sans-serif;
+  max-width: 1200px; /* Limitar el ancho del contenedor */
+  margin: 0 auto; /* Centrar el contenedor */
+}
+
+/* Título */
+.titulo {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* Filtros */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filtros label {
+  display: flex;
+  flex-direction: column;
+}
+
+.buscar-btn {
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.buscar-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Contenedor para la tabla con scroll */
+.tabla-contenedor {
+  max-height: 400px; /* Altura máxima inicial */
+  overflow: auto; /* Scroll para filas y columnas */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-top: 20px;
+  max-width: 100%; /* Asegura que la tabla no se salga */
+  overflow-x: auto; /* Agrega scroll horizontal si es necesario */
+}
+
+/* Tabla compacta y adaptable */
+.tabla {
+  width: 100%;
+  min-width: 800px; /* Tamaño mínimo para evitar colapsos */
+  border-collapse: collapse;
+}
+
+.tabla th,
+.tabla td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+  background-color: #fff;
+}
+
+.tabla th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.tabla tr:nth-child(even) {
+  background-color: #f2f2f2; /* Rayado de filas */
+}
+
+/* Estilo del botón del enlace */
+.link {
+  color: blue;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Menú desplegable */
+.menu-container {
+  position: relative;
+  display: inline-block; /* Asegura que no afecte el layout de las filas */
+  height: auto; /* Elimina altura extra */
+}
+
+.menu-btn {
+  padding: 5px; /* Agregar padding para asegurar que el botón tenga un tamaño adecuado */
+  width: 30px; /* Controlar el tamaño del botón */
+  height: 30px; /* Ajustar la altura */
+}
+
+.menu {
+  position: absolute;
+  top: 25px;
+  right: 0;
+  list-style: none;
+  padding: 10px;
+  margin: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.menu-item {
+  background: none;
+  border: none;
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 5px 0;
+}
+
+.menu-item:hover {
+  color: #0056b3;
+}

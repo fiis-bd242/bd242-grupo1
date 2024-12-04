@@ -1,0 +1,55 @@
+.menu-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .menu-content {
+    flex: 1;
+    padding: 20px;
+    background-color: #f5f5f5;
+  }
+  
+  .menu-content h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .menu-content p {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .menu-options {
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .menu-card {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    width: 200px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .menu-card:hover {
+    transform: scale(1.05);
+  }
+  
+  .menu-card img {
+    width: 50px;
+    margin-bottom: 10px;
+  }
+  
+  .menu-card h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .menu-card p {
+    font-size: 14px;
+    color: #555;
+  }

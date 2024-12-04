@@ -1,0 +1,65 @@
+/* General Container */
+.test-detalle-container {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+/* Sidebar */
+.sidebar {
+    flex: 0 0 250px;
+    background-color: #6a1b9a;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+}
+
+/* Main Content */
+.test-detalle-content {
+    flex: 1;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    margin: 20px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Titles and Information */
+h1, h2 {
+    margin-bottom: 10px;
+    color: #6a1b9a;
+}
+
+.test-info p {
+    margin: 5px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+/* Buttons */
+.btn {
+    background-color: #00c853;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin-top: 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    font-size: 16px;
+}
+
+.btn:hover {
+    background-color: #009624;
+}
+
+/* Loading/Error */
+.loading, .error {
+    color: #ff5722;
+    text-align: center;
+    margin: 20px;
+    font-weight: bold;
+}

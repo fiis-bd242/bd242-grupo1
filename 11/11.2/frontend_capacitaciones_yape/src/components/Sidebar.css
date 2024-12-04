@@ -1,0 +1,77 @@
+/* Sidebar */
+.sidebar {
+  position: fixed; /* Mantiene el sidebar fijo */
+  top: 0;
+  left: 0;
+  width: 250px;
+  background-color: #7209b7; /* Color de fondo morado oscuro */
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  height: 100vh;
+  box-sizing: border-box; /* Asegura que padding no afecte el ancho/alto */
+}
+
+/* Logo */
+.sidebar-logo img {
+  width: 100px;
+  margin-bottom: 20px;
+}
+
+/* Usuario */
+.sidebar-user {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.sidebar-user img {
+  width: 80px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.sidebar-user p {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Menú */
+.sidebar-menu {
+  width: 100%;
+}
+
+/* Botones del menú */
+.sidebar-button {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  color: white;
+  padding: 10px;
+  text-align: left;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.sidebar-button:hover {
+  background-color: #560a8c; /* Color de fondo al pasar el mouse */
+}
+
+/* Botón de logout */
+.sidebar-logout {
+  margin-top: auto;
+  background-color: #04d361; /* Fondo verde para logout */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.sidebar-logout:hover {
+  background-color: #03b050; /* Fondo verde más claro al pasar el mouse */
+}

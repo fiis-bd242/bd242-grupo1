@@ -1,0 +1,110 @@
+/* Contenedor General */
+.notas-container {
+    display: flex;
+    height: 100vh; /* Esto asegura que ocupe el 100% de la altura de la ventana sin sobrepasar */
+    background-color: #f8f9fa;
+    padding-left: 20px; /* Espacio para evitar que el contenido se pegue al sidebar */
+    align-items: flex-start; /* Alinea el contenido al principio para evitar que se desplace */
+}
+  
+  /* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: #6a1b9a;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    height: 100vh; /* Ajuste para que ocupe toda la altura */
+}
+  
+  /* Contenido Principal */
+  .notas-content {
+    flex: 1;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    margin: 20px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Títulos */
+  h1, h2 {
+    margin-bottom: 15px;
+    color: #6a1b9a;
+  }
+  
+  /* Sección de Filtros */
+  .filter-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .filter-input {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 200px;
+  }
+  
+  .refresh-button {
+    background-color: #6a1b9a;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .refresh-button:hover {
+    background-color: #4a0072;
+  }
+  
+  /* Tabla de Resultados */
+  .notas-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .notas-table th, .notas-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  .notas-table th {
+    background-color: #6a1b9a;
+    color: white;
+  }
+  
+  .add-comment-button {
+    background-color: #00c853;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  
+  .add-comment-button:hover {
+    background-color: #009624;
+  }
+  
+  /* Información del Batch */
+  .batch-info {
+    margin-top: 20px;
+    background: #f1f8e9;
+    padding: 15px;
+    border: 1px solid #c5e1a5;
+    border-radius: 5px;
+  }
+  
+  .batch-info h3 {
+    margin-bottom: 10px;
+    color: #33691e;
+  }
