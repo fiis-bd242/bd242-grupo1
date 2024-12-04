@@ -1,19 +1,22 @@
-// src/components/Incidentes.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Asegúrate de usar 'useNavigate' correctamente
+import { useNavigate } from 'react-router-dom';
 import '../styles/Incidente.css';
 
+
+
 const Incidentes = () => {
+
   const [mensajeIncidente, setMensajeIncidente] = useState('');
   const [categoria, setCategoria] = useState('');
   const [codTicketInc, setCodTicketInc] = useState('');
   const [incidentes, setIncidentes] = useState([]);
   const [message, setMessage] = useState('');
-  const [reporte, setReporte] = useState(null);
 
   const navigate = useNavigate();
-
-  // Función para obtener todos los incidentes
+  const handleLogout = () => {
+    // Tu lógica de logout
+  };
+  // Obtener todos los incidentes
   const fetchIncidentes = async () => {
     try {
       const response = await fetch('http://localhost:8080/incidentes/obtener-incidentes');
@@ -28,7 +31,7 @@ const Incidentes = () => {
     }
   };
 
-  // Función para crear un incidente
+  // Crear un nuevo incidente
   const handleSubmit = async (e) => {
     e.preventDefault();
     const nuevoIncidente = {
@@ -44,10 +47,8 @@ const Incidentes = () => {
         body: JSON.stringify(nuevoIncidente),
       });
 
-      const result = await response.text();
-
       if (response.ok) {
-        setMessage(result);
+        setMessage('Incidente registrado con éxito');
         fetchIncidentes();
         setMensajeIncidente('');
         setCategoria('');
@@ -60,119 +61,121 @@ const Incidentes = () => {
     }
   };
 
-  // Función para obtener el reporte
-  const fetchReporte = async () => {
+  // Eliminar un incidente
+  const handleDelete = async (id) => {
     try {
-      const response = await fetch('http://localhost:8080/reportes/categorias');
+      const response = await fetch(`http://localhost:8080/incidentes/eliminar-incidente/${id}`, {
+        method: 'DELETE',
+      });
+
       if (response.ok) {
-        const data = await response.json();
-        setReporte(data);
+        setMessage('Incidente eliminado con éxito');
+        fetchIncidentes();
       } else {
-        setMessage('Error al obtener el reporte');
+        setMessage('Error al eliminar el incidente');
       }
     } catch (error) {
-      setMessage('Error al obtener el reporte');
+      setMessage('Error al eliminar el incidente');
     }
   };
 
-  // Llamar a la función fetchIncidentes cuando el componente se monta
+  // Obtener incidentes al montar el componente
   useEffect(() => {
     fetchIncidentes();
   }, []);
 
   return (
     <div className="incidentes-container">
-      <h1>Gestión de Incidentes</h1>
-
-      {message && <div className={`alert ${message.includes('con éxito') ? 'success' : 'error'}`}>{message}</div>}
-
-      <form onSubmit={handleSubmit} className="incidente-form">
-        <h2>Crear un Nuevo Incidente</h2>
-
-        <div className="form-group">
-          <label htmlFor="mensajeIncidente">Mensaje del Incidente</label>
-          <input
-            type="text"
-            id="mensajeIncidente"
-            value={mensajeIncidente}
-            onChange={(e) => setMensajeIncidente(e.target.value)}
-            required
-          />
+      {/* Barra lateral */}
+      <aside className="sidebar">
+        <div className="sidebar-content">
+          <div className="logo-container">
+            <img
+              src="https://vectorseek.com/wp-content/uploads/2023/09/Yape-App-Logo-Vector.svg-.png"
+              alt="Logo"
+              className="logo"
+              onClick={() => navigate('/menuIncidente')}
+            />
+          </div>
+          
+          
+          <nav className="nav-menu">
+            <button className="nav-button" onClick={() => navigate('/menuIncidente/registro')}>Registro</button>
+            <button className="nav-button" onClick={() => navigate('/menuIncidente/diagnostico')}>Diagnostico</button>
+            <button className="nav-button" onClick={() => navigate('/menuIncidente/PostMortem')}>Analisis-Postmortem</button>
+          </nav>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="categoria">Categoría</label>
-          <input
-            type="text"
-            id="categoria"
-            value={categoria}
-            onChange={(e) => setCategoria(e.target.value)}
-            required
-          />
-        </div>
+        <button className="logout-button" onClick={handleLogout}>
+          Cerrar sesión
+        </button>
+      </aside>
+      {/* Contenido principal */}
+      <div className="main-content">
+        <h1>Gestión de Incidentes</h1>
 
-        <div className="form-group">
-          <label htmlFor="codTicketInc">Código de Ticket</label>
-          <input
-            type="number"
-            id="codTicketInc"
-            value={codTicketInc}
-            onChange={(e) => setCodTicketInc(e.target.value)}
-            required
-          />
-        </div>
+        {/* Mensaje de alerta */}
+        {message && <div className={`alert ${message.includes('éxito') ? 'success' : 'error'}`}>{message}</div>}
 
-        <button type="submit" className="submit-btn">Registrar Incidente</button>
-      </form>
+        {/* Formulario para crear un incidente */}
+        <form onSubmit={handleSubmit} className="incidente-form">
+          <h2>Crear un Nuevo Incidente</h2>
+          <div className="form-group">
+            <label htmlFor="mensajeIncidente">Mensaje del Incidente</label>
+            <input
+              type="text"
+              id="mensajeIncidente"
+              value={mensajeIncidente}
+              onChange={(e) => setMensajeIncidente(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="categoria">Categoría</label>
+            <input
+              type="text"
+              id="categoria"
+              value={categoria}
+              onChange={(e) => setCategoria(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="codTicketInc">Código de Ticket</label>
+            <input
+              type="number"
+              id="codTicketInc"
+              value={codTicketInc}
+              onChange={(e) => setCodTicketInc(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="submit-btn">Registrar Incidente</button>
+        </form>
 
-      {/* Botón para mostrar el reporte */}
-      <div className="report-btn-container">
-        <button className="report-btn" onClick={() => navigate('/menuIncidente/Reporte')}>Generar Reporte</button>
-      </div>
-
-      {/* Mostrar reporte */}
-      {reporte && (
-        <div className="reporte-container">
-          <h2>Reporte Detallado</h2>
-          <table className="reporte-table">
-            <thead>
-              <tr>
-                <th>Categoría</th>
-                <th>Total</th>
-                <th>Porcentaje</th>
-                <th>Grado de Incidencia</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reporte.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.Categoria}</td>
-                  <td>{item.Total}</td>
-                  <td>{item.Porcentaje}%</td>
-                  <td>{item["Grado de Incidencia"]}</td>
-                </tr>
+        {/* Lista de incidentes */}
+        <div className="incidente-list">
+          <h2>Incidentes Registrados</h2>
+          {incidentes.length > 0 ? (
+            <ul>
+              {incidentes.map((incidente) => (
+                <li key={incidente.cod_incidente} className="list-item">
+                  <p><strong>ID:</strong> {incidente.cod_incidente}</p>
+                  <p><strong>Mensaje:</strong> {incidente.mensaje_incidente}</p>
+                  <p><strong>Categoría:</strong> {incidente.categoria}</p>
+                  <button
+                    className="delete-btn"
+                    onClick={() => handleDelete(incidente.cod_incidente)}
+                  >
+                    Eliminar
+                  </button>
+                </li>
               ))}
-            </tbody>
-          </table>
+            </ul>
+          ) : (
+            <p>No hay incidentes registrados.</p>
+          )}
         </div>
-      )}
-
-      <div className="incidente-list">
-        <h2>Incidentes Registrados</h2>
-        {incidentes.length > 0 ? (
-          <ul>
-            {incidentes.map((incidente, index) => (
-              <li key={index} className="incidente-item">
-                <p><strong>ID:</strong> {incidente.cod_incidente}</p>
-                <p><strong>Mensaje:</strong> {incidente.mensaje_incidente}</p>
-                <p><strong>Categoría:</strong> {incidente.categoria}</p>
-                <button className="delete-btn">Eliminar</button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No hay incidentes registrados.</p>
-        )}
       </div>
     </div>
   );

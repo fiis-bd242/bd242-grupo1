@@ -70,8 +70,8 @@ const MenuIncidente = () => {
         </button>
       </aside>
 
- {/* Main Content */}
- <main className="main-content">
+      {/* Main Content */}
+      <main className="main-content">
         <header className="header">
           <h1 className="page-title">Menú principal</h1>
           <div className="time">{time.toLocaleTimeString()}</div>
@@ -94,7 +94,7 @@ const MenuIncidente = () => {
           </div>
 
           {/* Diagnostico Card */}
-          <div className="card" onClick={() => navigate('/menuIncidente/diagnostico')}>
+          <div className="card" onClick={() => navigate('/menuIncidente/Incidentes')}>
             <div className="card-icon">
               <div className="question-mark">?</div>
             </div>
@@ -104,8 +104,8 @@ const MenuIncidente = () => {
             </p>
           </div>
 
-          {/* Postmortem Card */}
-          <div className="card" onClick={() => navigate('/menuIncidente/Analisis-Postmortem')}>
+          {/* Reporte Card */}
+          <div className="card" onClick={() => navigate('/menuIncidente/PostMortem')}>
             <div className="card-icon">
               <div className="question-mark">?</div>
             </div>
@@ -115,9 +115,20 @@ const MenuIncidente = () => {
             </p>
           </div>
         </div>
+
+        {/* Botón para Generar Reportes */}
+        <div className="generar-reportes-container">
+          <button
+            className="generar-reportes-button"
+            onClick={() => navigate('/menuIncidente/GenerarReportes')}
+          >
+            Generar Reportes
+          </button>
+        </div>
       </main>
     </div>
   );
 };
 
 export default MenuIncidente;
+

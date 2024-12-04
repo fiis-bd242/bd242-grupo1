@@ -1,161 +1,63 @@
 /* Contenedor principal */
-.incidentes-container {
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    box-sizing: border-box;
-    background-color: #d8bfd8; /* Fondo lila */
-    color: #000; /* Letras negras */
+.main-content {
+  display: flex; /* Flexbox para organizar los bloques */
+  flex-direction: column; /* Coloca el título arriba de los bloques */
+  gap: 20px; /* Espaciado entre el título y los bloques */
+  padding: 20px;
+  box-sizing: border-box;
+  height: calc(100vh - 40px); /* Ajusta la altura disponible */
 }
 
-/* Título principal */
-h1 {
-    width: 100%;
-    text-align: center;
-    color: #000; /* Letras negras */
-    margin-bottom: 20px;
+/* Contenedor para los bloques de formulario y lista */
+.blocks-container {
+  display: flex; /* Flexbox para los bloques de formulario y lista */
+  flex-direction: row; /* Coloca los bloques en fila */
+  gap: 20px; /* Espaciado entre los bloques */
+  flex-grow: 1; /* Permite que los bloques ocupen espacio restante */
+  align-items: flex-start; /* Alinea los elementos en la parte superior */
+  height: 100%; /* Asegura que los bloques ocupen todo el espacio disponible */
+  overflow: hidden; /* Evita que el contenido desborde */
 }
 
-/* Formulario */
+/* Estilos del formulario */
 .incidente-form {
-    flex: 1;
-    min-width: 300px;
-    max-width: 400px;
-    background-color: #f9f9f9; /* Fondo del formulario */
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    height: fit-content; /* Ajusta el alto al contenido */
-    color: #000; /* Letras negras */
-}
-
-.incidente-form h2 {
-    text-align: center;
-    color: #000; /* Letras negras */
-    margin-bottom: 15px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #000; /* Letras negras */
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #971515;
-    border-radius: 5px;
-    box-sizing: border-box;
-    color: #000; /* Letras negras */
-    background-color: #fff; /* Fondo blanco */
-}
-
-button.submit-btn {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    background-color: #007bff;
-    color: #000; /* Letras negras */
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button.submit-btn:hover {
-    background-color: #0056b3;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex: 1 1 30%; /* Ajusta el tamaño del formulario */
+  max-width: 400px; /* Limita el ancho máximo */
+  box-sizing: border-box;
+  height: 100%; /* Ajusta la altura al contenedor */
+  overflow-y: auto; /* Habilita desplazamiento vertical si es necesario */
 }
 
 /* Lista de incidentes */
 .incidente-list {
-    flex: 2;
-    min-width: 300px;
-    background-color: #f1f1f1; /* Fondo claro */
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    max-height: calc(100vh - 100px); /* Ocupa el espacio visible menos el título */
-    overflow-y: auto; /* Habilita el scroll si hay muchos incidentes */
-    color: #000; /* Letras negras */
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex: 2 1 70%; /* Ajusta el tamaño de la lista */
+  max-width: 800px; /* Limita el ancho máximo */
+  box-sizing: border-box;
+  height: 100%; /* Ajusta la altura al contenedor */
+  overflow-y: auto; /* Permite desplazamiento si la lista es muy larga */
 }
 
-.incidente-list h2 {
-    text-align: center;
-    color: #000; /* Letras negras */
-    margin-bottom: 15px;
-}
-
-.incidente-item {
-    padding: 15px;
-    background-color: #fff; /* Fondo blanco */
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    color: #000; /* Letras negras */
-}
-
-.incidente-item p {
-    margin: 5px 0;
-}
-
-/* Botón eliminar */
-button.delete-btn {
-    background-color: #dc3545;
-    color: #000; /* Letras negras */
-    border: none;
-    padding: 8px 15px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-button.delete-btn:hover {
-    background-color: #c82333;
-}
-
-/* Alertas */
-.alert {
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    font-weight: bold;
-    text-align: center;
-    width: 100%;
-    box-sizing: border-box;
-    color: #000; /* Letras negras */
-}
-
-.alert.success {
-    background-color: #28a745;
-    color: #000; /* Letras negras */
-}
-
-.alert.error {
-    background-color: #dc3545;
-    color: #000; /* Letras negras */
-}
-
-/* Responsividad */
+/* Responsive Design */
 @media (max-width: 768px) {
-    .incidentes-container {
-        flex-direction: column;
-    }
+  .blocks-container {
+    flex-direction: column; /* Cambia a disposición vertical en pantallas pequeñas */
+  }
 
-    .incidente-form, .incidente-list {
-        max-width: 100%;
-    }
-
-    .incidente-list {
-        max-height: none;
-    }
+  .incidente-form,
+  .incidente-list {
+    flex: none;
+    width: 100%; /* Ocupa todo el ancho disponible */
+    max-width: 100%;
+    height: auto; /* Permite ajustar la altura automáticamente */
+    overflow-y: auto; /* Asegura que el contenido desplazable funcione en pantallas pequeñas */
+  }
 }
+

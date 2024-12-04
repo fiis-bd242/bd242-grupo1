@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import '../styles/diagnostico.css';
 
 const Diagnostico = () => {
@@ -9,6 +11,11 @@ const Diagnostico = () => {
   const [codProveedor, setCodProveedor] = useState('');
   const [codCausa, setCodCausa] = useState('');
   const [message, setMessage] = useState('');
+
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    // Tu lógica de logout
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,6 +59,35 @@ const Diagnostico = () => {
 
   return (
     <div className="diagnostico-container">
+      <aside className="sidebar">
+        <div className="sidebar-content">
+          <div className="logo-container">
+            <img
+              src="https://vectorseek.com/wp-content/uploads/2023/09/Yape-App-Logo-Vector.svg-.png"
+              alt="Logo"
+              className="logo"
+              onClick={() => navigate('/menu')}
+            />
+          </div>
+          
+          <div className="user-profile">
+            <div className="avatar"></div>
+            <div className="welcome-text">¡Bienvenido/a!</div>
+            
+          </div>
+
+          <nav className="nav-menu">
+            <button className="nav-button" onClick={() => navigate('/menuIncidente/registro')}>Registro</button>
+            <button className="nav-button" onClick={() => navigate('/menuIncidente/diagnostico')}>Diagnostico</button>
+            <button className="nav-button" onClick={() => navigate('/menuIncidente/Analisis-Postmortem')}>Analisis-Postmortem</button>
+          </nav>
+        </div>
+
+        <button className="logout-button" onClick={handleLogout}>
+          Cerrar sesión
+        </button>
+      </aside>
+
       <h1>Registrar Diagnóstico</h1>
       {message && <div className={`alert ${message.includes('éxito') ? 'success' : 'error'}`}>{message}</div>}
       <form onSubmit={handleSubmit}>

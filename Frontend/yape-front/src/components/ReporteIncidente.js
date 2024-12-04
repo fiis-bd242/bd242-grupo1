@@ -2,11 +2,18 @@
 
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
+
 import '../styles/Reporte.css';  // Aquí puedes agregar un archivo CSS si lo necesitas para estilizar la tabla.
 
 const Reporte = () => {
   const [reportes, setReportes] = useState([]);
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    // Tu lógica de logout
+  };
+
 
   // Función para obtener el reporte detallado
   const fetchReporte = async () => {
@@ -30,6 +37,30 @@ const Reporte = () => {
 
   return (
     <div className="reporte-container">
+      {/* Barra lateral */}
+      <aside className="sidebar">
+        <div className="sidebar-content">
+          <div className="logo-container">
+            <img
+              src="https://vectorseek.com/wp-content/uploads/2023/09/Yape-App-Logo-Vector.svg-.png"
+              alt="Logo"
+              className="logo"
+              onClick={() => navigate('/menuIncidente')}
+            />
+          </div>
+          
+          
+          <nav className="nav-menu">
+            <button className="nav-button" onClick={() => navigate('/menuIncidente/registro')}>Registro</button>
+            <button className="nav-button" onClick={() => navigate('/menuIncidente/Incidentes')}>Diagnostico</button>
+            <button className="nav-button" onClick={() => navigate('/menuIncidente/PostMortem')}>Analisis-Postmortem</button>
+          </nav>
+        </div>
+
+        <button className="logout-button" onClick={handleLogout}>
+          Cerrar sesión
+        </button>
+      </aside>
       <h1>Reporte de Incidentes por Categoría</h1>
 
       {/* Mostrar mensaje de éxito o error */}

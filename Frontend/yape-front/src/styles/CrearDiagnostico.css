@@ -1,0 +1,153 @@
+/* Contenedor principal */
+.main-content {
+    display: flex; /* Mantener flexbox */
+    flex-direction: column; /* Cambiar a disposición vertical */
+    align-items: center; /* Centrar horizontalmente el contenido */
+    gap: 20px; /* Espaciado entre los elementos */
+    padding: 20px;
+    box-sizing: border-box;
+    height: auto; /* Permitir que crezca según el contenido */
+    min-height: 100vh; /* Asegurar que ocupe al menos la altura de la pantalla */
+    overflow-y: auto; /* Habilitar desplazamiento vertical si es necesario */
+}
+
+/* Contenedor para los bloques de formulario y lista */
+.blocks-container {
+    display: flex;
+    flex-direction: row; /* Mantener disposición en fila */
+    gap: 20px;
+    width: 100%; /* Asegura que ocupe el ancho disponible */
+    justify-content: center; /* Centrar horizontalmente */
+}
+
+/* Título principal */
+.main-title {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px; /* Agregar espacio inferior */
+    margin-top: 20px; /* Asegurar que no quede muy arriba */
+    color: black;
+    width: 100%; /* Asegurar que el título ocupe todo el ancho */
+    max-width: 800px; /* Limitar el ancho del título */
+}
+
+/* Estilos del formulario */
+/* Ajustar el formulario */
+.incidente-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex: 1 1 400px;
+    max-width: 600px;
+    box-sizing: border-box;
+    margin-top: 20px; /* Añadir margen superior para separar del encabezado */
+}
+
+.incidente-form h2 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    color: black; /* Letras en negro */
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: black; /* Letras en negro */
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 15px; /* Espacio agrandado */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem; /* Tamaño de letra ajustado */
+}
+
+/* Aumentar espacio para descripciones y comentarios */
+.form-group textarea {
+    height: 100px; /* Más alto para comentarios */
+    resize: vertical; /* Permitir redimensionar verticalmente */
+}
+
+.submit-btn {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    background-color: #45a049;
+}
+
+/* Lista de incidentes */
+.incidente-list {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex: 2 1 400px; /* Ajusta el tamaño de la lista */
+    max-width: 600px;
+    box-sizing: border-box;
+}
+
+.incidente-list h2 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    color: black; /* Letras en negro */
+}
+
+.incidente-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.incidente-item {
+    background-color: #f9f9f9;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.incidente-item p {
+    margin: 5px 0;
+    color: black; /* Letras en negro */
+}
+
+.delete-btn {
+    background-color: #f44336;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background-color: #d32f2f;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .blocks-container {
+        flex-direction: column; /* Cambiar a disposición vertical */
+    }
+
+    .incidente-form,
+    .incidente-list {
+        flex: none;
+        width: 100%;
+        max-width: 100%;
+    }
+}
