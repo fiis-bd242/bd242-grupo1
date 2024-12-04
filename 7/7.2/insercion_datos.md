@@ -415,6 +415,8 @@ VALUES
     
 INSERT INTO Capacitacion (fecha_inicio, fecha_final, nombre, estado, descripcion, ID_instructor)
 VALUES
+    ('2024-10-19', '2025-02-04', 'AI Integration', 'en_proceso', 'Integer tincidunt ante vel ipsum. Praesent blandit lacinia erat. Vestibulum sed magna at nunc commodo placerat.', 12),
+    ('2024-11-03', '2025-01-29', 'Blockchain Development', 'en_proceso', 'Vestibulum quam sapien, varius ut, blandit non, interdum in, ante. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae', 13),
     ('2024-10-01', '2024-10-15', 'Capacitación en Ventas', 'pendiente', 'Capacitación sobre técnicas de ventas.', 1),
     ('2024-10-05', '2024-10-20', 'Capacitación en Marketing', 'en_proceso', 'Capacitación sobre estrategias de marketing digital.', 2),
     ('2024-10-10', '2024-10-25', 'Capacitación en Liderazgo', 'finalizado', 'Capacitación sobre habilidades de liderazgo.', 3);
@@ -422,30 +424,34 @@ VALUES
 -- Inserciones para la tabla empleadoxcapacitacion
 INSERT INTO empleadoxcapacitacion (estado, resultado, ID_empleado, ID_capacitacion)
 VALUES
-    ('inscrito', NULL, 1, 1),
-    ('aprobado', 85, 2, 2),
-    ('reprobado', 45, 3, 3),
-    ('pendiente', NULL, 4, 1),
-    ('inscrito', NULL, 5, 2);
+    ('inscrito', NULL, 1, 3),
+    ('aprobado', 85, 2, 4),
+    ('reprobado', 45, 3, 5),
+    ('pendiente', NULL, 4, 3),
+    ('inscrito', NULL, 5, 4);
 
 -- Inserciones para la tabla Modulo
 INSERT INTO Modulo (nombre, orden, estado, ID_capacitacion)
 VALUES
-    ('Módulo 1: Introducción', 1, 'activo', 1),
-    ('Módulo 2: Estrategias Avanzadas', 2, 'activo', 2),
-    ('Módulo 3: Habilidades de Comunicación', 1, 'inactivo', 3);
+    ('Introduction to AI', 1, 'activo', 1),
+    ('Basics of AI', 2, 'activo', 1),
+    ('AI Algorithms', 3, 'activo', 1),
+    ('Módulo 1: Introducción', 1, 'activo', 3),
+    ('Módulo 2: Estrategias Avanzadas', 2, 'activo', 4),
+    ('Módulo 3: Habilidades de Comunicación', 1, 'inactivo', 5);
 
 -- Inserciones para la tabla Test
 INSERT INTO Test (nombre, fecha, estado, descripcion, ID_modulo)
 VALUES
-    ('Test de Ventas', '2024-10-10', 'pendiente', 'Evaluación sobre las técnicas de ventas aprendidas.', 1),
-    ('Test de Marketing', '2024-10-15', 'realizado', 'Evaluación sobre estrategias de marketing digital.', 2);
+    ('Introduction to AI Exam', '2024-11-02', 'cerrado', 'Introduction to AI Exam. Covering the first module and introduction to AI concepts.', 1),
+    ('Test de Ventas', '2024-10-10', 'pendiente', 'Evaluación sobre las técnicas de ventas aprendidas.', 4),
+    ('Test de Marketing', '2024-10-15', 'realizado', 'Evaluación sobre estrategias de marketing digital.', 5);
 
 -- Inserciones para la tabla Recurso
 INSERT INTO Recurso (nombre, contenido, tipo, orden, estado, ID_modulo)
 VALUES
-    ('Video de Ventas', 'Contenido sobre técnicas de ventas.', 'video', 1, 'activo', 1),
-    ('Documento de Marketing', 'Guía de estrategias de marketing.', 'documento', 2, 'activo', 2);
+    ('Video de Ventas', 'Contenido sobre técnicas de ventas.', 'video', 1, 'activo', 4),
+    ('Documento de Marketing', 'Guía de estrategias de marketing.', 'documento', 2, 'activo', 5);
 
 -- Inserciones para la tabla Pregunta
 INSERT INTO Pregunta (titulo, tipo, ID_test)
@@ -456,8 +462,8 @@ VALUES
 -- Inserciones para la tabla Resultado_Test
 INSERT INTO Resultado_Test (puntaje, comentario, ID_empleado, ID_test)
 VALUES
-    (90, 'Buen desempeño en el test de ventas.', 2, 1),
-    (70, 'Desempeño aceptable en el test de marketing.', 3, 2);
+    (90, 'Buen desempeño en el test de ventas.', 2, 2),
+    (70, 'Desempeño aceptable en el test de marketing.', 3, 3);
 
 -- Inserciones para la tabla Retroalimen_capacitacion
 INSERT INTO Retroalimen_capacitacion (comentario, ID_capacitacion)
